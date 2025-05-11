@@ -1,0 +1,7 @@
+.layout {
+  margin-left: auto;
+  margin-right: auto;
+  min-height: var(--layout-min-h);
+  width: 100%;
+  max-width: var(--layout-max-w);
+}
