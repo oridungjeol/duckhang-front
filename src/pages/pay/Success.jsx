@@ -1,54 +1,92 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 export function Success() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
+  const [isLoading, setIsLoading] = useState(true);
+  const [paymentInfo, setPaymentInfo] = useState(null);
+  const [error, setError] = useState(null);
+
   useEffect(() => {
-    // 쿼리 파라미터 값이 결제 요청할 때 보낸 데이터와 동일한지 반드시 확인하세요.
-    // 클라이언트에서 결제 금액을 조작하는 행위를 방지할 수 있습니다.
     const requestData = {
       orderId: searchParams.get("orderId"),
       amount: searchParams.get("amount"),
       paymentKey: searchParams.get("paymentKey"),
     };
 
+    console.log(requestData)
+
     async function confirm() {
-      const response = await fetch("/confirm", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestData),
-      });
+      try {
+        const response = await fetch("http://localhost:8080/confirm", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json", 
+          },
+          body: JSON.stringify(requestData),
+        });
 
-      const json = await response.json();
+        const json = await response.json();
 
-      if (!response.ok) {
-        // 결제 실패 비즈니스 로직을 구현하세요.
-        navigate(`/fail?message=${json.message}&code=${json.code}`);
-        return;
+        
+
+        if (!response.ok) {
+          // 결제 실패 처리
+          setError(json.message || "결제 확인 실패");
+          navigate(`/fail?message=${json.message}&code=${json.code}`);
+          return;
+        }
+
+        // 결제 성공 처리
+        setPaymentInfo(json);
+      } catch (err) {
+        setError("네트워크 오류가 발생했습니다.");
+        console.error(err);
+      } finally {
+        setIsLoading(false);
       }
-
-      // 결제 성공 비즈니스 로직을 구현하세요.
     }
+
     confirm();
-  }, []);
+  }, [navigate, searchParams]);
+
+  if (isLoading) {
+    return (
+      <div className="result wrapper">
+        <div className="box_section">
+          <h2>결제 확인 중...</h2>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="result wrapper">
+        <div className="box_section">
+          <h2>결제 실패</h2>
+          <p>{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="result wrapper">
       <div className="box_section">
-        <h2>
-          결제 성공
-        </h2>
-        <p>{`주문번호: ${searchParams.get("orderId")}`}</p>
-        <p>{`결제 금액: ${Number(
-          searchParams.get("amount")
-        ).toLocaleString()}원`}</p>
-        <p>{`paymentKey: ${searchParams.get("paymentKey")}`}</p>
+        <h2>결제 성공</h2>
+        <p>{`주문번호: ${paymentInfo.orderId}`}</p>
+        <p>{`결제 금액: ${Number(paymentInfo.totalAmount).toLocaleString()}원`}</p>
+        <p>{`결제 수단: ${paymentInfo.method}`}</p>
+        <p>{`승인 일시: ${paymentInfo.approvedAt}`}</p>
+        <a href={paymentInfo.receipt?.url} target="_blank" rel="noopener noreferrer">
+          영수증 보기
+        </a>
       </div>
     </div>
   );
 }
+
 export default Success;

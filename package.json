@@ -2,6 +2,7 @@
   "name": "duckhang-front",
   "version": "0.1.0",
   "private": true,
+  "proxy": "http://localhost:8080",
   "dependencies": {
     "@tailwindcss/vite": "^4.1.6",
     "@testing-library/dom": "^10.4.0",
