@@ -6,6 +6,9 @@ import Board from "./pages/board";
 import Chat from "./pages/chat";
 import Map from "./pages/map";
 import MyPage from "./pages/mypage";
+import Checkout from "./pages/pay";
+import Success from "./pages/pay/Success";
+import Fail from "./pages/pay/Fail";
 
 import "./App.css";
 
@@ -27,6 +30,9 @@ function App() {
           <Route path="/chat" element={<Chat />} />
           <Route path="/map" element={<Map />} />
           <Route path="/mypage" element={<MyPage />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/success" element={<Success />} />
+          <Route path="/fail" element={<Fail />} />
         </Routes>
       </div>
     </Router>
