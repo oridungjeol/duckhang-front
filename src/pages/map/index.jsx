@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 import LiveMapLoader from "./liveMapLoader";
 import stompClient from"./clientStompConnector";
@@ -6,34 +6,42 @@ import { activateStompClient } from "./clientStompConnector";
 
 const LiveMap = () => {
   const mapRef = useRef(null);
+  const mapInstance = useRef(null)
+  const markersRef = useRef({});
+  const boundsRef = useRef(null)
 
-  const markers = {};
   const myUserId = "asdf";
   const otherUserId = "zxcv";
   const roomId = 111;
 
-  function createMap(latitude, longitude) {
+  const createMap = useCallback((latitude, longitude) => {
     const mapContainer = mapRef.current;
     const options = {
       center: new window.kakao.maps.LatLng(latitude, longitude),
       level: 3,
     };
-    return new window.kakao.maps.Map(mapContainer, options);
-  }
+    mapInstance.current = new window.kakao.maps.Map(mapContainer, options);
+    boundsRef.current = new window.kakao.maps.LatLngBounds();
+  }, []);
 
-  function createMarkers(map, bounds, latitude, longitude) {
+  const createMarkers = useCallback((latitude, longitude) => {
+    const map = mapInstance.current;
+    const bounds = boundsRef.current;
+
     const myMarker = new window.kakao.maps.Marker({ position : new window.kakao.maps.LatLng(latitude, longitude) });
-    markers[myUserId] = myMarker;
     myMarker.setMap(map);
+    markersRef.current[myUserId] = myMarker;
     bounds.extend(myMarker.getPosition());
 
     const otherMarker = new window.kakao.maps.Marker({ position : new window.kakao.maps.LatLng(latitude-0.0001, longitude-0.0001) });
-    markers[otherUserId] = otherMarker;
     otherMarker.setMap(map);
+    markersRef.current[otherUserId] = otherMarker;
     bounds.extend(otherMarker.getPosition());
-  }
 
-  function updateMarkers() {
+    map.setBounds(bounds);
+  }, []);
+
+  const updateMarkers = useCallback(() => {
     activateStompClient((client) => {
       client.subscribe("/topic/map.latlng", (message) => {
         console.log("받은 메시지:", message.body);
@@ -41,10 +49,10 @@ const LiveMap = () => {
         const parsed = JSON.parse(message.body);
         const { latitude, longitude, userId, roomId } = parsed;
 
-        markers[userId].setPosition(new window.kakao.maps.LatLng(latitude, longitude))
+        markersRef.current[userId].setPosition(new window.kakao.maps.LatLng(latitude, longitude))
       });
     });
-  }
+  }, []);
 
   //초기 map 세팅
   useEffect(() => {
@@ -54,16 +62,9 @@ const LiveMap = () => {
 
         LiveMapLoader().then(() => {
           window.kakao.maps.load(() => {
-            const map = createMap(latitude, longitude);
+            createMap(latitude, longitude);
 
-            function setBounds() {
-              map.setBounds(bounds);
-            }
-            const bounds = new window.kakao.maps.LatLngBounds();  
-
-            createMarkers(map, bounds, latitude, longitude)
-
-            setBounds()
+            createMarkers(latitude, longitude)
 
             stompClient.activate();
 
@@ -72,36 +73,38 @@ const LiveMap = () => {
         });
       }
     );
+  }, [createMap, createMarkers, updateMarkers]);
+
+  const updateLocation = useCallback(() => {
+    return setInterval(() => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+
+        console.log("5초마다 위치:", latitude, longitude);
+
+        stompClient.publish({
+          destination: "/topic/map.latlng",
+          body: JSON.stringify({
+            userId: otherUserId,
+            roomId: roomId,
+            latitude: latitude + (Math.random() - 0.5) * 0.001,
+            longitude: longitude + (Math.random() - 0.5) * 0.001,
+          }),
+        });
+      },
+      (error) => {
+        console.error("위치 가져오기 실패", error);
+      }
+    );
+    }, 5000);
   }, []);
 
   //5초마다 위치 업데이트
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-
-          console.log("5초마다 위치:", latitude, longitude);
-
-          stompClient.publish({
-            destination: "/topic/map.latlng",
-            body: JSON.stringify({
-              userId: otherUserId,
-              roomId: roomId,
-              latitude: latitude + (Math.random() - 0.5) * 0.001,
-              longitude: longitude + (Math.random() - 0.5) * 0.001,
-            }),
-          });
-          updateMarkers();
-        },
-        (error) => {
-          console.error("위치 가져오기 실패", error);
-        }
-      );
-    }, 5000);
-
+    const intervalId = updateLocation();
     return () => clearInterval(intervalId);
-  }, []);
+  }, [updateLocation]);
 
   return (
     <>
