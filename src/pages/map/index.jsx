@@ -46,6 +46,7 @@ const LiveMap = () => {
     });
   }
 
+  //초기 map 세팅
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -73,16 +74,15 @@ const LiveMap = () => {
     );
   }, []);
 
+  //5초마다 위치 업데이트
   useEffect(() => {
     const intervalId = setInterval(() => {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          const latitude = position.coords.latitude;
-          const longitude = position.coords.longitude;
+          const { latitude, longitude } = position.coords;
 
           console.log("5초마다 위치:", latitude, longitude);
 
-          // STOMP 웹소켓으로 서버에 위치 전송
           stompClient.publish({
             destination: "/topic/map.latlng",
             body: JSON.stringify({
@@ -103,26 +103,13 @@ const LiveMap = () => {
     return () => clearInterval(intervalId);
   }, []);
 
-  function sendLatLngData() {
-    stompClient.publish({
-      destination: `/topic/map.latlng`,
-      body: JSON.stringify({ 
-        latitude: 37.5665, 
-        longitude: 126.975,
-        userId: "zxcv",
-        roomId: roomId
-      }),
-    });
-  }
-
   return (
     <>
       <div 
         ref={mapRef} 
-        style={{ width: "100%", height: "500px" }} 
+        style={{ width: "100%", height: "100vh" }} 
       >
       </div>
-        <button onClick={() => {sendLatLngData()}}>click me</button>
     </>
   );
 };
