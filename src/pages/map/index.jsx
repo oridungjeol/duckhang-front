@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef } from "react";
 
 import LiveMapLoader from "./liveMapLoader";
-import stompClient from"./clientStompConnector";
-import { activateStompClient } from "./clientStompConnector";
+import stompClient from"../../utils/clientStompConnector";
+import { activateStompClient } from "../../utils/clientStompConnector";
 
 const LiveMap = () => {
   const mapRef = useRef(null);
