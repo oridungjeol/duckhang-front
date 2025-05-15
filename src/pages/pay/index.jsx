@@ -8,11 +8,13 @@ const customerKey = "4rOfQsR548H62ySKBLWo5";
 export function Checkout() {
   const [amount, setAmount] = useState({
     currency: "KRW",
-    value: 50_000,
+    value: 30_000,
   });
   const [ready, setReady] = useState(false);
   const [widgets, setWidgets] = useState(null);
 
+    // 비회원 결제
+    // const widgets = tossPayments.widgets({ customerKey: ANONYMOUS });
   useEffect(() => {
     async function fetchPaymentWidgets() {
       const tossPayments = await loadTossPayments(clientKey);
@@ -29,38 +31,44 @@ export function Checkout() {
     async function renderPaymentWidgets() {
       if (widgets == null) return;
 
-      await widgets.setAmount(amount);
-
-      await Promise.all([
-        widgets.renderPaymentMethods({
-          selector: "#payment-method",
-          variantKey: "DEFAULT",
-        }),
-        widgets.renderAgreement({
-          selector: "#agreement",
-          variantKey: "AGREEMENT",
-        }),
-      ]);
+    // ------ 주문의 결제 금액 설정 ------
+    await widgets.setAmount(amount);
+     
+    await Promise.all([
+      // ------  결제 UI 렌더링 ------
+      widgets.renderPaymentMethods({
+        selector: "#payment-method",
+        variantKey: "DEFAULT",
+      }),
+      // ------  이용약관 UI 렌더링 ------
+      widgets.renderAgreement({
+        selector: "#agreement",
+        variantKey: "AGREEMENT",
+      }),
+    ]);
+     
 
       setReady(true);
     }
 
-    renderPaymentWidgets();
-  }, [widgets]);
+  renderPaymentWidgets();
+}, [widgets]);
+  
 
   useEffect(() => {
     if (widgets == null) return;
     widgets.setAmount(amount);
   }, [widgets, amount]);
 
-  return (
-    <div className="wrapper">
-      <div className="box_section">
-        {/* 결제 UI */}
-        <div id="payment-method" />
-        {/* 이용약관 UI */}
-        <div id="agreement" />
 
+return (
+  <div className="wrapper">
+    <div className="box_section">
+      {/* 결제 UI */}
+      <div id="payment-method" />
+      {/* 이용약관 UI */}
+      <div id="agreement" />
+      
         {/* 결제하기 버튼 */}
         <button
           className="button"
@@ -74,6 +82,7 @@ export function Checkout() {
               const data = await res.json();
               const orderId = data.orderId;
 
+     
               // ------ 결제 요청 ------
               await widgets.requestPayment({
                 orderId: orderId,
@@ -93,7 +102,8 @@ export function Checkout() {
         </button>
       </div>
     </div>
+
   );
 }
-
 export default Checkout;
+
