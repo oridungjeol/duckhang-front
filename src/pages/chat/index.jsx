@@ -1,9 +1,6 @@
 import { useEffect, useCallback } from "react";
 import SockJS from "sockjs-client";
-import { Stomp, Client } from "@stomp/stompjs";
-
-// import stompClient from "../../utils/clientStompConnector";
-import { activateStompClient } from "../../utils/clientStompConnector";
+import { Stomp } from "@stomp/stompjs";
 
 export default function Chat() {
 
@@ -12,31 +9,17 @@ export default function Chat() {
 
   stompClient.connect({}, function(frame) {
     console.log('Connected: ' + frame);
-    const subscription = stompClient.subscribe('/topic/chat', function(message) {
-        console.log(message.body);
+    stompClient.subscribe('/topic/chat', function(message) {
         const data = JSON.parse(message.body);
         console.log(data);
     });
-    console.log("subscription: " + subscription);
-    // 연결 완료 후 join 메시지(옵션)를 보낼 수 있음
+
     stompClient.send("/app/chat", {}, JSON.stringify({
         type: 'JOIN',
-        roomId: 555,
-        sender: "me"
+        content: "testing",
+        room_id: 555
     }));
   });
-
-  // const roomId = 555;
-
-  // useEffect(() => {
-  //   activateStompClient((client) => {
-  //     client.subscribe(`/topic/chat.app`, (chat) => {
-  //       const parsed = JSON.parse(chat.body);
-  //       const { content, roomId } = parsed;
-  //       console.log(content, roomId);
-  //     })
-  //   });
-  // }, []);
 
   return (
     <div>

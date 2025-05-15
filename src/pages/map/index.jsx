@@ -12,7 +12,7 @@ const LiveMap = () => {
 
   let myUser_id = "asdf";
   let otherUser_id = "zxcv";
-  let room_id = 111;
+  let room_id = 112;
   let stompClient;
 
   let latitude;
@@ -26,11 +26,11 @@ const LiveMap = () => {
     stompClient.connect({}, function (frame) {
       console.log("Connected: " + frame);
 
-      stompClient.subscribe("/topic/map.latlng", function (message) {
+      stompClient.subscribe(`/topic/map.latlng/${room_id}`, function (message) {
         const data = JSON.parse(message.body);
         console.log(data);
 
-        if (markersRef.current[data.user_id]) {
+        if (markersRef.current[data.user_id]) { //마커가 존재한다면
           markersRef.current[data.user_id].setPosition(new window.kakao.maps.LatLng(data.latitude, data.longitude))
         }
       });
@@ -41,7 +41,7 @@ const LiveMap = () => {
             latitude = position.coords.latitude;
             longitude = position.coords.longitude;
 
-            stompClient.send("/app/map.latlng", {}, JSON.stringify({
+            stompClient.send(`/app/map.latlng/${room_id}`, {}, JSON.stringify({
               latitude: latitude + (Math.random() - 0.5) * 0.001,
               longitude: longitude + (Math.random() - 0.5) * 0.001,
               user_id: myUser_id,
