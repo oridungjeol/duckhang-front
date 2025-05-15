@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
+import SockJS from "sockjs-client";
+import { Stomp, Client } from "@stomp/stompjs";
 
 import LiveMapLoader from "./liveMapLoader";
 import stompClient from"../../utils/clientStompConnector";
@@ -13,9 +15,10 @@ const LiveMap = () => {
   const myUserId = "asdf";
   const otherUserId = "zxcv";
   const roomId = 111;
-
+  let stompClient;
+  
   const createMap = useCallback((latitude, longitude) => {
-    const mapContainer = mapRef.current;
+  const mapContainer = mapRef.current;
     const options = {
       center: new window.kakao.maps.LatLng(latitude, longitude),
       level: 3,
@@ -42,7 +45,10 @@ const LiveMap = () => {
   }, []);
 
   const updateMarkers = useCallback(() => {
-    activateStompClient((client) => {
+
+    stompClient.connect({}, client => {
+      console.log(client.connected)
+      if (client.connected) {
       client.subscribe("/topic/map.latlng", (message) => {
         console.log("받은 메시지:", message.body);
 
@@ -51,11 +57,16 @@ const LiveMap = () => {
 
         markersRef.current[userId].setPosition(new window.kakao.maps.LatLng(latitude, longitude))
       });
-    });
+    }    });
+
   }, []);
 
   //초기 map 세팅
   useEffect(() => {
+    const socket = new SockJS("http://localhost:8080/ws");
+     stompClient = Stomp.over(socket);
+    
+    
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
@@ -82,9 +93,11 @@ const LiveMap = () => {
         const { latitude, longitude } = position.coords;
 
         console.log("5초마다 위치:", latitude, longitude);
-
+      console.log(stompClient.connected)
+      if (stompClient.connected) {
+      
         stompClient.publish({
-          destination: "/topic/map.latlng",
+          destination: "/app/map.latlng",
           body: JSON.stringify({
             userId: otherUserId,
             roomId: roomId,
@@ -92,6 +105,7 @@ const LiveMap = () => {
             longitude: longitude + (Math.random() - 0.5) * 0.001,
           }),
         });
+      }
       },
       (error) => {
         console.error("위치 가져오기 실패", error);
