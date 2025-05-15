@@ -55,8 +55,10 @@ export function Success() {
   if (isLoading) {
     return (
       <div className="result wrapper">
-        <div className="box_section">
+        <div className="box_section loading-container">
+          <div className="loading-spinner"></div>
           <h2>결제 확인 중...</h2>
+          <p>잠시만 기다려주세요</p>
         </div>
       </div>
     );
@@ -74,23 +76,36 @@ export function Success() {
   }
 
   return (
-    <div className="result wrapper">
-      <div className="box_section">
-        <h2>결제 성공</h2>
+    <div className="result wrapper" style={{ flexDirection: 'column' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '40px', marginBottom: '32px' }}>
+        <svg width="90" height="90" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="45" fill="#3282f6" />
+          <path d="M30 52L45 67L70 42" stroke="white" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        <div className="box_section">
+        <h2>결제가 완료되었습니다.</h2>
         <p>{`주문번호: ${paymentInfo.orderId}`}</p>
-        <p>{`결제 금액: ${Number(paymentInfo.totalAmount).toLocaleString()}원`}</p>
-        <p>{`결제 수단: ${paymentInfo.method}`}</p>
-        <p>{`승인 일시: ${paymentInfo.approvedAt}`}</p>
-        <a
-          href={paymentInfo.receipt?.url}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          영수증 보기
-        </a>
+        <p>{`결제금액: ${Number(paymentInfo.totalAmount).toLocaleString()}원`}</p>
+        <p>{`결제수단: ${paymentInfo.method}`}</p>
+        <p>{`결제일시: ${formatDate(paymentInfo.approvedAt)}`}</p>
+       
+      </div>
+      <button
+          className="button">확인</button>
       </div>
     </div>
   );
+}
+
+function formatDate(dateString) {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  const hh = String(date.getHours()).padStart(2, '0');
+  const min = String(date.getMinutes()).padStart(2, '0');
+  return `${yyyy}.${mm}.${dd} ${hh}:${min}`;
 }
 
 export default Success;

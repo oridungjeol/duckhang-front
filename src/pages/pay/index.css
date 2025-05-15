@@ -1,23 +1,83 @@
 .button {
-    /* 기존 스타일 유지 */
-    background-color: #3282f6;
-    color: #f9fcff;
-    margin-top: 32px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 8px 22px;
-    border: none;
-    border-radius: 8px;
-    font-weight: 500;
-    font-size: 17px;
-    cursor: pointer;
-    max-width: 480px;
-    width: 100%;
-    height: 100%;
-  
-    /* 추가 */
-    margin-left: auto;
-    margin-right: auto;
-  }
-  
+  /* 기존 스타일 유지 */
+  background-color: #3282f6;
+  color: #f9fcff;
+  margin-top: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 22px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 17px;
+  cursor: pointer;
+  max-width: 480px;
+  width: 100%;
+  height: 100%;
+
+  /* 추가 */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
+.result.wrapper {
+min-height: 100vh;
+display: flex;
+align-items: center;
+justify-content: center;
+/* text-align: center; */
+}
+
+.loading-container {
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+padding: 2rem;
+text-align: center;
+background: white;
+border-radius: 8px;
+box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.loading-spinner {
+width: 50px;
+height: 50px;
+border: 5px solid #f3f3f3;
+border-top: 5px solid #3498db;
+border-radius: 50%;
+animation: spin 1s linear infinite;
+margin-bottom: 1rem;
+}
+
+@keyframes spin {
+0% { transform: rotate(0deg); }
+100% { transform: rotate(360deg); }
+}
+
+.loading-container h2 {
+margin: 1rem 0;
+color: #333;
+}
+
+.loading-container p {
+color: #666;
+font-size: 0.9rem;
+}
+
+.box_section {
+/* text-align: center; */
+}
+
+.box_section h2 {
+text-align: center;
+}
+
+.fail-button {
+padding-left: 32px;
+padding-right: 32px;
+margin-left: auto;
+margin-right: auto;
+}
