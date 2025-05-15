@@ -6,28 +6,29 @@ const clientKey = "test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm";
 const customerKey = "4rOfQsR548H62ySKBLWo5";
 
 export function Checkout() {
-  // 테스트용 하드코딩 boardId
+  // 하드코딩된 테스트용 값
   const boardId = 5;
+  const type = "rental";
 
   const [amount, setAmount] = useState({ currency: "KRW", value: 0 });
-  const [rentalPrice, setRentalPrice] = useState(0);
+  const [price, setPrice] = useState(0);
   const [widgets, setWidgets] = useState(null);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    async function fetchRentalPrice() {
+    async function fetchPrice() {
       try {
-        const res = await fetch(`http://localhost:8080/api/rental/${boardId}`);
-        if (!res.ok) throw new Error("렌탈 가격을 불러올 수 없습니다.");
-        const rental = await res.json();
-        setRentalPrice(rental.price);
-        setAmount({ currency: "KRW", value: rental.price });
+        const res = await fetch(`http://localhost:8080/api/price/${type}/${boardId}`);
+        if (!res.ok) throw new Error("가격 조회 실패");
+        const data = await res.json();
+        setPrice(data.price);
+        setAmount({ currency: "KRW", value: data.price });
       } catch (err) {
         console.error(err);
       }
     }
-    fetchRentalPrice();
-  }, [boardId]);
+    fetchPrice();
+  }, [boardId, type]);
 
   useEffect(() => {
     async function loadWidgets() {
@@ -42,14 +43,8 @@ export function Checkout() {
       if (!widgets || amount.value === 0) return;
       await widgets.setAmount(amount);
       await Promise.all([
-        widgets.renderPaymentMethods({
-          selector: "#payment-method",
-          variantKey: "DEFAULT",
-        }),
-        widgets.renderAgreement({
-          selector: "#agreement",
-          variantKey: "AGREEMENT",
-        }),
+        widgets.renderPaymentMethods({ selector: "#payment-method", variantKey: "DEFAULT" }),
+        widgets.renderAgreement({ selector: "#agreement", variantKey: "AGREEMENT" }),
       ]);
       setReady(true);
     }
@@ -68,19 +63,18 @@ export function Checkout() {
           onClick={async () => {
             if (!widgets) return;
             try {
-              const res = await fetch("http://localhost:8080/api/order/create-order-id", {
+              const res = await fetch("http://localhost:8080/api/payment/create-order-id", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ boardId }),
+                body: JSON.stringify({ boardId, type }),
               });
               if (!res.ok) throw new Error("주문 생성 실패");
-              const data = await res.json();
-              const orderId = data.orderId;
+              const { orderId } = await res.json();
 
               await widgets.requestPayment({
                 orderId,
-                orderName: "렌탈 결제 테스트",
-                successUrl: `${window.location.origin}/success?orderId=${orderId}&amount=${rentalPrice}`,
+                orderName: `${type.toUpperCase()} 게시글 결제`,
+                successUrl: `${window.location.origin}/success?orderId=${orderId}&amount=${price}&type=${type}`,
                 failUrl: `${window.location.origin}/fail`,
                 customerEmail: "customer123@gmail.com",
                 customerName: "김토스",
