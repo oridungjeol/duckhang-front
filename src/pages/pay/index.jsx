@@ -1,94 +1,87 @@
-import { loadTossPayments, ANONYMOUS } from "@tosspayments/tosspayments-sdk";
 import { useEffect, useState } from "react";
+import { loadTossPayments } from "@tosspayments/tosspayments-sdk";
 import "./index.css";
 
 const clientKey = "test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm";
 const customerKey = "4rOfQsR548H62ySKBLWo5";
 
 export function Checkout() {
-  const [amount, setAmount] = useState({
-    currency: "KRW",
-    value: 30_000,
-  });
-  const [ready, setReady] = useState(false);
+  // 테스트용 하드코딩 boardId
+  const boardId = 5;
+
+  const [amount, setAmount] = useState({ currency: "KRW", value: 0 });
+  const [rentalPrice, setRentalPrice] = useState(0);
   const [widgets, setWidgets] = useState(null);
+  const [ready, setReady] = useState(false);
 
-    // 비회원 결제
-    // const widgets = tossPayments.widgets({ customerKey: ANONYMOUS });
   useEffect(() => {
-    async function fetchPaymentWidgets() {
-      const tossPayments = await loadTossPayments(clientKey);
-      const widgets = tossPayments.widgets({
-        customerKey,
-      });
-      setWidgets(widgets);
+    async function fetchRentalPrice() {
+      try {
+        const res = await fetch(`http://localhost:8080/api/rental/${boardId}`);
+        if (!res.ok) throw new Error("렌탈 가격을 불러올 수 없습니다.");
+        const rental = await res.json();
+        setRentalPrice(rental.price);
+        setAmount({ currency: "KRW", value: rental.price });
+      } catch (err) {
+        console.error(err);
+      }
     }
-
-    fetchPaymentWidgets();
-  }, [clientKey, customerKey]);
+    fetchRentalPrice();
+  }, [boardId]);
 
   useEffect(() => {
-    async function renderPaymentWidgets() {
-      if (widgets == null) return;
+    async function loadWidgets() {
+      const tossPayments = await loadTossPayments(clientKey);
+      setWidgets(tossPayments.widgets({ customerKey }));
+    }
+    loadWidgets();
+  }, []);
 
-    // ------ 주문의 결제 금액 설정 ------
-    await widgets.setAmount(amount);
-     
-    await Promise.all([
-      // ------  결제 UI 렌더링 ------
-      widgets.renderPaymentMethods({
-        selector: "#payment-method",
-        variantKey: "DEFAULT",
-      }),
-      // ------  이용약관 UI 렌더링 ------
-      widgets.renderAgreement({
-        selector: "#agreement",
-        variantKey: "AGREEMENT",
-      }),
-    ]);
-     
-
+  useEffect(() => {
+    async function renderWidgets() {
+      if (!widgets || amount.value === 0) return;
+      await widgets.setAmount(amount);
+      await Promise.all([
+        widgets.renderPaymentMethods({
+          selector: "#payment-method",
+          variantKey: "DEFAULT",
+        }),
+        widgets.renderAgreement({
+          selector: "#agreement",
+          variantKey: "AGREEMENT",
+        }),
+      ]);
       setReady(true);
     }
-
-  renderPaymentWidgets();
-}, [widgets]);
-  
-
-  useEffect(() => {
-    if (widgets == null) return;
-    widgets.setAmount(amount);
+    renderWidgets();
   }, [widgets, amount]);
 
+  return (
+    <div className="wrapper">
+      <div className="box_section">
+        <div id="payment-method" />
+        <div id="agreement" />
 
-return (
-  <div className="wrapper">
-    <div className="box_section">
-      {/* 결제 UI */}
-      <div id="payment-method" />
-      {/* 이용약관 UI */}
-      <div id="agreement" />
-      
-        {/* 결제하기 버튼 */}
         <button
           className="button"
           disabled={!ready}
           onClick={async () => {
+            if (!widgets) return;
             try {
-              // ------ 서버에서 orderId 받아오기 ------
-              const res = await fetch("/create-order-id ", {
+              const res = await fetch("http://localhost:8080/api/order/create-order-id", {
                 method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ boardId }),
               });
+              if (!res.ok) throw new Error("주문 생성 실패");
               const data = await res.json();
               const orderId = data.orderId;
 
-     
-              // ------ 결제 요청 ------
               await widgets.requestPayment({
-                orderId: orderId,
-                orderName: "토스 티셔츠 외 2건",
-                successUrl: window.location.origin + "/success",
-                failUrl: window.location.origin + "/fail",
+                orderId,
+                orderName: "렌탈 결제 테스트",
+                successUrl: `${window.location.origin}/success?orderId=${orderId}&amount=${rentalPrice}`,
+                failUrl: `${window.location.origin}/fail`,
                 customerEmail: "customer123@gmail.com",
                 customerName: "김토스",
                 customerMobilePhone: "01012341234",
@@ -102,8 +95,7 @@ return (
         </button>
       </div>
     </div>
-
   );
 }
-export default Checkout;
 
+export default Checkout;
