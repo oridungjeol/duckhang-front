@@ -6,8 +6,7 @@ const clientKey = "test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm";
 const customerKey = "4rOfQsR548H62ySKBLWo5";
 
 export function Checkout() {
-  // 하드코딩된 테스트용 값
-  const boardId = 5;
+  const boardId = 102;
   const type = "rental";
 
   const [amount, setAmount] = useState({ currency: "KRW", value: 0 });
@@ -18,7 +17,7 @@ export function Checkout() {
   useEffect(() => {
     async function fetchPrice() {
       try {
-        const res = await fetch(`http://localhost:8080/api/price/${type}/${boardId}`);
+        const res = await fetch(`http://localhost:8080/api/price/${type}/${boardId}`); // ✅ 수정
         if (!res.ok) throw new Error("가격 조회 실패");
         const data = await res.json();
         setPrice(data.price);

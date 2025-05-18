@@ -1,6 +1,6 @@
 .button {
   /* 기존 스타일 유지 */
-  background-color: #3282f6;
+  background-color: #5580e6;
   color: #f9fcff;
   margin-top: 32px;
   display: flex;
@@ -80,4 +80,18 @@ padding-left: 32px;
 padding-right: 32px;
 margin-left: auto;
 margin-right: auto;
+}
+
+.refund-button {
+  background-color: #f87171; /* 붉은색 계열 */
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.refund-button:hover {
+  background-color: #ef4444;
 }

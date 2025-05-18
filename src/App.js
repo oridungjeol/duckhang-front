@@ -9,6 +9,10 @@ import MyPage from "./pages/mypage";
 import Checkout from "./pages/pay";
 import Success from "./pages/pay/Success";
 import Fail from "./pages/pay/Fail";
+import TestRefundPage from "./pages/pay/TestRefundPage";
+import RefundSuccess from "./pages/refund/RefundSuccess";
+import RefundFail from "./pages/refund/RefundFail";
+
 
 import "./App.css";
 
@@ -33,6 +37,9 @@ function App() {
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/success" element={<Success />} />
           <Route path="/fail" element={<Fail />} />
+          <Route path="/test-refund" element={<TestRefundPage />} />
+          <Route path="/refund-success" element={<RefundSuccess />} />
+          <Route path="/refund-fail" element={<RefundFail />} />
         </Routes>
       </div>
     </Router>
