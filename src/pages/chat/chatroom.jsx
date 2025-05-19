@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
 
@@ -9,8 +9,9 @@ export default function ChatRoom() {
 
   const navigate = useNavigate();
 
-  const room_id = 555;
-  const user_id = sessionStorage.getItem("user_id");
+  const location = useLocation();
+  const data = location.state;
+  console.log("data: ", data);
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -28,7 +29,7 @@ export default function ChatRoom() {
       console.log('Connected: ' + frame);
       isConnected.current = true;
 
-      stompClient.subscribe(`/topic/chat/${room_id}`, function(message) {
+      stompClient.subscribe(`/topic/chat/${data.room_id}`, function(message) {
         const data = JSON.parse(message.body);
         setMessages((prev) => [...prev, data]);
       });
@@ -52,12 +53,12 @@ export default function ChatRoom() {
       const kstDate = new Date(kstOffset);
       const created_at = kstDate.toISOString().slice(0, 19);
 
-      stompClient.send(`/app/chat/${room_id}`, {}, JSON.stringify({
+      stompClient.send(`/app/chat/${data.room_id}`, {}, JSON.stringify({
         type: 'TEXT',
-        author_uuid: user_id,
+        author_uuid: data.user_id,
         content: input,
         created_at: created_at,
-        room_id: room_id,
+        room_id: data.room_id,
       }));
 
       setInput("");
@@ -76,12 +77,12 @@ export default function ChatRoom() {
       const kstDate = new Date(kstOffset);
       const created_at = kstDate.toISOString().slice(0, 19);
 
-      stompClient.send(`/app/chat/${room_id}`, {}, JSON.stringify({
+      stompClient.send(`/app/chat/${data.room_id}`, {}, JSON.stringify({
         type: 'PAY',
-        author_uuid: user_id,
+        author_uuid: data.user_id,
         content: "",
         created_at: created_at,
-        room_id: room_id,
+        room_id: data.room_id,
       }));
     }
     else {
@@ -98,12 +99,12 @@ export default function ChatRoom() {
       const kstDate = new Date(kstOffset);
       const created_at = kstDate.toISOString().slice(0, 19);
 
-      stompClient.send(`/app/chat/${room_id}`, {}, JSON.stringify({
+      stompClient.send(`/app/chat/${data.room_id}`, {}, JSON.stringify({
         type: 'MAP',
-        author_uuid: user_id,
+        author_uuid: data.user_id,
         content: "",
         created_at: created_at,
-        room_id: room_id,
+        room_id: data.room_id,
       }));
     }
     else {
@@ -112,7 +113,7 @@ export default function ChatRoom() {
   }
 
   const renderMessage = (msg, index) => {
-    const isMine = msg.author_uuid === user_id;
+    const isMine = msg.author_uuid === data.user_id;
   
     switch (msg.type) {
       case 'SYSTEM':

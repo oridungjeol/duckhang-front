@@ -11,6 +11,10 @@ export default function ProfilePage() {
     const [scope, setScope] = useState("");
 
     useEffect(() => {
+        const url = new URL(window.location.href);
+        const path = url.pathname.split('/');
+        const uuid = path[2];
+        
         const fetchUserData = async () => {
             try {
                 const response = await axios.get(`http://localhost:8080/user/${uuid}`); // 실제 UUID로 변경
