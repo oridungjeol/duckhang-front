@@ -6,6 +6,7 @@ import Board from "./pages/board";
 import Chat from "./pages/chat";
 import Map from "./pages/map";
 import MyPage from "./pages/mypage";
+import LoginPage from "./pages/user";
 
 import "./App.css";
 
@@ -23,6 +24,8 @@ function App() {
       <div className="min-h-screen bg-gray-50 layout">
         <Routes>
           <Route path="/" element={<User />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/user/:uuid" element={<MyPage />} />
           <Route path="/board" element={<Board />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="/map" element={<Map />} />
