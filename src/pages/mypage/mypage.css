@@ -1,0 +1,38 @@
+.mypage-container {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    font-family: 'Arial', sans-serif;
+  }
+  
+  .profile-img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-right: 20px;
+    object-fit: cover;
+  }
+  
+  .user-info {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .nickname {
+    font-weight: bold;
+    font-size: 20px;
+    margin-bottom: 8px;
+  }
+  
+  .stars {
+    font-size: 18px;
+  }
+  
+  .star-filled {
+    color: #ffc107;
+  }
+  
+  .star-empty {
+    color: #e4e5e9;
+  }
+  
