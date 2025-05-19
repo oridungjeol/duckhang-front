@@ -1,0 +1,13 @@
+.container {
+  padding: 50px 40px;
+}
+
+.chatting-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.chatting {
+  display: flex;
+  flex-direction: row;
+}
