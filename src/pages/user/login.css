@@ -1,4 +1,4 @@
-.login-container {
+.login-wrap {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -6,7 +6,11 @@
   height: 100vh;
 }
 
-.login-box {
+.login-type{
+  .display:
+}
+
+.social {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -25,9 +29,6 @@
   border-radius: 8px;
   cursor: pointer;
   box-shadow: 0 0 0 1px #ccc;
-}
-
-.kakao-login-button {
   background: none;
   border: none;
   padding: 0;

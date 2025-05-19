@@ -1,0 +1,36 @@
+.profile-wrap{
+  display: flex;
+  align-items: flex-start;
+  padding: 20px;
+  max-width: 400px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background-color: #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.profile-image img{
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid #eee;
+}
+
+.user-info{
+  margin-left: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.nickname {
+  font-size: 18px;
+  font-weight: bold;
+  color: #222;
+  margin-bottom: 5px;
+}
+
+.scope {
+  font-size: 14px;
+  color: #666;
+}
