@@ -9,19 +9,16 @@ export default function Chat() {
   const datas = [
     {
       "room_id": 555,
-      "user_id":"asdf",
       "name": "채팅방1",
       "recent": "최근 대화1"
     },
     {
       "room_id": 666,
-      "user_id":"asdf",
       "name": "채팅방2",
       "recent": "최근 대화2"
     },
     {
       "room_id": 777,
-      "user_id":"asdf",
       "name": "채팅방3",
       "recent": "최근 대화3"
     },

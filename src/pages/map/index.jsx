@@ -91,7 +91,7 @@ const LiveMap = () => {
     bounds.extend(otherMarker.getPosition());
 
     map.setBounds(bounds);
-  }, []);
+  });
 
   //초기 map 세팅
   useEffect(() => {

@@ -7,16 +7,17 @@ import "./chatroom.css";
 
 export default function ChatRoom() {
 
-  const navigate = useNavigate();
-
   const location = useLocation();
   const data = location.state;
-  console.log("data: ", data);
+
+  const navigate = useNavigate();
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const stompClientRef = useRef(null);
   const isConnected = useRef(false);
+
+  const user_id = sessionStorage.getItem('user_id');
 
   useEffect(() => {
     if (isConnected.current) return;
@@ -55,7 +56,7 @@ export default function ChatRoom() {
 
       stompClient.send(`/app/chat/${data.room_id}`, {}, JSON.stringify({
         type: 'TEXT',
-        author_uuid: data.user_id,
+        author_uuid: user_id,
         content: input,
         created_at: created_at,
         room_id: data.room_id,
@@ -79,7 +80,7 @@ export default function ChatRoom() {
 
       stompClient.send(`/app/chat/${data.room_id}`, {}, JSON.stringify({
         type: 'PAY',
-        author_uuid: data.user_id,
+        author_uuid: user_id,
         content: "",
         created_at: created_at,
         room_id: data.room_id,
@@ -101,7 +102,7 @@ export default function ChatRoom() {
 
       stompClient.send(`/app/chat/${data.room_id}`, {}, JSON.stringify({
         type: 'MAP',
-        author_uuid: data.user_id,
+        author_uuid: user_id,
         content: "",
         created_at: created_at,
         room_id: data.room_id,
@@ -113,7 +114,7 @@ export default function ChatRoom() {
   }
 
   const renderMessage = (msg, index) => {
-    const isMine = msg.author_uuid === data.user_id;
+    const isMine = msg.author_uuid === user_id;
   
     switch (msg.type) {
       case 'SYSTEM':
