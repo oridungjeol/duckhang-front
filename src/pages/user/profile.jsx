@@ -6,18 +6,21 @@ import duckhang from "../../images/duckhang.png";
 import "./profile.css";
 
 export default function ProfilePage() {
-    const { uuid } = useParams();
+
     const [nickname, setNickname] = useState("");
     const [scope, setScope] = useState("");
 
     useEffect(() => {
-        const url = new URL(window.location.href);
-        const path = url.pathname.split('/');
-        const uuid = path[2];
-        
         const fetchUserData = async () => {
+            const url = new URL(window.location.href);
+            const pathSegments = url.pathname.split('/');
+            const uuid = pathSegments[2];
+            console.log(uuid)
             try {
-                const response = await axios.get(`http://localhost:8080/user/${uuid}`); // 실제 UUID로 변경
+                const response = await axios.get(`http://localhost/api/user/${uuid}`, {
+                    withCredentials: true,
+                });
+
                 console.log(response.data.nickname, response.data.scope)
                 setNickname(response.data.nickname);
                 setScope(response.data.scope);
@@ -42,5 +45,5 @@ export default function ProfilePage() {
                 </div>
             </div>
         </>
-    );
+    ); 
 }

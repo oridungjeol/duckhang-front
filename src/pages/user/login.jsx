@@ -3,7 +3,7 @@ import "./login.css";
 import kakaoLoginImg from '../../images/kakao_login_large_wide.png';
 
 const handleKakaoLogin = () => {
-  window.location.href = 'http://localhost:8080/oauth2/authorization/kakao';
+  window.location.href = 'http://localhost/api/oauth2/authorization/kakao';
 };
 
 const Login = () => {
