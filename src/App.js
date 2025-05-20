@@ -5,6 +5,7 @@ import Login from "./pages/user/login"
 import Profile from "./pages/user/profile"
 import Board from "./pages/board";
 import Chat from "./pages/chat";
+import ChatRoom from "./pages/chat/chatroom";
 import Map from "./pages/map";
 
 import "./App.css";
@@ -26,6 +27,7 @@ function App() {
           <Route path="/user/:uuid" element={<Profile />} />
           <Route path="/board" element={<Board />} />
           <Route path="/chat" element={<Chat />} />
+          <Route path="/chat/:rood_id" element={<ChatRoom />} />
           <Route path="/map" element={<Map />} />
         </Routes>
       </div>

@@ -18,7 +18,6 @@ const LiveMap = () => {
   let latitude;
   let longitude;
 
-  //test
   useEffect(() => {
     const socket = new SockJS("http://localhost:8080/ws");
     stompClient = Stomp.over(socket);

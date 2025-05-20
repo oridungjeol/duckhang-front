@@ -6,6 +6,7 @@ import duckhang from "../../images/duckhang.png";
 import "./profile.css";
 
 export default function ProfilePage() {
+
     const [nickname, setNickname] = useState("");
     const [scope, setScope] = useState("");
 
