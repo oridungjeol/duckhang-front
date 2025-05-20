@@ -1,11 +1,11 @@
 import { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-import User from "./pages/user";
+import Login from "./pages/user/login"
+import Profile from "./pages/user/profile"
 import Board from "./pages/board";
 import Chat from "./pages/chat";
 import Map from "./pages/map";
-import MyPage from "./pages/mypage";
 
 import "./App.css";
 
@@ -22,11 +22,11 @@ function App() {
     <Router>
       <div className="min-h-screen bg-gray-50 layout">
         <Routes>
-          <Route path="/" element={<User />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/user/:uuid" element={<Profile />} />
           <Route path="/board" element={<Board />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="/map" element={<Map />} />
-          <Route path="/mypage" element={<MyPage />} />
         </Routes>
       </div>
     </Router>
