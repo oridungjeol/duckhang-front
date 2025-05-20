@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import axios from "axios";
 import Header from "../../components/header";
 import duckhang from "../../images/duckhang.png";
@@ -16,8 +15,9 @@ export default function ProfilePage() {
             const uuid = pathSegments[2];
             console.log(uuid)
             try {
-                const response = await axios.get(`http://localhost:8080/user/${uuid}`, {
+                const response = await axios.get(`http://localhost/api/user/${uuid}`, {
                     withCredentials: true,
+
                 });
 
                 console.log(response.data.nickname, response.data.scope)
