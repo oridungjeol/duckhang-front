@@ -16,7 +16,7 @@ export default function ProfilePage() {
             const uuid = pathSegments[2];
             console.log(uuid)
             try {
-                const response = await axios.get(`http://localhost:8080/user/${uuid}`, {
+                const response = await axios.get(`http://localhost/api/user/${uuid}`, {
                     withCredentials: true,
                 });
 
