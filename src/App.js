@@ -1,11 +1,13 @@
 import { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-import User from "./pages/user";
+import Login from "./pages/user/login"
+import Profile from "./pages/user/profile"
 import Board from "./pages/board";
 import Chat from "./pages/chat";
+import ChatRoom from "./pages/chat/chatroom";
 import Map from "./pages/map";
-import MyPage from "./pages/mypage";
+
 import Checkout from "./pages/pay";
 import Success from "./pages/pay/Success";
 import Fail from "./pages/pay/Fail";
@@ -29,11 +31,13 @@ function App() {
     <Router>
       <div className="min-h-screen bg-gray-50 layout">
         <Routes>
-          <Route path="/" element={<User />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/user/:uuid" element={<Profile />} />
           <Route path="/board" element={<Board />} />
           <Route path="/chat" element={<Chat />} />
+          <Route path="/chat/:rood_id" element={<ChatRoom />} />
           <Route path="/map" element={<Map />} />
-          <Route path="/mypage" element={<MyPage />} />
+   
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/success" element={<Success />} />
           <Route path="/fail" element={<Fail />} />

@@ -14,27 +14,37 @@ export default function RefundButton({ orderId }) {
     setLoading(true);
 
     try {
-      const res = await fetch(`http://localhost:8080/api/payment/cancel/${orderId}`, {
+      const res = await fetch(`http://localhost:8080/payment/cancel/${orderId}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        credentials: 'include',
+        headers: {
+          "Content-Type": "application/json",
+        }
       });
 
       const data = await res.json();
-  
 
-      if (!res.ok) throw new Error(data.error || "보증금 환불 실패");
+      if (!res.ok) {
+        const errorMessage = data.error || "보증금 환불 실패";
+        throw new Error(errorMessage);
+      }
 
       navigate("/refund-success", {
         state: {
           refundInfo: {
             orderId: data.orderId || orderId,
-            cancelAmount: data.cancelAmount, // amount가 없으면 cancelAmount 사용
+            cancelAmount: data.cancelAmount,
             refundedAt: data.refundedAt ?? data.canceledAt ?? new Date().toISOString(),
           },
         },
       });
     } catch (error) {
-      navigate("/refund-fail", { state: { message: error.message || "보증금 환불 실패" } });
+      const errorMessage = error.message || "보증금 환불 실패";
+      navigate("/refund-fail", { 
+        state: { 
+          message: errorMessage 
+        } 
+      });
     } finally {
       setLoading(false);
     }

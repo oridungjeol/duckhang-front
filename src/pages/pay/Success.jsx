@@ -22,8 +22,9 @@ export function Success() {
 
     async function confirm() {
       try {
-        const response = await fetch("http://localhost:8080/api/payment/confirm", {
+        const response = await fetch("http://localhost:8080/payment/confirm", {
           method: "POST",
+          credentials: 'include',
           headers: {
             "Content-Type": "application/json",
           },
@@ -33,15 +34,18 @@ export function Success() {
         const json = await response.json();
 
         if (!response.ok) {
-          setError(json.message || "결제 확인 실패");
-          navigate(`/fail?message=${json.message}&code=${json.code}`);
+          const errorMessage = json.message || "결제 확인 실패";
+          setError(errorMessage);
+          navigate(`/fail?message=${encodeURIComponent(errorMessage)}&code=${json.code || 'UNKNOWN'}`);
           return;
         }
 
         setPaymentInfo(json);
       } catch (err) {
-        setError("네트워크 오류가 발생했습니다.");
-        console.error(err);
+        const errorMessage = "네트워크 오류가 발생했습니다.";
+        setError(errorMessage);
+        console.error("결제 확인 중 오류 발생:", err);
+        navigate(`/fail?message=${encodeURIComponent(errorMessage)}&code=NETWORK_ERROR`);
       } finally {
         setIsLoading(false);
       }
