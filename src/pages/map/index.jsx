@@ -95,11 +95,14 @@ const LiveMap = () => {
 
   //초기 map 세팅
   useEffect(() => {
+    console.log("useEffect 실행");
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
+        console.log(latitude, longitude);
 
         LiveMapLoader().then(() => {
+          console.log("livemaploader 실행됨");
           window.kakao.maps.load(() => {
             createMap(latitude, longitude);
             createMarkers(latitude, longitude)
@@ -107,7 +110,7 @@ const LiveMap = () => {
         });
       }
     );
-  }, [createMap, createMarkers]);
+  }, []);
 
   return (
     <>
