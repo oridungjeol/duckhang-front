@@ -14,8 +14,9 @@ const Header = () => {
     if (token) {
       try {
         const decoded = jwtDecode(token);
-        setUsername(decoded.nickname || '사용자');
+        setUsername(decoded || '사용자');
         setUuid(decoded.sub);
+        console.log(username)
       } catch (error) {
         console.error('JWT 디코딩 실패:', error);
         setUsername(null);
