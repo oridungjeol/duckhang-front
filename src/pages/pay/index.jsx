@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation } from 'react-router-dom';
 import { loadTossPayments } from "@tosspayments/tosspayments-sdk";
 import "./index.css";
 
@@ -6,8 +7,8 @@ const clientKey = "test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm";
 const customerKey = "4rOfQsR548H62ySKBLWo5";
 
 export function Checkout() {
-  const boardId = 102;
-  const type = "rental";
+  const { state } = useLocation();
+  const [payData, setPayData] = useState(null);
 
   const [amount, setAmount] = useState({ currency: "KRW", value: 0 });
   const [price, setPrice] = useState(0);
@@ -16,12 +17,21 @@ export function Checkout() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    if (state) {
+      setPayData(state);
+    }
+  }, [state]);
+
+  useEffect(() => {
     async function fetchPrice() {
       try {
-        const res = await fetch(`http://localhost:8080/payment/price/${type}/${boardId}`, {
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-        });
+        const res = await fetch(
+          `http://localhost:8080/payment/price/${payData.type}/${payData.boardId}`,
+          {
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+          }
+        );
 
         if (res.status === 401) {
           throw new Error("로그인이 필요합니다.");
@@ -42,8 +52,10 @@ export function Checkout() {
       }
     }
 
-    fetchPrice();
-  }, [boardId, type]);
+    if (payData?.boardId && payData?.type) {
+      fetchPrice();
+    }
+  }, [payData]);
 
   useEffect(() => {
     async function loadWidgets() {
@@ -97,7 +109,6 @@ export function Checkout() {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ boardId, type }),
               });
 
               if (!res.ok) {
@@ -109,8 +120,8 @@ export function Checkout() {
 
               await widgets.requestPayment({
                 orderId,
-                orderName: `${type.toUpperCase()} 게시글 결제`,
-                successUrl: `${window.location.origin}/success?orderId=${orderId}&amount=${price}&type=${type}`,
+                orderName: `${payData.type.toUpperCase()} 게시글 결제`,
+                successUrl: `${window.location.origin}/success?orderId=${orderId}&amount=${price}&type=${payData.type}`,
                 failUrl: `${window.location.origin}/fail`,
                 customerEmail: "customer123@gmail.com",
                 customerName: "김토스",

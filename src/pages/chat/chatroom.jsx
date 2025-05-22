@@ -170,7 +170,7 @@ export default function ChatRoom() {
               :
                 <>
                   <div>결제 요청을 받았어요</div>
-                  <button onClick={() => { navigate('/checkout') }}> 결제하기 </button>
+                  <button onClick={() => { navigate('/checkout', { state: { boardId: data.boardId, type: data.type } }) }}> 결제하기 </button>
                 </>
               }
             </div>
