@@ -20,6 +20,8 @@ export default function ChatRoom() {
 
   const user_id = sessionStorage.getItem('user_id');
 
+  const pageRef = useRef(0);
+
   useEffect(() => {
     //이전 메시지 로드
     loadMessageData();
@@ -49,16 +51,27 @@ export default function ChatRoom() {
   }, [])
 
   const loadMessageData = async() => {
-    console.log("현재 쿠키:", document.cookie);
-
     try {
-      const response = await axios.get(`http://localhost/api/chat/recent/${data.room_id}`, {
+      const response = await axios.get(`http://localhost/api/chat/recent/${data.room_id}?page=${pageRef.current}&size=50&sort=createdAt,desc`, {
         withCredentials: true,
       })
       console.log("message data: ", response);
-      setMessages(response.data);
+      setMessages(response.data.reverse());
     } catch(error) {
       console.error("최근 채팅 기록 불러오기 중 오류 발생:", error);
+    }
+  }
+
+  const loadMoreMessageData = async() => {
+    try {
+      pageRef.current += 1;
+      const response = await axios.get(`http://localhost/api/chat/recent/${data.room_id}?page=${pageRef.current}&size=50&sort=createdAt,desc`, {
+        withCredentials: true,
+      })
+      const reversedData = response.data.reverse();
+      setMessages((prev) => [...reversedData, ...prev]);
+    } catch(error) {
+      console.error("과거 채팅 기록 불러오기 중 오류 발생:", error);
     }
   }
 
@@ -195,6 +208,7 @@ export default function ChatRoom() {
   return (
     <div className="chat-container">
       <div className="chat-box">
+        <button onClick={() => {loadMoreMessageData()}}>채팅 더보기</button>
         {messages.map((msg, index) => renderMessage(msg, index))}
       </div>
       <button onClick={() => {handlePay()}}>결제 요청</button>
