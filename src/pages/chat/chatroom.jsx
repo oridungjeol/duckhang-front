@@ -2,23 +2,31 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from 'react-router-dom';
 import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
+import axios from "axios";
 
 import "./chatroom.css";
 
 export default function ChatRoom() {
 
-  const navigate = useNavigate();
-
   const location = useLocation();
   const data = location.state;
-  console.log("data: ", data);
+
+  const navigate = useNavigate();
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const stompClientRef = useRef(null);
   const isConnected = useRef(false);
 
+  const user_id = sessionStorage.getItem('user_id');
+
+  const pageRef = useRef(0);
+
   useEffect(() => {
+    //이전 메시지 로드
+    loadMessageData();
+
+    //stomp 연결
     if (isConnected.current) return;
 
     const socket = new SockJS("http://localhost:8080/ws");
@@ -42,6 +50,30 @@ export default function ChatRoom() {
     };
   }, [])
 
+  const loadMessageData = async() => {
+    try {
+      const response = await axios.get(`http://localhost/api/chat/recent/${data.room_id}?page=${pageRef.current}&size=50&sort=createdAt,desc`, {
+        withCredentials: true,
+      })
+      console.log("message data: ", response);
+      setMessages(response.data.reverse());
+    } catch(error) {
+      console.error("최근 채팅 기록 불러오기 중 오류 발생:", error);
+    }
+  }
+
+  const loadMoreMessageData = async() => {
+    try {
+      pageRef.current += 1;
+      const response = await axios.get(`http://localhost/api/chat/recent/${data.room_id}?page=${pageRef.current}&size=50&sort=createdAt,desc`, {
+        withCredentials: true,
+      })
+      const reversedData = response.data.reverse();
+      setMessages((prev) => [...reversedData, ...prev]);
+    } catch(error) {
+      console.error("과거 채팅 기록 불러오기 중 오류 발생:", error);
+    }
+  }
 
   const handleSend = () => {
     const stompClient = stompClientRef.current
@@ -55,7 +87,7 @@ export default function ChatRoom() {
 
       stompClient.send(`/app/chat/${data.room_id}`, {}, JSON.stringify({
         type: 'TEXT',
-        author_uuid: data.user_id,
+        author_uuid: user_id,
         content: input,
         created_at: created_at,
         room_id: data.room_id,
@@ -79,7 +111,7 @@ export default function ChatRoom() {
 
       stompClient.send(`/app/chat/${data.room_id}`, {}, JSON.stringify({
         type: 'PAY',
-        author_uuid: data.user_id,
+        author_uuid: user_id,
         content: "",
         created_at: created_at,
         room_id: data.room_id,
@@ -101,7 +133,7 @@ export default function ChatRoom() {
 
       stompClient.send(`/app/chat/${data.room_id}`, {}, JSON.stringify({
         type: 'MAP',
-        author_uuid: data.user_id,
+        author_uuid: user_id,
         content: "",
         created_at: created_at,
         room_id: data.room_id,
@@ -113,7 +145,7 @@ export default function ChatRoom() {
   }
 
   const renderMessage = (msg, index) => {
-    const isMine = msg.author_uuid === data.user_id;
+    const isMine = msg.author_uuid === user_id;
   
     switch (msg.type) {
       case 'SYSTEM':
@@ -151,7 +183,7 @@ export default function ChatRoom() {
               :
                 <>
                   <div>결제 요청을 받았어요</div>
-                  <button> 결제하기 </button>
+                  <button onClick={() => { navigate('/checkout', { state: { boardId: data.boardId, type: data.type } }) }}> 결제하기 </button>
                 </>
               }
             </div>
@@ -176,6 +208,7 @@ export default function ChatRoom() {
   return (
     <div className="chat-container">
       <div className="chat-box">
+        <button onClick={() => {loadMoreMessageData()}}>채팅 더보기</button>
         {messages.map((msg, index) => renderMessage(msg, index))}
       </div>
       <button onClick={() => {handlePay()}}>결제 요청</button>
