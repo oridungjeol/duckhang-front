@@ -4,6 +4,7 @@ import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
 import axios from "axios";
 
+import { getChattingData } from "./hook";
 import "./chatroom.css";
 
 export default function ChatRoom() {
@@ -51,15 +52,8 @@ export default function ChatRoom() {
   }, [])
 
   const loadMessageData = async() => {
-    try {
-      const response = await axios.get(`http://localhost/api/chat/recent/${data.room_id}?page=${pageRef.current}&size=50&sort=createdAt,desc`, {
-        withCredentials: true,
-      })
-      console.log("message data: ", response);
-      setMessages(response.data.reverse());
-    } catch(error) {
-      console.error("최근 채팅 기록 불러오기 중 오류 발생:", error);
-    }
+    const message_list = await getChattingData(data, pageRef);
+    setMessages(message_list);
   }
 
   const loadMoreMessageData = async() => {
