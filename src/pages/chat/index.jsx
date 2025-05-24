@@ -10,6 +10,9 @@ export default function Chat() {
   const navigate = useNavigate();
   const [datas, setDatas] = useState([])
 
+  /**
+   * 유저가 속한 채팅방 리스트 load
+   */
   useEffect(() => {
     const fetchChatRoomList = async() => {
       const chatRoomList = await getChatRoomList();
@@ -19,6 +22,10 @@ export default function Chat() {
     fetchChatRoomList();
   }, [])
 
+  /**
+   * 채팅방 클릭 시 해당 채팅방으로 이동
+   * @param {*} data 
+   */
   const enterChatRoom = (data) => {
     navigate(`/chat/${data.room_id}`, { state: data });
   }

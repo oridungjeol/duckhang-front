@@ -1,5 +1,9 @@
 import axios from "axios";
 
+/**
+ * 유저가 속한 모든 채팅방의 정보 호출
+ * @returns response.data
+ */
 export async function getChatRoomList() {
   try {
     const response = await axios.get(`http://localhost/api/chat/chatroom`, {
@@ -12,6 +16,12 @@ export async function getChatRoomList() {
   }
 }
 
+/**
+ * 해당 채팅방의 최근 50개 대화를 리턴
+ * @param {*} data
+ * @param {*} pageRef
+ * @returns
+ */
 export async function getChattingData(data, pageRef) {
   try {
     const response = await axios.get(
