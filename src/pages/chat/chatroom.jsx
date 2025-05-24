@@ -17,7 +17,7 @@ export default function ChatRoom() {
   const [input, setInput] = useState("");
   const stompClientRef = useRef(null);
   const isConnected = useRef(false);
-  const messageEndRef = useRef<HTMLDivElement | null>(null);
+  const scrollRef = useRef();
 
   const user_id = sessionStorage.getItem('user_id');
 
@@ -53,12 +53,9 @@ export default function ChatRoom() {
     };
   }, [])
 
-  /**
-   * 메시지를 보낼 때 스크롤을 맨 밑으로 내려주는 useEffect
-   */
   useEffect(() => {
-    messageEndRef.current.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }, [messages])
 
   /**
    * 이전 채팅 기록 50개를 호출
@@ -229,10 +226,9 @@ export default function ChatRoom() {
 
   return (
     <div className="chat-container">
-      <div className="chat-box">
+      <div className="chat-box" ref={scrollRef}>
         <button onClick={() => {loadMoreMessageData()}}>채팅 더보기</button>
         {messages.map((msg, index) => renderMessage(msg, index))}
-        <div ref={messageEndRef}></div>
       </div>
       <button onClick={() => {handlePay()}}>결제 요청</button>
       <button onClick={() => {handleMap()}}>위치 확인</button>
