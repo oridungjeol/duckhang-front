@@ -1,37 +1,50 @@
 import { useNavigate } from 'react-router';
+import { useEffect, useState } from 'react';
+
+import { getChatRoomList } from './hook';
 
 import "./index.css"
 
 export default function Chat() {
 
   const navigate = useNavigate();
+  const [datas, setDatas] = useState({})
 
-  const datas = [
-    {
-      "room_id": 555,
-      "name": "채팅방1",
-      "recent": "최근 대화1",
-      "boardId": 102,
-      "type": "rental"
-    },
-    {
-      "room_id": 666,
-      "name": "채팅방2",
-      "recent": "최근 대화2",
-      "boardId": 102,
-      "type": "rental"
-    },
-    {
-      "room_id": 777,
-      "name": "채팅방3",
-      "recent": "최근 대화3",
-      "boardId": 102,
-      "type": "rental"
-    },
-  ]
+  useEffect(() => {
+    const fetchChatRoomList = async() => {
+      const chatRoomList = await getChatRoomList();
+      console.log(chatRoomList);
+      setDatas(chatRoomList);
+    }
+
+    fetchChatRoomList();
+  }, [])
+
+  // const datas = [
+  //   {
+  //     "room_id": 555,
+  //     "name": "채팅방1",  //참여자 이름
+  //     "recent": "최근 대화1",
+  //     "boardId": 102,
+  //     "type": "rental"
+  //   },
+  //   {
+  //     "room_id": 666,
+  //     "name": "채팅방2",
+  //     "recent": "최근 대화2",
+  //     "boardId": 102,
+  //     "type": "rental"
+  //   },
+  //   {
+  //     "room_id": 777,
+  //     "name": "채팅방3",
+  //     "recent": "최근 대화3",
+  //     "boardId": 102,
+  //     "type": "rental"
+  //   },
+  // ]
 
   const enterChatRoom = (data) => {
-    //data를 넘겨야 함
     navigate(`/chat/${data.room_id}`, { state: data });
   }
 
