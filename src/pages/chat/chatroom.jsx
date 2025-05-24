@@ -53,6 +53,9 @@ export default function ChatRoom() {
     };
   }, [])
 
+  /**
+   * 맨 처음, 메시지를 보낼 때 스크롤 맨 밑으로 고정
+   */
   useEffect(() => {
     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages])
@@ -77,6 +80,17 @@ export default function ChatRoom() {
       console.error("과거 채팅 기록 불러오기 중 오류 발생:", error);
     }
   }
+
+  /**
+   * 엔터로 메시지 전송
+   * @param {*} e 
+   */
+  const activeEnter = (e) => {
+    if(e.key === "Enter") {
+      handleSend();
+    }
+  }
+
 
   /**
    * 텍스트 메시지 핸들러
@@ -238,6 +252,7 @@ export default function ChatRoom() {
           placeholder="메시지를 입력하세요"
           value={input}
           onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => activeEnter(e)}
         />
         <button onClick={() => {handleSend()}}>전송</button>
       </div>
