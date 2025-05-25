@@ -28,8 +28,6 @@ export default function ChatRoom() {
    * stomp 연결
    */
   useEffect(() => {
-    loadMessageData();
-
     if (isConnected.current) return;
 
     const socket = new SockJS("http://localhost:8080/ws");
@@ -45,6 +43,8 @@ export default function ChatRoom() {
         setMessages((prev) => [...prev, data]);
       });
     });
+
+    loadMessageData();
 
     return () => {
       stompClient.disconnect(() => {
@@ -90,7 +90,6 @@ export default function ChatRoom() {
       handleSend();
     }
   }
-
 
   /**
    * 텍스트 메시지 핸들러
@@ -184,7 +183,7 @@ export default function ChatRoom() {
       case 'SYSTEM':
         return (
           <div key={index} className="system-message">
-            시스템 메시지
+            {msg.content}
           </div>
         );
   
