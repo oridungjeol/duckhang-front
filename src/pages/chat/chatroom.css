@@ -19,6 +19,31 @@
   align-items: center;
 }
 
+.chat-header span:last-child {
+  display: flex;
+  gap: 8px;
+}
+
+.pay-btn {
+  background-color: #ffffff;
+  color: #ff9a4e;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.pay-btn:hover {
+  background-color: #ffdc58;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
 .chat-box {
   flex: 1;
   background-color: #ffffff;
@@ -110,7 +135,7 @@
 .system-message {
   text-align: center;
   color: #ff9a4e;
-  font-size: 12px;
+  font-size: 16px;
   margin: 8px 0;
   animation: fadeIn 0.5s ease-out;
 }
