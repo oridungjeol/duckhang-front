@@ -11,16 +11,16 @@ export default function ChatRoom() {
   const location = useLocation();
   const data = location.state;
 
+  const uuid = localStorage.getItem('uuid')
+
   const navigate = useNavigate();
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+
   const stompClientRef = useRef(null);
   const isConnected = useRef(false);
   const scrollRef = useRef();
-
-  const user_id = sessionStorage.getItem('user_id');
-
   const pageRef = useRef(0);
 
   /**
@@ -108,7 +108,7 @@ export default function ChatRoom() {
 
       stompClient.send(`/app/chat/${data.room_id}`, {}, JSON.stringify({
         type: 'TEXT',
-        author_uuid: user_id,
+        author_uuid: data.uuid,
         content: input,
         created_at: created_at,
         room_id: data.room_id,
@@ -135,7 +135,7 @@ export default function ChatRoom() {
 
       stompClient.send(`/app/chat/${data.room_id}`, {}, JSON.stringify({
         type: 'PAY',
-        author_uuid: user_id,
+        author_uuid: uuid,
         content: "",
         created_at: created_at,
         room_id: data.room_id,
@@ -160,7 +160,7 @@ export default function ChatRoom() {
 
       stompClient.send(`/app/chat/${data.room_id}`, {}, JSON.stringify({
         type: 'MAP',
-        author_uuid: user_id,
+        author_uuid: uuid,
         content: "",
         created_at: created_at,
         room_id: data.room_id,
@@ -178,7 +178,7 @@ export default function ChatRoom() {
    * @returns 
    */
   const renderMessage = (msg, index) => {
-    const isMine = msg.author_uuid === user_id;
+    const isMine = msg.author_uuid === uuid;
   
     switch (msg.type) {
       case 'SYSTEM':
@@ -228,7 +228,7 @@ export default function ChatRoom() {
           <div key={index} className="map-wrapper">
             <div className="map">
               <div>지도로 상대방의 위치를 확인하세요</div>
-              <button onClick={() => { navigate('/map') }}>지도 확인하기</button>
+              <button onClick={() => { navigate('/map', { state: { uuid: uuid, room_id: data.room_id } }) }}>지도 확인하기</button>
             </div>
           </div>
         );
