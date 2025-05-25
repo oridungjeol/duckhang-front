@@ -240,24 +240,28 @@ export default function ChatRoom() {
 
   return (
     <div className="chat-container">
-      <div>
-        {data.name}
+      <div className="chat-header">
+        <span>{data.name}</span>
+        <span>
+          <button onClick={() => {handleMap()}} className="pay-btn">위치 공유</button>
+          <button onClick={() => {handlePay()}} className="pay-btn">결제 요청</button>
+        </span>
       </div>
       <div className="chat-box" ref={scrollRef}>
-        <button onClick={() => {loadMoreMessageData()}}>채팅 더보기</button>
+        <button className="load-more-btn" onClick={() => {loadMoreMessageData()}}>
+          이전 대화 더보기
+        </button>
         {messages.map((msg, index) => renderMessage(msg, index))}
       </div>
-      <button onClick={() => {handlePay()}}>결제 요청</button>
-      <button onClick={() => {handleMap()}}>위치 확인</button>
       <div className="input-container">
-        <input 
-          type="text" 
-          placeholder="메시지를 입력하세요"
+        <input
+          type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => activeEnter(e)}
+          onKeyPress={activeEnter}
+          placeholder="메시지를 입력하세요..."
         />
-        <button onClick={() => {handleSend()}}>전송</button>
+        <button onClick={handleSend}>전송</button>
       </div>
     </div>
   )
