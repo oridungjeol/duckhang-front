@@ -240,6 +240,9 @@ export default function ChatRoom() {
 
   return (
     <div className="chat-container">
+      <div>
+        {data.name}
+      </div>
       <div className="chat-box" ref={scrollRef}>
         <button onClick={() => {loadMoreMessageData()}}>채팅 더보기</button>
         {messages.map((msg, index) => renderMessage(msg, index))}
