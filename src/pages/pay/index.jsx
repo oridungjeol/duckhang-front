@@ -19,6 +19,7 @@ export function Checkout() {
   useEffect(() => {
     if (state) {
       setPayData(state);
+      console.log(state);
     }
   }, [state]);
 
@@ -26,7 +27,7 @@ export function Checkout() {
     async function fetchPrice() {
       try {
         const res = await fetch(
-          `http://localhost:8080/payment/price/${payData.type}/${payData.boardId}`,
+          `http://localhost/api/payment/price/${payData.type}/${payData.board_id}`,
           {
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
@@ -52,7 +53,7 @@ export function Checkout() {
       }
     }
 
-    if (payData?.boardId && payData?.type) {
+    if (payData?.board_id && payData?.type) {
       fetchPrice();
     }
   }, [payData]);
@@ -105,7 +106,7 @@ export function Checkout() {
           onClick={async () => {
             if (!widgets) return;
             try {
-              const res = await fetch("http://localhost:8080/payment/create-order-id", {
+              const res = await fetch("http://localhost/api/payment/create-order-id", {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },

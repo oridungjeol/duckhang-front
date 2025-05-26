@@ -22,7 +22,7 @@ export function Success() {
 
     async function confirm() {
       try {
-        const response = await fetch("http://localhost:8080/payment/confirm", {
+        const response = await fetch("http://localhost/api/payment/confirm", {
           method: "POST",
           credentials: 'include',
           headers: {
