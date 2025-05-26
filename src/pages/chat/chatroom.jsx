@@ -30,11 +30,11 @@ export default function ChatRoom() {
   useEffect(() => {
     if (isConnected.current) return;
 
+    console.log(data);
+
     const socket = new SockJS("http://localhost:8080/ws");
     let stompClient = Stomp.over(socket);
     stompClientRef.current = stompClient;
-
-    console.log("uuid가 있나요? : ", uuid);
 
     const headers = {
       uuid: uuid
@@ -221,7 +221,7 @@ export default function ChatRoom() {
               :
                 <>
                   <div>결제 요청을 받았어요</div>
-                  <button onClick={() => { navigate('/checkout', { state: { boardId: data.boardId, type: data.type } }) }}> 결제하기 </button>
+                  <button onClick={() => { navigate('/checkout', { state: { board_id: data.board_id, type: data.type } }) }}> 결제하기 </button>
                 </>
               }
             </div>
