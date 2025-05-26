@@ -1,37 +1,32 @@
 import { useNavigate } from 'react-router';
+import { useEffect, useState } from 'react';
+
+import { getChatRoomList } from './hook';
 
 import "./index.css"
 
 export default function Chat() {
 
   const navigate = useNavigate();
+  const [datas, setDatas] = useState([])
 
-  const datas = [
-    {
-      "room_id": 555,
-      "name": "채팅방1",
-      "recent": "최근 대화1",
-      "boardId": 102,
-      "type": "rental"
-    },
-    {
-      "room_id": 666,
-      "name": "채팅방2",
-      "recent": "최근 대화2",
-      "boardId": 102,
-      "type": "rental"
-    },
-    {
-      "room_id": 777,
-      "name": "채팅방3",
-      "recent": "최근 대화3",
-      "boardId": 102,
-      "type": "rental"
-    },
-  ]
+  /**
+   * 유저가 속한 채팅방 리스트 load
+   */
+  useEffect(() => {
+    const fetchChatRoomList = async() => {
+      const chatRoomList = await getChatRoomList();
+      setDatas(chatRoomList);
+    }
 
+    fetchChatRoomList();
+  }, [])
+
+  /**
+   * 채팅방 클릭 시 해당 채팅방으로 이동
+   * @param {*} data 
+   */
   const enterChatRoom = (data) => {
-    //data를 넘겨야 함
     navigate(`/chat/${data.room_id}`, { state: data });
   }
 
@@ -39,8 +34,8 @@ export default function Chat() {
     <div className="container">
       <h1>채팅</h1>
       <div className="chatting-list">
-        {datas.map((data, index) => (
-          <div key={index} className="chatting" onClick={() => { enterChatRoom(data) }}>
+        {datas.map((data) => (
+          <div key={data.room_id} className="chatting" onClick={() => { enterChatRoom(data) }}>
             <div>
               <img src="/images/duckhang.jpg" alt="duckhang" className="chat-thumbnail" />
             </div>

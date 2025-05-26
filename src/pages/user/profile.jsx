@@ -14,7 +14,7 @@ export default function ProfilePage() {
             const url = new URL(window.location.href);
             const pathSegments = url.pathname.split('/');
             const uuid = pathSegments[2];
-            console.log(uuid)
+            localStorage.setItem("uuid", uuid);
             try {
                 const response = await axios.get(`http://localhost:8080/user/${uuid}`, {
                     withCredentials: true,

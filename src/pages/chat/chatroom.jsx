@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from 'react-router-dom';
 import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
-import axios from "axios";
 
+import { getChattingData } from "./hook";
 import "./chatroom.css";
 
 export default function ChatRoom() {
@@ -11,29 +11,36 @@ export default function ChatRoom() {
   const location = useLocation();
   const data = location.state;
 
+  const uuid = localStorage.getItem('uuid')
+
   const navigate = useNavigate();
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+
   const stompClientRef = useRef(null);
   const isConnected = useRef(false);
-
-  const user_id = sessionStorage.getItem('user_id');
-
+  const scrollRef = useRef();
   const pageRef = useRef(0);
 
+  /**
+   * 이전 메시지 데이터 로드
+   * stomp 연결
+   */
   useEffect(() => {
-    //이전 메시지 로드
-    loadMessageData();
-
-    //stomp 연결
     if (isConnected.current) return;
 
     const socket = new SockJS("http://localhost:8080/ws");
     let stompClient = Stomp.over(socket);
     stompClientRef.current = stompClient;
 
-    stompClient.connect({}, function(frame) {
+    console.log("uuid가 있나요? : ", uuid);
+
+    const headers = {
+      uuid: uuid
+    };
+
+    stompClient.connect(headers, function(frame) {
       console.log('Connected: ' + frame);
       isConnected.current = true;
 
@@ -43,6 +50,8 @@ export default function ChatRoom() {
       });
     });
 
+    loadMessageData();
+
     return () => {
       stompClient.disconnect(() => {
         console.log("Disconnected");
@@ -50,31 +59,48 @@ export default function ChatRoom() {
     };
   }, [])
 
+  /**
+   * 맨 처음, 메시지를 보낼 때 스크롤 맨 밑으로 고정
+   */
+  useEffect(() => {
+    scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }, [messages])
+
+  /**
+   * 이전 채팅 기록 50개를 호출
+   */
   const loadMessageData = async() => {
-    try {
-      const response = await axios.get(`http://localhost/api/chat/recent/${data.room_id}?page=${pageRef.current}&size=50&sort=createdAt,desc`, {
-        withCredentials: true,
-      })
-      console.log("message data: ", response);
-      setMessages(response.data.reverse());
-    } catch(error) {
-      console.error("최근 채팅 기록 불러오기 중 오류 발생:", error);
-    }
+    const message_list = await getChattingData(data, pageRef);
+    setMessages(message_list);
   }
 
+  /**
+   * 더 과거의 채팅 기록 50개를 추가 호출
+   */
   const loadMoreMessageData = async() => {
     try {
       pageRef.current += 1;
-      const response = await axios.get(`http://localhost/api/chat/recent/${data.room_id}?page=${pageRef.current}&size=50&sort=createdAt,desc`, {
-        withCredentials: true,
-      })
-      const reversedData = response.data.reverse();
-      setMessages((prev) => [...reversedData, ...prev]);
+      const message_list = await getChattingData(data, pageRef);
+      setMessages((prev) => [...message_list, ...prev]);
     } catch(error) {
       console.error("과거 채팅 기록 불러오기 중 오류 발생:", error);
     }
   }
 
+  /**
+   * 엔터로 메시지 전송
+   * @param {*} e 
+   */
+  const activeEnter = (e) => {
+    if(e.key === "Enter") {
+      handleSend();
+    }
+  }
+
+  /**
+   * 텍스트 메시지 핸들러
+   * @returns 
+   */
   const handleSend = () => {
     const stompClient = stompClientRef.current
     if (stompClient?.connected) {
@@ -87,7 +113,7 @@ export default function ChatRoom() {
 
       stompClient.send(`/app/chat/${data.room_id}`, {}, JSON.stringify({
         type: 'TEXT',
-        author_uuid: user_id,
+        author_uuid: data.uuid,
         content: input,
         created_at: created_at,
         room_id: data.room_id,
@@ -100,6 +126,9 @@ export default function ChatRoom() {
     }
   };
 
+  /**
+   * 결제 메시지 핸들러
+   */
   const handlePay = () => {
     const stompClient = stompClientRef.current
     if (stompClient?.connected) {
@@ -111,7 +140,7 @@ export default function ChatRoom() {
 
       stompClient.send(`/app/chat/${data.room_id}`, {}, JSON.stringify({
         type: 'PAY',
-        author_uuid: user_id,
+        author_uuid: uuid,
         content: "",
         created_at: created_at,
         room_id: data.room_id,
@@ -122,6 +151,9 @@ export default function ChatRoom() {
     }
   }
 
+  /**
+   * 지도 메시지 핸들러
+   */
   const handleMap = () => {
     const stompClient = stompClientRef.current
     if (stompClient?.connected) {
@@ -133,7 +165,7 @@ export default function ChatRoom() {
 
       stompClient.send(`/app/chat/${data.room_id}`, {}, JSON.stringify({
         type: 'MAP',
-        author_uuid: user_id,
+        author_uuid: uuid,
         content: "",
         created_at: created_at,
         room_id: data.room_id,
@@ -144,14 +176,20 @@ export default function ChatRoom() {
     }
   }
 
+  /**
+   * 타입별 메시지 UI 렌더링
+   * @param {*} msg 
+   * @param {*} index 
+   * @returns 
+   */
   const renderMessage = (msg, index) => {
-    const isMine = msg.author_uuid === user_id;
+    const isMine = msg.author_uuid === uuid;
   
     switch (msg.type) {
       case 'SYSTEM':
         return (
           <div key={index} className="system-message">
-            시스템 메시지
+            {msg.content}
           </div>
         );
   
@@ -195,7 +233,7 @@ export default function ChatRoom() {
           <div key={index} className="map-wrapper">
             <div className="map">
               <div>지도로 상대방의 위치를 확인하세요</div>
-              <button onClick={() => { navigate('/map') }}>지도 확인하기</button>
+              <button onClick={() => { navigate('/map', { state: { uuid: uuid, room_id: data.room_id } }) }}>지도 확인하기</button>
             </div>
           </div>
         );
@@ -207,20 +245,28 @@ export default function ChatRoom() {
 
   return (
     <div className="chat-container">
-      <div className="chat-box">
-        <button onClick={() => {loadMoreMessageData()}}>채팅 더보기</button>
+      <div className="chat-header">
+        <span>{data.name}</span>
+        <span>
+          <button onClick={() => {handleMap()}} className="pay-btn">위치 공유</button>
+          <button onClick={() => {handlePay()}} className="pay-btn">결제 요청</button>
+        </span>
+      </div>
+      <div className="chat-box" ref={scrollRef}>
+        <button className="load-more-btn" onClick={() => {loadMoreMessageData()}}>
+          이전 대화 더보기
+        </button>
         {messages.map((msg, index) => renderMessage(msg, index))}
       </div>
-      <button onClick={() => {handlePay()}}>결제 요청</button>
-      <button onClick={() => {handleMap()}}>위치 확인</button>
       <div className="input-container">
-        <input 
-          type="text" 
-          placeholder="메시지를 입력하세요"
+        <input
+          type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
+          onKeyPress={activeEnter}
+          placeholder="메시지를 입력하세요..."
         />
-        <button onClick={() => {handleSend()}}>전송</button>
+        <button onClick={handleSend}>전송</button>
       </div>
     </div>
   )

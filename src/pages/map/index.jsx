@@ -1,18 +1,20 @@
 import { useCallback, useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
 import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
 
 import LiveMapLoader from "./liveMapLoader";
 
 const LiveMap = () => {
+  const location = useLocation();
+  const data = location.state;
+
   const mapRef = useRef(null);
   const mapInstance = useRef(null)
   const markersRef = useRef({});
   const boundsRef = useRef(null)
 
-  let myUser_id = "asdf";
-  let otherUser_id = "zxcv";
-  let room_id = 112;
+  let otherUser_id = "zxcv";  //상대방 uuid로 변경 필요
   let stompClient;
 
   let latitude;
@@ -25,7 +27,7 @@ const LiveMap = () => {
     stompClient.connect({}, function (frame) {
       console.log("Connected: " + frame);
 
-      stompClient.subscribe(`/topic/map.latlng/${room_id}`, function (message) {
+      stompClient.subscribe(`/topic/map.latlng/${data.room_id}`, function (message) {
         const data = JSON.parse(message.body);
         console.log(data);
 
@@ -40,11 +42,11 @@ const LiveMap = () => {
             latitude = position.coords.latitude;
             longitude = position.coords.longitude;
 
-            stompClient.send(`/app/map.latlng/${room_id}`, {}, JSON.stringify({
+            stompClient.send(`/app/map.latlng/${data.room_id}`, {}, JSON.stringify({
               latitude: latitude + (Math.random() - 0.5) * 0.001,
               longitude: longitude + (Math.random() - 0.5) * 0.001,
-              user_id: myUser_id,
-              room_id: room_id,
+              user_id: data.uuid,
+              room_id: data.room_id,
             }));
 
           },
@@ -58,13 +60,12 @@ const LiveMap = () => {
         clearInterval(sendInterval);
         if (stompClient?.connected) {
           stompClient.disconnect(() => {
-            console.log("STOMP 연결 해제");
+            console.log("라우터 이동으로 연결 해제됨");
           });
         }
       };
     });
-  }, []);
-
+  }, [location.pathname]);
   
   const createMap = useCallback((latitude, longitude) => {
   const mapContainer = mapRef.current;
@@ -82,7 +83,7 @@ const LiveMap = () => {
 
     const myMarker = new window.kakao.maps.Marker({ position : new window.kakao.maps.LatLng(latitude, longitude) });
     myMarker.setMap(map);
-    markersRef.current[myUser_id] = myMarker;
+    markersRef.current[data.uuid] = myMarker;
     bounds.extend(myMarker.getPosition());
 
     const otherMarker = new window.kakao.maps.Marker({ position : new window.kakao.maps.LatLng(latitude, longitude) });
