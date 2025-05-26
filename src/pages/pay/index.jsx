@@ -109,7 +109,14 @@ export function Checkout() {
               const res = await fetch("http://localhost/api/payment/create-order-id", {
                 method: "POST",
                 credentials: "include",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  boardId: payData.board_id,
+                  type: payData.type,
+                  price: price,
+                }),
               });
 
               if (!res.ok) {
@@ -131,6 +138,7 @@ export function Checkout() {
             } catch (error) {
               console.error("결제 실패:", error);
               setError("결제 처리 중 오류가 발생했습니다.");
+              console.log(error);
             }
           }}
         >

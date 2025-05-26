@@ -1,0 +1,97 @@
+.scrollContainer {
+  display: flex;
+  overflow-x: auto;
+  gap: 16px;
+  margin-top: 16px;
+  padding-bottom: 8px;
+}
+
+.gridContainer {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.card {
+  min-width: 220px;
+  max-width: 220px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.cardImage {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  background: #f3f4f6;
+}
+
+.cardBody {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.cardTitle {
+  font-weight: 600;
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+
+.cardPrice {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #222;
+  margin-bottom: 4px;
+}
+
+.cardWon {
+  font-size: 0.9rem;
+  color: #888;
+  margin-left: 2px;
+}
+
+.cardInfo {
+  display: flex;
+  align-items: center;
+  font-size: 0.85rem;
+  color: #888;
+  gap: 6px;
+  margin-top: auto;
+}
+
+.dot {
+  margin: 0 2px;
+}
+
+.loading, .noResult {
+  text-align: center;
+  color: #888;
+  margin-top: 32px;
+}
+
+.overrideRoot {
+  width: 100vw !important;
+  max-width: 100vw !important;
+  border: none !important;
+  box-shadow: none !important;
+  min-height: 100vh;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  background: #fff;
+} 
