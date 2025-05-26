@@ -33,8 +33,8 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/user/:uuid" element={<Profile />} />
-          <Route path="/board" element={<Board />} />
-          <Route path="/board/:board_id" element={<BoardDetail />} />
+          <Route path="/board/:type" element={<Board />} />
+          <Route path="/board/:type/:board_id" element={<BoardDetail />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="/chat/:rood_id" element={<ChatRoom />} />
           <Route path="/map" element={<Map />} />
