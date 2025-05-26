@@ -9,44 +9,37 @@ export default function Person() {
     {
       id: 1,
       title: '던전 파티원 구합니다',
-      type: '구인',
+      price: 0,
       image: 'https://via.placeholder.com/120',
       author: '작성자1',
+      author_uuid: 'qwer',
       date: '2024-03-15',
-      status: 'recruiting',
-      details: {
-        level: '60+',
-        class: '힐러',
-        time: '저녁 8시'
-      }
+      type: '구인',
+      description: '구인111111111'
     },
     {
       id: 2,
       title: '주말 레이드 동행 구합니다',
+      price: 0,
       type: '동행',
       image: 'https://via.placeholder.com/120',
       author: '작성자2',
+      author_uuid: 'asdf',
       date: '2024-03-14',
-      status: 'companion',
-      details: {
-        level: '50+',
-        class: '딜러',
-        time: '주말 오후'
-      }
+      type: '구인',
+      description: '구인222222222'
     },
     {
       id: 3,
       title: 'PVP 대회 용병 구합니다',
+      price: 0,
       type: '용병',
       image: 'https://via.placeholder.com/120',
       author: '작성자3',
+      author_uuid: 'zxcv',
       date: '2024-03-13',
-      status: 'mercenary',
-      details: {
-        level: '70+',
-        class: '탱커',
-        time: '상시'
-      }
+      type: '구인',
+      description: '구인333333333'
     }
   ];
 
