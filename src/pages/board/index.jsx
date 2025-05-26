@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import Deal from './deal';
-import Person from './person';
+import Deal from './post/deal';
+import Person from './post/person';
 import './index.css';
 
 export default function Board() {

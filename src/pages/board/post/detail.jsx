@@ -1,5 +1,5 @@
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { createChatRoom } from './hook';
+import { createChatRoom } from '../hook';
 import './detail.css';
 
 export default function BoardDetail() {
