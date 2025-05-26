@@ -34,7 +34,13 @@ export default function ChatRoom() {
     let stompClient = Stomp.over(socket);
     stompClientRef.current = stompClient;
 
-    stompClient.connect({}, function(frame) {
+    console.log("uuid가 있나요? : ", uuid);
+
+    const headers = {
+      uuid: uuid
+    };
+
+    stompClient.connect(headers, function(frame) {
       console.log('Connected: ' + frame);
       isConnected.current = true;
 
