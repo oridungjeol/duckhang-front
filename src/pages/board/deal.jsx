@@ -7,7 +7,7 @@ export default function Deal() {
   //dummy data
   const posts = [
     {
-      id: 1,
+      post_id: 1,
       title: '아이폰 13 Pro Max 판매합니다',
       price: '1,200,000원',
       image: 'https://via.placeholder.com/120',
@@ -18,7 +18,7 @@ export default function Deal() {
       description: '아이폰 13 팔아요 싱싱한 아이폰 1개에 120만원~'
     },
     {
-      id: 2,
+      post_id: 2,
       title: '맥북 프로 16인치 대여',
       price: '50,000원/일',
       image: 'https://via.placeholder.com/120',
@@ -29,7 +29,7 @@ export default function Deal() {
       description: '맥북 빌려드려요 이런 기회 두 번 다시 없어'
     },
     {
-      id: 3,
+      post_id: 3,
       title: '게이밍 의자 교환',
       price: '교환 희망',
       image: 'https://via.placeholder.com/120',

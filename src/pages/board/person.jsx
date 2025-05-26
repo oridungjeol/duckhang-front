@@ -7,7 +7,7 @@ export default function Person() {
   // 임시 데이터
   const posts = [
     {
-      id: 1,
+      post_id: 1,
       title: '던전 파티원 구합니다',
       price: 0,
       image: 'https://via.placeholder.com/120',
@@ -18,7 +18,7 @@ export default function Person() {
       description: '구인111111111'
     },
     {
-      id: 2,
+      post_id: 2,
       title: '주말 레이드 동행 구합니다',
       price: 0,
       type: '동행',
@@ -30,7 +30,7 @@ export default function Person() {
       description: '구인222222222'
     },
     {
-      id: 3,
+      post_id: 3,
       title: 'PVP 대회 용병 구합니다',
       price: 0,
       type: '용병',
@@ -43,10 +43,14 @@ export default function Person() {
     }
   ];
 
+  const handleItemClick = (post) => {
+    navigate(`/board/deal/${post.post_id}`, { state: post });
+  };
+
   return (
     <div className="person-board">
       {posts.map((post) => (
-        <div onClick={() => {navigate(`/board/person/${post.id}`)}} key={post.id}>
+        <div onClick={() => handleItemClick(post)} key={post.id}>
           <div className="person-item">
             <div className="person-item-image">
               <img src={post.image} alt={post.title} />
@@ -55,20 +59,6 @@ export default function Person() {
               <div className="person-item-header">
                 <span className="person-type">{post.type}</span>
                 <h3 className="person-item-title">{post.title}</h3>
-              </div>
-              <div className="person-item-details">
-                <div className="person-detail-item">
-                  <i className="fas fa-level-up-alt"></i>
-                  <span>레벨 {post.details.level}</span>
-                </div>
-                <div className="person-detail-item">
-                  <i className="fas fa-user"></i>
-                  <span>{post.details.class}</span>
-                </div>
-                <div className="person-detail-item">
-                  <i className="fas fa-clock"></i>
-                  <span>{post.details.time}</span>
-                </div>
               </div>
               <div className="person-item-info">
                 <span>{post.author}</span>
