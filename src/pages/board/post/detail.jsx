@@ -10,11 +10,12 @@ export default function BoardDetail() {
   console.log(state);
 
   const createRoom = async () => {
-    const name = '작성자의 이름';
+    const author_uuid = state.author_uuid;
+    const name = state.title;
     const board_id = parseInt(id);
-    const type = 'rental'; // 임시로 고정값 설정
+    const type =  state.type;
 
-    const info = await createChatRoom(name, board_id, type);
+    const info = await createChatRoom(name, board_id, type, author_uuid);
     navigate(`/chat/${info.room_id}`, { state: info });
   }
 
@@ -26,7 +27,7 @@ export default function BoardDetail() {
         </div>
         
         <div className="board-info">
-          <span className="board-title">{state.title}</span>
+          <span className="board-title">{state.title} | {state.nickname}</span>
           
           <div className="board-meta">
             <span className="board-price">{state.price}</span>
@@ -34,7 +35,7 @@ export default function BoardDetail() {
           </div>
           
           <div className="board-description">
-            <p>{state.description}</p>
+            <p>{state.content}</p>
           </div>
         </div>
 
