@@ -113,7 +113,7 @@ export default function ChatRoom() {
 
       stompClient.send(`/app/chat/${data.room_id}`, {}, JSON.stringify({
         type: 'TEXT',
-        author_uuid: data.uuid,
+        author_uuid: uuid,
         content: input,
         created_at: created_at,
         room_id: data.room_id,
