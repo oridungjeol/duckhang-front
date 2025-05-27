@@ -7,11 +7,12 @@ import axios from "axios";
  * @param {*} type 게시글 타입
  * @returns 채팅방 정보
  */
-export async function createChatRoom(name, board_id, type) {
+export async function createChatRoom(name, board_id, type, author_uuid) {
   const data = {
     name: name,
     board_id: board_id,
     type: type,
+    author_uuid: author_uuid,
   };
 
   try {

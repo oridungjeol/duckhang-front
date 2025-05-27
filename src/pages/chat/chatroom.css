@@ -2,14 +2,14 @@
   max-width: 600px;
   margin: 0 auto;
   padding: 1rem;
-  background-color: #ffffff;
+  background-color: #f9f8f7;
   height: 90vh;
   display: flex;
   flex-direction: column;
 }
 
 .chat-header {
-  background-color: #ff9a4e;
+  background-color: #fba337;
   color: #ffffff;
   padding: 1rem;
   border-radius: 12px 12px 0 0;
@@ -26,7 +26,7 @@
 
 .pay-btn {
   background-color: #ffffff;
-  color: #ff9a4e;
+  color: #fba337;
   border: none;
   padding: 8px 16px;
   border-radius: 20px;
@@ -38,7 +38,7 @@
 }
 
 .pay-btn:hover {
-  background-color: #ffdc58;
+  background-color: #ffca1a;
   color: #ffffff;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
@@ -46,7 +46,7 @@
 
 .chat-box {
   flex: 1;
-  background-color: #ffffff;
+  background-color: #f9f8f7;
   padding: 1rem;
   overflow-y: auto;
   display: flex;
@@ -55,7 +55,7 @@
 }
 
 .load-more-btn {
-  background-color: #ffdc58;
+  background-color: #ffca1a;
   color: #4a4a3c;
   border: none;
   padding: 0.5rem 1rem;
@@ -67,7 +67,7 @@
 }
 
 .load-more-btn:hover {
-  background-color: #ff9a4e;
+  background-color: #fba337;
   color: #ffffff;
 }
 
@@ -121,7 +121,7 @@
 }
 
 .message.me {
-  background-color: #ffdc58;
+  background-color: #ffca1a;
   color: #4a4a3c;
   border-top-right-radius: 4px;
 }
@@ -134,7 +134,7 @@
 
 .system-message {
   text-align: center;
-  color: #ff9a4e;
+  color: #fba337;
   font-size: 16px;
   margin: 8px 0;
   animation: fadeIn 0.5s ease-out;
@@ -150,9 +150,9 @@
 }
 
 .input-container {
-  background-color: #ffffff;
+  background-color: #f9f8f7;
   padding: 1rem;
-  border-top: 1px solid #ffdc58;
+  border-top: 1px solid #ffca1a;
   display: flex;
   gap: 0.5rem;
 }
@@ -160,7 +160,7 @@
 .input-container input {
   flex: 1;
   padding: 0.8rem;
-  border: 2px solid #ffdc58;
+  border: 2px solid #ffca1a;
   border-radius: 8px;
   font-size: 14px;
   outline: none;
@@ -168,11 +168,11 @@
 }
 
 .input-container input:focus {
-  border-color: #ff9a4e;
+  border-color: #fba337;
 }
 
 .input-container button {
-  background-color: #ffdc58;
+  background-color: #ffca1a;
   color: #4a4a3c;
   border: none;
   padding: 0.8rem 1.5rem;
@@ -183,7 +183,7 @@
 }
 
 .input-container button:hover {
-  background-color: #ff9a4e;
+  background-color: #fba337;
   color: #ffffff;
 }
 
@@ -196,7 +196,7 @@
 
 .map {
   padding: 12px 16px;
-  background-color: #ffdc58;
+  background-color: #ffca1a;
   border-radius: 12px;
   max-width: 80%;
   display: flex;
@@ -206,7 +206,7 @@
 }
 
 .map button {
-  background-color: #ff9a4e;
+  background-color: #fba337;
   color: #ffffff;
   border: none;
   padding: 0.5rem 1rem;
@@ -216,5 +216,5 @@
 }
 
 .map button:hover {
-  background-color: #ff9a4e;
+  background-color: #fba337;
 }
