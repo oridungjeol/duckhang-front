@@ -4,7 +4,6 @@ import './detail.css';
 
 export default function BoardDetail() {
   const navigate = useNavigate();
-  const { id } = useParams();
   const { state } = useLocation();
 
   console.log(state);
@@ -12,10 +11,11 @@ export default function BoardDetail() {
   const createRoom = async () => {
     const author_uuid = state.author_uuid;
     const name = state.title;
-    const board_id = parseInt(id);
+    const board_id = state.id;
     const type =  state.type;
 
     const info = await createChatRoom(name, board_id, type, author_uuid);
+    console.log("info: ",info);
     navigate(`/chat/${info.room_id}`, { state: info });
   }
 

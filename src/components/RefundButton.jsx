@@ -14,7 +14,7 @@ export default function RefundButton({ orderId }) {
     setLoading(true);
 
     try {
-      const res = await fetch(`http://localhost:8080/payment/cancel/${orderId}`, {
+      const res = await fetch(`http://localhost/api/payment/cancel/${orderId}`, {
         method: "POST",
         credentials: 'include',
         headers: {
