@@ -1,10 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import './deal.css';
 
-export default function Deal() {
+export default function Deal({ keyword = '', category }) {
   const navigate = useNavigate();
 
-  //dummy data
   const posts = [
     {
       id: 1,
@@ -45,36 +44,47 @@ export default function Deal() {
     navigate(`/board/deal/${post.id}`, { state: post });
   };
 
+  // 🔍 카테고리 및 검색어로 필터링
+  const filteredPosts = posts.filter((post) => {
+    const matchesCategory = post.type === category;
+    const matchesKeyword =
+      keyword.trim() === '' ||
+      post.title.toLowerCase().includes(keyword.toLowerCase()) ||
+      post.content.toLowerCase().includes(keyword.toLowerCase()) ||
+      post.nickname.toLowerCase().includes(keyword.toLowerCase());
+
+    return matchesCategory && matchesKeyword;
+  });
+
   return (
     <div className="deal-board">
-      {posts.map((post) => (
-        <div 
-          key={post.id} 
-          className="deal-item"
-          onClick={() => handleItemClick(post)}
-          style={{ cursor: 'pointer' }}
-        >
-          <div className="deal-item-image">
-            <img src={post.imageUrl} alt={post.title} />
-          </div>
-          <div className="deal-item-content">
-            <div className="deal-item-header">
-              <span className="deal-type">{post.type}</span>
-              <h3 className="deal-item-title">{post.title}</h3>
+      {filteredPosts.length === 0 ? (
+        <p style={{ padding: '2rem', textAlign: 'center' }}>검색 결과가 없습니다.</p>
+      ) : (
+        filteredPosts.map((post) => (
+          <div
+            key={post.id}
+            className="deal-item"
+            onClick={() => handleItemClick(post)}
+            style={{ cursor: 'pointer' }}
+          >
+            <div className="deal-item-image">
+              <img src={post.imageUrl} alt={post.title} />
             </div>
-            <p className="deal-item-price">{post.price}</p>
-            <div className="deal-item-info">
-              <span>{post.nickname}</span>
-              <span>{post.createdAt}</span>
+            <div className="deal-item-content">
+              <div className="deal-item-header">
+                <span className="deal-type">{post.type}</span>
+                <h3 className="deal-item-title">{post.title}</h3>
+              </div>
+              <p className="deal-item-price">{post.price}</p>
+              <div className="deal-item-info">
+                <span>{post.nickname}</span>
+                <span>{post.createdAt}</span>
+              </div>
             </div>
-            {/* <span className={`deal-status ${post.status}`}>
-              {post.status === 'available' && '판매중'}
-              {post.status === 'reserved' && '예약중'}
-              {post.status === 'completed' && '거래완료'}
-            </span> */}
           </div>
-        </div>
-      ))}
+        ))
+      )}
     </div>
   );
 }
