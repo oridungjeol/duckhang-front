@@ -8,6 +8,7 @@ import BoardDetail from "./pages/board/post/detail";
 import Chat from "./pages/chat";
 import ChatRoom from "./pages/chat/chatroom";
 import Map from "./pages/map";
+import Write from "./pages/board/write";
 
 import Checkout from "./pages/pay";
 import Success from "./pages/pay/Success";
@@ -34,6 +35,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/user/:uuid" element={<Profile />} />
           <Route path="/board/:type" element={<Board />} />
+          <Route path="/board/:type/write" element={<Write />} />
           <Route path="/board/:type/:board_id" element={<BoardDetail />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="/chat/:rood_id" element={<ChatRoom />} />

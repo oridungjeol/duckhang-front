@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
 
-import { getChattingData } from "./hook";
+import { getChattingData, uploadImage } from "./hook";
 import "./chatroom.css";
 
 export default function ChatRoom() {
@@ -17,6 +17,7 @@ export default function ChatRoom() {
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+  const [image, setImage] = useState(null);
 
   const stompClientRef = useRef(null);
   const isConnected = useRef(false);
@@ -98,6 +99,7 @@ export default function ChatRoom() {
   }
 
   /**
+   * TODO 텍스트 / 이미지 분기점, 텍스트 메시지 핸들러는 새로 하나 만들 것
    * 텍스트 메시지 핸들러
    * @returns 
    */
@@ -125,6 +127,39 @@ export default function ChatRoom() {
       console.log("연결이 되지 않았습니다.");
     }
   };
+
+  /**
+   * 이미지 메시지 핸들러
+   */
+  const handleImage = async () => {
+    const formData = new FormData();
+    formData.append('image', image);
+
+    console.log(image);
+
+    const image_url = await uploadImage(formData);
+    console.log(image_url);
+
+    const stompClient = stompClientRef.current
+    if (stompClient?.connected) {
+
+      const now = new Date();
+      const kstOffset = now.getTime() + (9 * 60 * 60 * 1000); // +9시간
+      const kstDate = new Date(kstOffset);
+      const created_at = kstDate.toISOString().slice(0, 19);
+
+      stompClient.send(`/app/chat/${data.room_id}`, {}, JSON.stringify({
+        type: 'IMAGE',
+        author_uuid: uuid,
+        content: image_url,
+        created_at: created_at,
+        room_id: data.room_id,
+      }));
+    }
+    else {
+      console.log("연결이 되지 않았습니다.");
+    }
+  }
 
   /**
    * 결제 메시지 핸들러
@@ -174,6 +209,10 @@ export default function ChatRoom() {
     else {
       console.log("연결이 되지 않았습니다.");
     }
+  }
+
+  const addImage = (e) => {
+    setImage(e.target.files[0]);
   }
 
   /**
@@ -260,13 +299,27 @@ export default function ChatRoom() {
       </div>
       <div className="input-container">
         <input
+          type="file"
+          className="image-btn"
+          id="image-upload"
+          style={{ display: 'none' }}
+          onChange={(e) => addImage(e)}
+        />
+        <label htmlFor="image-upload" className="send-btn">
+          +
+        </label>
+        <button className="send-btn" onClick={handleImage}>임시 이미지 전송</button>
+        <input
           type="text"
+          className="input-text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={activeEnter}
           placeholder="메시지를 입력하세요..."
         />
-        <button onClick={handleSend}>전송</button>
+        <button className="send-btn" onClick={handleSend}>
+          전송
+        </button>
       </div>
     </div>
   )
