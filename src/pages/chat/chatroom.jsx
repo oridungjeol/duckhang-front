@@ -276,6 +276,66 @@ export default function ChatRoom() {
   };
 
   /**
+   * 환불 메시지 핸들러
+   */
+  const handleRefund = async () => {
+    try {
+      // 결제 정보 가져오기
+      const paymentResponse = await fetch(`http://localhost/api/payment/${data.board_id}`, {
+        credentials: 'include'
+      });
+      const paymentData = await paymentResponse.json();
+
+      if (!paymentData.orderId) {
+        alert("결제 정보를 찾을 수 없습니다.");
+        return;
+      }
+
+      // 게시글 정보 가져오기
+      const boardResponse = await fetch(`http://localhost/api/board/${data.type}/${data.board_id}`, {
+        credentials: 'include'
+      });
+      const boardData = await boardResponse.json();  
+
+      const refundInfo = {
+        price: boardData.price,
+        deposit: data.type === 'RENTAL' ? (boardData.deposit || 0) : 0,
+        totalAmount: data.type === 'RENTAL' ? boardData.price + (boardData.deposit || 0) : boardData.price,
+        boardId: data.board_id,
+        type: data.type,
+        orderId: paymentData.orderId
+      };
+
+      const stompClient = stompClientRef.current;
+      if (stompClient?.connected) {
+        const now = new Date();
+        const kstOffset = now.getTime() + 9 * 60 * 60 * 1000; // +9시간
+        const kstDate = new Date(kstOffset);
+        const created_at = kstDate.toISOString().slice(0, 19);
+
+        const message = {
+          type: "REFUND",
+          author_uuid: uuid,
+          content: JSON.stringify(refundInfo),
+          created_at: created_at,
+          room_id: data.room_id,
+        };
+
+        stompClient.send(
+          `/app/chat/${data.room_id}`,
+          {},
+          JSON.stringify(message)
+        );
+      } else {
+        console.log("연결이 되지 않았습니다.");
+      }
+    } catch (error) {
+      console.error("환불 요청 실패:", error);
+      alert("환불 요청 중 오류가 발생했습니다.");
+    }
+  };
+
+  /**
    * 구매확정 핸들러
    */
   const handlePurchaseConfirm = () => {
@@ -391,6 +451,42 @@ export default function ChatRoom() {
           </div>
         );
 
+      case "REFUND":
+        let refundData;
+        try {
+          refundData = msg.content ? JSON.parse(msg.content) : null;
+        } catch (error) {
+          refundData = null;
+        }
+        return (
+          <div key={index} className={`message-wrapper ${isMine ? "me" : "other"}`}>
+            <div className={`message ${isMine ? "me" : "other"}`}>
+              {isMine ? (
+                <div>환불 요청을 보냈어요</div>
+              ) : (
+                <>
+                  <div>환불 요청을 받았어요</div>
+                  <button
+                    onClick={() => {
+                      navigate("/test-refund", {
+                        state: {
+                          board_id: data.board_id,
+                          room_id: data.room_id,
+                          room_name: data.name,
+                          orderId: refundData?.orderId,
+                          type: data.type
+                        }
+                      });
+                    }}
+                  >
+                    환불하기
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        );
+
       case "MAP":
         return (
           <div key={index} className="map-wrapper">
@@ -432,6 +528,11 @@ export default function ChatRoom() {
               <button onClick={handlePay} className="pay-btn">
                 결제 요청
               </button>
+              {data.type === 'RENTAL' && (
+                <button onClick={handleRefund} className="pay-btn">
+                  환불 요청
+                </button>
+              )}
             </>
           )}
         </span>
