@@ -3,6 +3,10 @@
   flex-direction: column;
   gap: 1rem;
   padding: 3rem;
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: #f9f8f7;
+  min-height: 100vh;
 }
 
 .form-group {
@@ -14,20 +18,18 @@
   display: flex;
   gap: 1rem;
   margin-bottom: 1rem;
+  flex-wrap: wrap;
 }
 
 .radio-label {
   display: flex;
   align-items: center;
   gap: 8px;
-
   position: relative;
   padding: 8px 16px;
-
   background-color: #ffffff;
   border: 2px solid #fba337;
   border-radius: 20px;
-
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -66,71 +68,172 @@
 .content-input:focus {
   outline: none;
   border-color: #fba337;
-  box-shadow: 0 0 0 2px #fba337;
+  box-shadow: 0 0 0 2px rgba(251, 163, 55, 0.2);
 }
 
 .content-input {
-  height: 15em;
+  min-height: 200px;
+  resize: vertical;
 }
 
 .preview-container {
   display: flex;
   flex-direction: row;
   align-items: center;
-
-  overflow-x: scroll;
-  overflow-y: hidden;
-  white-space: nowrap;
+  gap: 1rem;
+  overflow-x: auto;
+  padding: 1rem 0;
 }
 
 .preview-item {
-  width: 10rem;
-  height: 10rem;
+  width: 200px;
+  height: 200px;
   object-fit: cover;
-  flex-shrink: 0;
-
   border-radius: 20px;
-}
-
-.image-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 10rem;
-  height: 10rem;
-  flex-shrink: 0;
-  background-color: #ffffff;
-  color: #fba337;
-  border: 2px solid #fba337;
-  border-radius: 20px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 14px;
-  transition: all 0.3s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .button-container {
   display: flex;
-  flex-direction: row;
-  justify-content: space-evenly;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 2rem;
 }
 
 .submit-button,
 .cancel-button {
-  width: 10rem;
-  border: none;
-  padding: 10px 20px;
+  width: 200px;
+  padding: 12px 24px;
+  border: 2px solid #fba337;
   border-radius: 20px;
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  background-color: #ffffff;
+  color: #fba337;
 }
 
 .submit-button:hover {
   background-color: #fba337;
   color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .cancel-button:hover {
-  background-color: #d9d9d9;
+  background-color: #f1f1f1;
+  border-color: #d9d9d9;
+  color: #666;
+}
+
+.submit-button:disabled {
+  background-color: #f1f1f1;
+  border-color: #d9d9d9;
+  color: #999;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.error-message {
+  color: #ff4444;
+  font-size: 14px;
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+/* 로딩 애니메이션 스타일 */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 400px;
+}
+
+.duck-loading {
+  width: 60px;
+  height: 60px;
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.duck-body {
+  width: 40px;
+  height: 30px;
+  background-color: #FFD700;
+  border-radius: 50% 50% 45% 45%;
+  position: absolute;
+  top: 15px;
+  left: 10px;
+  animation: bounce 0.6s infinite alternate;
+}
+
+.duck-head {
+  width: 25px;
+  height: 25px;
+  background-color: #FFD700;
+  border-radius: 50%;
+  position: absolute;
+  top: 10px;
+  left: 35px;
+}
+
+.duck-beak {
+  width: 15px;
+  height: 8px;
+  background-color: #FF6B6B;
+  border-radius: 50% 50% 0 0;
+  position: absolute;
+  top: 18px;
+  left: 55px;
+  transform: rotate(-10deg);
+}
+
+.duck-leg {
+  width: 4px;
+  height: 15px;
+  background-color: #FF6B6B;
+  position: absolute;
+  bottom: 0;
+}
+
+.duck-leg.left {
+  left: 20px;
+  transform: rotate(-15deg);
+}
+
+.duck-leg.right {
+  left: 30px;
+  transform: rotate(15deg);
+}
+
+.loading-text {
+  color: #666;
+  font-size: 1.1rem;
+  margin-top: 1rem;
+  animation: fadeInOut 1.5s infinite;
+}
+
+@keyframes bounce {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.4;
+  }
 }
