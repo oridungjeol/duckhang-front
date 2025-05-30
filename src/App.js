@@ -38,7 +38,7 @@ function App() {
           <Route path="/board/:type/write" element={<Write />} />
           <Route path="/board/:type/:board_id" element={<BoardDetail />} />
           <Route path="/chat" element={<Chat />} />
-          <Route path="/chat/:rood_id" element={<ChatRoom />} />
+          <Route path="/chat/:room_id" element={<ChatRoom />} />
           <Route path="/map" element={<Map />} />
 
           <Route path="/checkout" element={<Checkout />} />

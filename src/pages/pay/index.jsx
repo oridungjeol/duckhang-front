@@ -22,6 +22,7 @@ export function Checkout() {
       console.log(state);
     }
   }, [state]);
+  console.log("state", state);
 
   useEffect(() => {
     async function fetchPrice() {
@@ -52,11 +53,13 @@ export function Checkout() {
         setError(err.message);
       }
     }
+    console.log("payData", payData);
 
     if (payData?.board_id && payData?.type) {
       fetchPrice();
     }
   }, [payData]);
+
 
   useEffect(() => {
     async function loadWidgets() {

@@ -97,6 +97,7 @@
 .search-box {
   display: flex;
   gap: 0.5rem;
+  align-items: center;
 }
 
 .search-box input {
@@ -105,7 +106,9 @@
   border-radius: 20px;
   font-size: 0.9rem;
   width: 200px;
-  transition: all 0.3s ease;
+  transition: width 0.3s ease;
+  height: 36px;
+  box-sizing: border-box;
 }
 
 .search-box input:focus {
@@ -122,11 +125,26 @@
   border-radius: 20px;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease;
+  height: 36px;
+  box-sizing: border-box;
+  white-space: nowrap;
 }
 
 .search-btn:hover {
   background-color: #ffca1a;
+}
+
+.search-type-select {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  color: #333;
+  cursor: pointer;
+  background-color: #fff;
+  height: 36px;
+  box-sizing: border-box;
 }
 
 .board-content {
