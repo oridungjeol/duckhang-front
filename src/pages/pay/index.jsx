@@ -132,7 +132,7 @@ export function Checkout() {
               await widgets.requestPayment({
                 orderId,
                 orderName: `${payData.type.toUpperCase()} 게시글 결제`,
-                successUrl: `${window.location.origin}/success?orderId=${orderId}&amount=${price}&type=${payData.type}`,
+                successUrl: `${window.location.origin}/success?orderId=${orderId}&amount=${price}&type=${payData.type}&room_id=${payData.room_id}&board_id=${payData.board_id}&room_name=${encodeURIComponent(payData.room_name)}`,
                 failUrl: `${window.location.origin}/fail`,
                 customerEmail: "customer123@gmail.com",
                 customerName: "김토스",

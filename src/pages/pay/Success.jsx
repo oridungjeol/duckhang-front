@@ -41,6 +41,21 @@ export function Success() {
         }
 
         setPaymentInfo(json);
+
+        // 결제 완료 후 채팅방으로 이동
+        const roomId = searchParams.get("room_id");
+        if (roomId) {
+          navigate(`/chat/${roomId}`, {
+            state: {
+              type: "PAYMENT_COMPLETE",
+              content: json.orderId,
+              room_id: roomId,
+              board_id: searchParams.get("board_id"),
+              type: searchParams.get("type"),
+              name: searchParams.get("room_name")
+            }
+          });
+        }
       } catch (err) {
         const errorMessage = "네트워크 오류가 발생했습니다.";
         setError(errorMessage);

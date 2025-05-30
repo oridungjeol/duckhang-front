@@ -17,6 +17,7 @@ export default function ChatRoom() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [image, setImage] = useState(null);
+  const [orderId, setOrderId] = useState(null);
 
   const stompClientRef = useRef(null);
   const isConnected = useRef(false);
@@ -46,6 +47,11 @@ export default function ChatRoom() {
 
       stompClient.subscribe(`/topic/chat/${data.room_id}`, function (message) {
         const data = JSON.parse(message.body);
+        console.log("Received message:", data);
+        if (data.type === "PAYMENT_COMPLETE") {
+          console.log("Payment complete, orderId:", data.content);
+          setOrderId(data.content);
+        }
         setMessages((prev) => [...prev, data]);
       });
     });
@@ -283,12 +289,17 @@ export default function ChatRoom() {
                   <button
                     onClick={() => {
                       navigate("/checkout", {
-                        state: { board_id: data.board_id, type: data.type },
+                        state: { 
+                          board_id: data.board_id, 
+                          type: data.type,
+                          room_id: data.room_id,
+                          room_name: data.name,
+                          return_to: `/chat/${data.room_id}`
+                        },
                       });
                     }}
                   >
-                    {" "}
-                    결제하기{" "}
+                    결제하기
                   </button>
                 </>
               )}
@@ -314,8 +325,81 @@ export default function ChatRoom() {
           </div>
         );
 
+      case "PAYMENT_COMPLETE":
+        return (
+          <div key={index} className="system-message">
+            결제가 완료되었습니다.
+          </div>
+        );
+
       default:
         return null;
+    }
+  };
+
+  const handleConfirmPurchase = async () => {
+    if (!orderId) {
+      alert("결제 요청이 필요합니다.");
+      return;
+    }
+
+    try {
+      console.log("구매확정 요청:", orderId);
+      const res = await fetch(`http://localhost/api/payment/cancel/${orderId}`, {
+        method: "POST",
+        credentials: 'include',
+        headers: {
+          "Content-Type": "application/json",
+        }
+      });
+
+      const data = await res.json();
+      console.log("구매확정 응답:", data);
+
+      if (!res.ok) {
+        throw new Error(data.error || "구매 확정 실패");
+      }
+
+      // 구매 확정 성공 시 WebSocket으로 메시지 전송
+      const stompClient = stompClientRef.current;
+      if (stompClient?.connected) {
+        const now = new Date();
+        const kstOffset = now.getTime() + 9 * 60 * 60 * 1000; // +9시간
+        const kstDate = new Date(kstOffset);
+        const created_at = kstDate.toISOString().slice(0, 19);
+
+        stompClient.send(
+          `/app/chat/${data.room_id}`,
+          {},
+          JSON.stringify({
+            type: "CONFIRM_PURCHASE",
+            author_uuid: uuid,
+            content: orderId,
+            created_at: created_at,
+            room_id: data.room_id,
+          })
+        );
+
+        // 구매 확정 성공 시 리다이렉트
+        navigate("/refund-success", {
+          state: {
+            refundInfo: {
+              orderId: data.orderId || orderId,
+              cancelAmount: data.cancelAmount,
+              refundedAt: data.refundedAt ?? data.canceledAt ?? new Date().toISOString(),
+            },
+          },
+        });
+      } else {
+        console.log("연결이 되지 않았습니다.");
+      }
+    } catch (error) {
+      console.error("구매 확정 중 오류 발생:", error);
+      navigate("/refund-fail", { 
+        state: { 
+          message: error.message || "구매 확정 실패" 
+        } 
+      });
     }
   };
 
@@ -329,6 +413,13 @@ export default function ChatRoom() {
           </button>
           <button onClick={handlePay} className="pay-btn">
             결제 요청
+          </button>
+          <button 
+            onClick={handleConfirmPurchase} 
+            className="pay-btn"
+            disabled={!orderId}
+          >
+            구매 확정 {orderId ? `(ID: ${orderId})` : ''}
           </button>
         </span>
       </div>
