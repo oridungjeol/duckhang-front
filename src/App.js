@@ -9,6 +9,7 @@ import Chat from "./pages/chat";
 import ChatRoom from "./pages/chat/chatroom";
 import Map from "./pages/map";
 import Write from "./pages/board/write";
+import EditBoardForm from "./pages/board/write/edit";
 
 import Checkout from "./pages/pay";
 import Success from "./pages/pay/Success";
@@ -37,6 +38,7 @@ function App() {
           <Route path="/board/:type" element={<Board />} />
           <Route path="/board/:type/write" element={<Write />} />
           <Route path="/board/:type/:board_id" element={<BoardDetail />} />
+          <Route path="/board/write/:type/:board_id" element={<EditBoardForm />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="/chat/:room_id" element={<ChatRoom />} />
           <Route path="/map" element={<Map />} />
