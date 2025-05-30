@@ -4,6 +4,101 @@
   padding: 1.5rem;
 }
 
+/* 로딩 애니메이션 스타일 */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  min-height: 200px;
+}
+
+.duck-loading {
+  width: 60px;
+  height: 60px;
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.duck-body {
+  width: 40px;
+  height: 30px;
+  background-color: #FFD700;
+  border-radius: 50% 50% 45% 45%;
+  position: absolute;
+  top: 15px;
+  left: 10px;
+  animation: bounce 0.6s infinite alternate;
+}
+
+.duck-head {
+  width: 25px;
+  height: 25px;
+  background-color: #FFD700;
+  border-radius: 50%;
+  position: absolute;
+  top: 10px;
+  left: 35px;
+}
+
+.duck-beak {
+  width: 15px;
+  height: 8px;
+  background-color: #FF6B6B;
+  border-radius: 50% 50% 0 0;
+  position: absolute;
+  top: 18px;
+  left: 55px;
+  transform: rotate(-10deg);
+}
+
+.duck-leg {
+  width: 4px;
+  height: 15px;
+  background-color: #FF6B6B;
+  position: absolute;
+  bottom: 0;
+}
+
+.duck-leg.left {
+  left: 20px;
+  transform: rotate(-15deg);
+}
+
+.duck-leg.right {
+  left: 30px;
+  transform: rotate(15deg);
+}
+
+.loading-text {
+  color: #666;
+  font-size: 1.1rem;
+  margin-top: 1rem;
+  animation: fadeInOut 1.5s infinite;
+}
+
+@keyframes bounce {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.4;
+  }
+}
+
 .deal-item {
   display: flex;
   flex-direction: row;
@@ -70,9 +165,21 @@
 
 .deal-item-info {
   display: flex;
-  gap: 1rem;
-  color: #666;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
   font-size: 0.9rem;
+  color: #666;
+}
+
+.deal-nickname {
+  font-weight: 500;
+  color: #333;
+}
+
+.deal-time {
+  color: #888;
+  font-size: 0.85rem;
 }
 
 .deal-status {
