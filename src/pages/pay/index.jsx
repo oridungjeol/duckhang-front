@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from 'react-router-dom';
+import { useLocation } from "react-router-dom";
 import { loadTossPayments } from "@tosspayments/tosspayments-sdk";
 import "./index.css";
 
@@ -12,26 +12,28 @@ export function Checkout() {
 
   const [amount, setAmount] = useState({ currency: "KRW", value: 0 });
   const [price, setPrice] = useState(0);
+  const [orderId, setOrderId] = useState(null);
+
   const [widgets, setWidgets] = useState(null);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState(null);
 
+  // URL state에서 결제 정보 받아오기
   useEffect(() => {
     if (state) {
       setPayData(state);
-      console.log(state);
     }
   }, [state]);
-  console.log("state", state);
 
+  // 게시글 가격 조회
   useEffect(() => {
     async function fetchPrice() {
       try {
         const res = await fetch(
           `http://localhost/api/payment/price/${payData.type}/${payData.board_id}`,
           {
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
           }
         );
 
@@ -53,14 +55,13 @@ export function Checkout() {
         setError(err.message);
       }
     }
-    console.log("payData", payData);
 
     if (payData?.board_id && payData?.type) {
       fetchPrice();
     }
   }, [payData]);
 
-
+  // TossPayments 위젯 로딩
   useEffect(() => {
     async function loadWidgets() {
       try {
@@ -75,14 +76,21 @@ export function Checkout() {
     loadWidgets();
   }, []);
 
+  // 위젯 렌더링
   useEffect(() => {
     async function renderWidgets() {
       if (!widgets || amount.value === 0) return;
       try {
         await widgets.setAmount(amount);
         await Promise.all([
-          widgets.renderPaymentMethods({ selector: "#payment-method", variantKey: "DEFAULT" }),
-          widgets.renderAgreement({ selector: "#agreement", variantKey: "AGREEMENT" }),
+          widgets.renderPaymentMethods({
+            selector: "#payment-method",
+            variantKey: "DEFAULT",
+          }),
+          widgets.renderAgreement({
+            selector: "#agreement",
+            variantKey: "AGREEMENT",
+          }),
         ]);
         setReady(true);
         setError(null);
@@ -95,6 +103,41 @@ export function Checkout() {
     renderWidgets();
   }, [widgets, amount]);
 
+  // 주문 ID 생성 (처음 한 번만)
+  useEffect(() => {
+    async function fetchOrCreateOrderId() {
+      try {
+        const res = await fetch("http://localhost/api/payment/create-order-id", {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            boardId: payData.board_id,
+            type: payData.type,
+            price: price,
+          }),
+        });
+
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.message || "주문 생성 실패");
+        }
+
+        const { orderId } = await res.json();
+        setOrderId(orderId);
+      } catch (err) {
+        console.error("주문 생성 실패:", err);
+        setError("주문 생성 중 오류가 발생했습니다.");
+      }
+    }
+
+    if (payData?.board_id && payData?.type && price > 0 && !orderId) {
+      fetchOrCreateOrderId();
+    }
+  }, [payData?.board_id, payData?.type, price, orderId]);
+
   return (
     <div className="wrapper">
       <div className="box_section">
@@ -105,30 +148,10 @@ export function Checkout() {
 
         <button
           className="button"
-          disabled={!ready}
+          disabled={!ready || !orderId}
           onClick={async () => {
-            if (!widgets) return;
+            if (!widgets || !orderId) return;
             try {
-              const res = await fetch("http://localhost/api/payment/create-order-id", {
-                method: "POST",
-                credentials: "include",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  boardId: payData.board_id,
-                  type: payData.type,
-                  price: price,
-                }),
-              });
-
-              if (!res.ok) {
-                const data = await res.json();
-                throw new Error(data.message || "주문 생성 실패");
-              }
-
-              const { orderId } = await res.json();
-
               await widgets.requestPayment({
                 orderId,
                 orderName: `${payData.type.toUpperCase()} 게시글 결제`,
@@ -141,7 +164,6 @@ export function Checkout() {
             } catch (error) {
               console.error("결제 실패:", error);
               setError("결제 처리 중 오류가 발생했습니다.");
-              console.log(error);
             }
           }}
         >
