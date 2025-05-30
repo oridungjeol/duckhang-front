@@ -18,11 +18,37 @@ export default function ChatRoom() {
   const [input, setInput] = useState("");
   const [image, setImage] = useState(null);
   const [orderId, setOrderId] = useState(null);
+  const [isAuthor, setIsAuthor] = useState(false);
 
   const stompClientRef = useRef(null);
   const isConnected = useRef(false);
   const scrollRef = useRef();
   const pageRef = useRef(0);
+
+  /**
+   * 글 작성자 정보 가져오기
+   */
+  const fetchAuthorInfo = async () => {
+    try {
+      console.log("게시글 정보 요청 시작:", data.board_id);
+      const response = await fetch(`http://localhost/api/board/rental/${data.board_id}`, {
+        credentials: 'include'
+      });
+      console.log("API 응답 상태:", response.status);
+      const boardData = await response.json();
+      console.log("게시글 작성자 UUID:", boardData.author_uuid);
+      console.log("현재 사용자 UUID:", uuid);
+      console.log("UUID 일치 여부:", boardData.author_uuid === uuid);
+      
+      const isAuthorCheck = boardData.author_uuid === uuid;
+      console.log("isAuthor 설정 전:", isAuthor);
+      console.log("isAuthor 설정 예정:", isAuthorCheck);
+      setIsAuthor(isAuthorCheck);
+      console.log("isAuthor 설정 후:", isAuthorCheck);
+    } catch (error) {
+      console.error("글 작성자 정보 가져오기 실패:", error);
+    }
+  };
 
   /**
    * 이전 메시지 데이터 로드
@@ -31,7 +57,11 @@ export default function ChatRoom() {
   useEffect(() => {
     if (isConnected.current) return;
 
-    console.log(data);
+    console.log("=== 채팅방 초기화 ===");
+    console.log("전달받은 데이터:", data);
+    console.log("현재 사용자 UUID:", uuid);
+
+    fetchAuthorInfo();
 
     const socket = new SockJS("http://localhost:8080/ws");
     let stompClient = Stomp.over(socket);
@@ -411,16 +441,20 @@ export default function ChatRoom() {
           <button onClick={handleMap} className="pay-btn">
             위치 공유
           </button>
-          <button onClick={handlePay} className="pay-btn">
-            결제 요청
-          </button>
-          <button 
-            onClick={handleConfirmPurchase} 
-            className="pay-btn"
-            disabled={!orderId}
-          >
-            구매 확정 {orderId ? `(ID: ${orderId})` : ''}
-          </button>
+          {isAuthor && (
+            <>
+              <button onClick={handlePay} className="pay-btn">
+                결제 요청
+              </button>
+              <button 
+                onClick={handleConfirmPurchase} 
+                className="pay-btn"
+                disabled={!orderId}
+              >
+                구매확정
+              </button>
+            </>
+          )}
         </span>
       </div>
       <div className="chat-box" ref={scrollRef}>
