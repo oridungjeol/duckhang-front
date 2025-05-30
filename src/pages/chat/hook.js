@@ -36,3 +36,21 @@ export async function getChattingData(data, pageRef) {
     console.error("최근 채팅 기록 불러오기 중 오류 발생:", error);
   }
 }
+
+export async function uploadImage(image) {
+  try {
+    const response = await axios.post(
+      `http://localhost/api/chat/upload/image`,
+      image,
+      { withCredentials: true },
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("이미지 firebase에 업로드 중 오류 발생:", error);
+  }
+}

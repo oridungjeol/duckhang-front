@@ -157,7 +157,7 @@
   gap: 0.5rem;
 }
 
-.input-container input {
+.image-btn {
   flex: 1;
   padding: 0.8rem;
   border: 2px solid #ffca1a;
@@ -167,7 +167,21 @@
   transition: all 0.3s ease;
 }
 
-.input-container input:focus {
+.image-btn:focus {
+  border-color: #fba337;
+}
+
+.input-text {
+  flex: 1;
+  padding: 0.8rem;
+  border: 2px solid #ffca1a;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.input-text:focus {
   border-color: #fba337;
 }
 
@@ -217,4 +231,31 @@
 
 .map button:hover {
   background-color: #fba337;
+}
+
+.send-btn {
+  background-color: #fba337;
+  color: #ffffff;
+  border: none;
+  /* padding: 0.8rem; */
+  border-radius: 50%;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+}
+
+.send-btn:hover {
+  background-color: #ffca1a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.image-btn {
+  display: none;
 }
