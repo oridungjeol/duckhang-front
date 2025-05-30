@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
+import Cookies from 'js-cookie';
 import './detail.css';
 
 // 채팅방 생성 함수 (예시)
@@ -23,6 +25,7 @@ export default function BoardDetail() {
   const [board, setBoard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isAuthor, setIsAuthor] = useState(false);
 
   // 한글 타입명 매핑 (화면 표시용)
   const boardTypeKorean = {
@@ -58,9 +61,25 @@ export default function BoardDetail() {
         try {
           const response = await axios.get(`/board/${boardType}/${board_id}`);
           setBoard(response.data);
-          return; // 성공 시 루프 종료
+          
+          // JWT 토큰에서 현재 사용자의 UUID 가져오기
+          const token = Cookies.get('accessToken');
+          if (token) {
+            try {
+              const decoded = jwtDecode(token);
+              const currentUserUuid = decoded.sub;
+              setIsAuthor(currentUserUuid === response.data.author_uuid);
+            } catch (error) {
+              console.error('JWT 디코딩 실패:', error);
+              setIsAuthor(false);
+            }
+          } else {
+            setIsAuthor(false);
+          }
+          
+          return;
         } catch (err) {
-          continue; // 다음 타입 시도
+          continue;
         }
       }
 
@@ -84,6 +103,36 @@ export default function BoardDetail() {
     } catch (err) {
       console.error('채팅방 생성 오류:', err);
       alert('채팅방을 생성할 수 없습니다.');
+    }
+  };
+
+  const handleEdit = () => {
+    navigate(`/board/write/${type}/${board_id}`, { state: { board } });
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm('정말로 이 게시글을 삭제하시겠습니까?')) {
+      return;
+    }
+
+    try {
+      const response = await axios.delete(`/board/${board.type}/${board_id}`, {
+        headers: {
+          'Authorization': `Bearer ${Cookies.get('accessToken')}`
+        }
+      });
+      
+      if (response.status === 200) {
+        alert('게시글이 삭제되었습니다.');
+        navigate('/board/deal'); // deal 페이지로 이동
+      }
+    } catch (error) {
+      console.error('게시글 삭제 실패:', error);
+      if (error.response?.status === 403) {
+        alert('삭제 권한이 없습니다.');
+      } else {
+        alert('게시글 삭제에 실패했습니다.');
+      }
     }
   };
 
@@ -140,7 +189,18 @@ export default function BoardDetail() {
 
         <div className="board-info">
           <div className="board-header">
-            <h1 className="board-title">{board.title}</h1>
+            <div className="title-container">
+              <h1 className="board-title">{board.title}</h1>
+              {isAuthor && (
+                <button className="delete-btn" onClick={handleDelete}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 6h18"></path>
+                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                  </svg>
+                </button>
+              )}
+            </div>
             <span className="board-author">작성자: {board.nickname}</span>
           </div>
 
@@ -168,6 +228,11 @@ export default function BoardDetail() {
         </div>
 
         <div className="board-actions">
+          {isAuthor && (
+            <button className="edit-btn" onClick={handleEdit}>
+              수정하기
+            </button>
+          )}
           <button className="chat-start-btn" onClick={createRoom}>
             채팅 시작하기
           </button>
