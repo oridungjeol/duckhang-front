@@ -42,6 +42,31 @@
   margin: 0;
 }
 
+.title-container {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: #666;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  margin-left: -8px;
+}
+
+.delete-btn:hover {
+  background-color: #ffebee;
+  color: #d32f2f;
+}
+
 .board-meta {
   display: flex;
   align-items: center;
@@ -69,11 +94,17 @@
   margin-top: 1rem;
 }
 
-.chat-start-btn {
+.board-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.edit-btn, .chat-start-btn {
   background-color: #fba337;
   color: #ffffff;
   border: none;
-  padding: 1rem 2rem;
+  padding: 0.75rem 1.5rem;
   border-radius: 8px;
   font-size: 16px;
   font-weight: bold;
@@ -81,9 +112,15 @@
   transition: all 0.3s ease;
   margin-top: 1rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  min-width: 120px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
 }
 
-.chat-start-btn:hover {
+.edit-btn:hover, .chat-start-btn:hover {
   background-color: #ffca1a;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);

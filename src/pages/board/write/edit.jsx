@@ -1,15 +1,19 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import "./index.css";
 
-export default function CreateBoardForm() {
+export default function EditBoardForm() {
   const navigate = useNavigate();
-  const [dealType, setDealType] = useState("purchase");
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [price, setPrice] = useState("");
-  const [deposit, setDeposit] = useState("");
-  const [imageUrl, setImageUrl] = useState([]);
+  const location = useLocation();
+  const { type, board_id } = useParams(); // board_id는 문자열
+  const { board } = location.state || {};
+
+  const [dealType, setDealType] = useState(board?.type?.toLowerCase() || "purchase");
+  const [title, setTitle] = useState(board?.title || "");
+  const [content, setContent] = useState(board?.content || "");
+  const [price, setPrice] = useState(board?.price || "");
+  const [deposit, setDeposit] = useState(board?.deposit || "");
+  const [imageUrl, setImageUrl] = useState(board?.imageUrl ? [board.imageUrl] : []);
 
   const handleDealTypeChange = (type) => {
     setDealType(type);
@@ -25,10 +29,10 @@ export default function CreateBoardForm() {
     switch (dealType) {
       case "purchase":
       case "sell":
-        requestData = { ...baseData, price };
+        requestData = { ...baseData, price: Number(price) };
         break;
       case "rental":
-        requestData = { ...baseData, price, deposit };
+        requestData = { ...baseData, price: Number(price), deposit: Number(deposit) };
         break;
       case "exchange":
         requestData = baseData;
@@ -39,16 +43,16 @@ export default function CreateBoardForm() {
     }
 
     try {
-      const response = await fetch(`http://localhost/api/board/${dealType}`, {
-        method: "POST",
+      const response = await fetch(`http://localhost/api/board/${dealType}/${board_id}`, {
+        method: "PATCH", // 🔁 PATCH로 변경
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestData),
       });
 
-      if (!response.ok) throw new Error("작성 실패");
-      
-      alert("작성 완료!");
-      navigate('/board/deal');
+      if (!response.ok) throw new Error("수정 실패");
+
+      alert("수정 완료!");
+      navigate(`/board/${type}/${board_id}`); // 수정된 dealType 대신 원래 type으로 이동
     } catch (err) {
       alert("에러 발생: " + err.message);
     }
@@ -58,24 +62,20 @@ export default function CreateBoardForm() {
     <form className="form-container" onSubmit={handleSubmit}>
       {/* 거래유형 버튼 */}
       <div className="radio-group">
-        {["purchase", "sell", "rental", "exchange"].map((type) => (
-          <label
-            key={type}
-            className={`radio-label ${dealType === type ? "active" : ""}`}
-            onClick={() => handleDealTypeChange(type)}
-          >
-            <input type="radio" name="dealType" value={type} />
-            <span className="radio-text">
-              {type === "purchase"
-                ? "구매"
-                : type === "sell"
-                ? "판매"
-                : type === "rental"
-                ? "대여"
-                : "교환"}
-            </span>
-          </label>
-        ))}
+        <label
+          className="radio-label active"
+        >
+          <input type="radio" name="dealType" value={dealType} checked readOnly />
+          <span className="radio-text">
+            {dealType === "purchase"
+              ? "구매"
+              : dealType === "sell"
+              ? "판매"
+              : dealType === "rental"
+              ? "대여"
+              : "교환"}
+          </span>
+        </label>
       </div>
 
       {/* 제목 */}
@@ -131,12 +131,13 @@ export default function CreateBoardForm() {
         </div>
       )}
 
-      {/* 이미지 업로드 (단순 URL 입력 예시) */}
+      {/* 이미지 URL 입력 */}
       <div className="form-group">
         <input
           className="title-input"
           type="text"
           placeholder="이미지 URL을 입력하세요"
+          value={imageUrl[0] || ""}
           onChange={(e) => setImageUrl([e.target.value])}
         />
       </div>
@@ -152,7 +153,7 @@ export default function CreateBoardForm() {
 
       {/* 버튼 */}
       <div className="button-container">
-        <input className="submit-button" type="submit" value="작성 완료" />
+        <input className="submit-button" type="submit" value="수정 완료" />
         <input
           className="cancel-button"
           type="button"
