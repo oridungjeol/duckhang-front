@@ -4,6 +4,7 @@
   "private": true,
   "proxy": "http://localhost:8080",
   "dependencies": {
+    "@lottiefiles/dotlottie-react": "^0.13.5",
     "@stomp/stompjs": "^7.1.1",
     "@tailwindcss/vite": "^4.1.6",
     "@testing-library/dom": "^10.4.0",
@@ -14,6 +15,7 @@
     "axios": "^1.9.0",
     "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",
+    "lottie-react": "^2.4.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.6.0",
