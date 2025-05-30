@@ -42,20 +42,7 @@ export function Success() {
 
         setPaymentInfo(json);
 
-        // 결제 완료 후 채팅방으로 이동
-        const roomId = searchParams.get("room_id");
-        if (roomId) {
-          navigate(`/chat/${roomId}`, {
-            state: {
-              type: "PAYMENT_COMPLETE",
-              content: json.orderId,
-              room_id: roomId,
-              board_id: searchParams.get("board_id"),
-              type: searchParams.get("type"),
-              name: searchParams.get("room_name")
-            }
-          });
-        }
+      
       } catch (err) {
         const errorMessage = "네트워크 오류가 발생했습니다.";
         setError(errorMessage);
@@ -116,6 +103,61 @@ export function Success() {
           <p>{`결제일시: ${formatDate(paymentInfo.approvedAt)}`}</p>
         </div>
       </div>
+      <button
+        onClick={() => {
+          const room_id = searchParams.get('room_id');
+          const room_name = searchParams.get('room_name');
+          const board_id = searchParams.get('board_id');
+          const type = searchParams.get('type');
+          const orderId = searchParams.get('orderId');
+          const amount = searchParams.get('amount');
+          
+          // 게시글 정보를 가져와서 보증금 정보를 포함
+          fetch(`http://localhost/api/board/rental/${board_id}`, {
+            credentials: 'include'
+          })
+          .then(response => response.json())
+          .then(boardData => {
+            navigate(`/chat/${room_id}`, { 
+              state: { 
+                room_id, 
+                name: room_name, 
+                board_id, 
+                type,
+                orderId,
+                deposit: boardData.deposit
+              } 
+            });
+          })
+          .catch(error => {
+            console.error("게시글 정보 가져오기 실패:", error);
+            // 에러가 발생해도 기본 정보만이라도 전달
+            navigate(`/chat/${room_id}`, { 
+              state: { 
+                room_id, 
+                name: room_name, 
+                board_id, 
+                type,
+                orderId
+              } 
+            });
+          });
+        }}
+        style={{
+          marginTop: "20px",
+          padding: "10px 20px",
+          backgroundColor: "#ffca1a",
+          color: "#4a4a3c",
+          border: "none",
+          borderRadius: "8px",
+          cursor: "pointer",
+          fontSize: "16px",
+          fontWeight: "bold",
+          transition: "all 0.3s ease",
+        }}
+      >
+        채팅방으로 돌아가기
+      </button>
     </div>
   );
 }
