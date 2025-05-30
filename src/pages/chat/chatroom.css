@@ -9,7 +9,7 @@
 }
 
 .chat-header {
-  background-color: #fba337;
+  background-color: #ffdc58;
   color: #ffffff;
   padding: 1rem;
   border-radius: 12px 12px 0 0;
@@ -17,6 +17,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  height: 15%;
+  border-bottom-left-radius: 30px;
 }
 
 .chat-header span:last-child {
