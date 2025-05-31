@@ -360,7 +360,7 @@ export default function ChatRoom() {
    * @returns
    */
   const renderMessage = (msg, index) => {
-    const isMine = msg.author_uuid === uuid;
+    const isMine = msg.author_uuid === uuid; //메세지 글쓴이가 나라면
 
     switch (msg.type) {
       case "SYSTEM":
