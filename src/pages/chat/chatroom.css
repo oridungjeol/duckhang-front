@@ -3,28 +3,29 @@
   margin: 0 auto;
   padding: 1rem;
   background-color: #f9f8f7;
-  height: 90vh;
+  height: 95vh;
   display: flex;
   flex-direction: column;
 }
 
 .chat-header {
-  background-color: #ffdc58;
-  color: #ffffff;
+  background-color: #f9f8f7;
+  border-bottom: solid #ffdc58;
   padding: 1rem;
   border-radius: 12px 12px 0 0;
   font-weight: bold;
   display: flex;
   justify-content: space-between;
   align-items: center;
-
-  height: 15%;
-  border-bottom-left-radius: 30px;
 }
 
 .chat-header span:last-child {
   display: flex;
   gap: 8px;
+}
+
+.chat-title {
+  color: #4169e1;
 }
 
 .pay-btn {
@@ -260,7 +261,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 60px;
 }
 
 .send-btn:hover {
@@ -269,70 +269,75 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
+.send-image-btn {
+  width: 50px;
+  height: 50px;
+}
+
 /* payment-success-card 스타일 */
 .payment-success-card {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: white;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    text-align: center;
-    z-index: 1000;
-    animation: fadeInScale 0.3s ease-out;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  z-index: 1000;
+  animation: fadeInScale 0.3s ease-out;
 }
 
 @keyframes fadeInScale {
-    from {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.9);
-    }
-    to {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
-    }
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
 
 .payment-success-icon {
-    font-size: 48px;
-    color: #4CAF50; /* Green color for success */
-    margin-bottom: 15px;
+  font-size: 48px;
+  color: #4caf50; /* Green color for success */
+  margin-bottom: 15px;
 }
 
 .payment-success-title {
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 20px;
-    color: #333;
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #333;
 }
 
 .payment-success-details p {
-    font-size: 16px;
-    margin-bottom: 10px;
-    color: #555;
-    line-height: 1.5;
+  font-size: 16px;
+  margin-bottom: 10px;
+  color: #555;
+  line-height: 1.5;
 }
 
 .payment-success-details p:last-child {
-    margin-bottom: 0;
+  margin-bottom: 0;
 }
 
 .payment-success-close {
-    margin-top: 25px;
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s ease;
+  margin-top: 25px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
 }
 
 .payment-success-close:hover {
-    background-color: #0056b3;
+  background-color: #0056b3;
 }
 
 .refund-request-info {
@@ -349,7 +354,7 @@
 }
 
 .refund-accept-btn {
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
   border: none;
   padding: 8px 16px;

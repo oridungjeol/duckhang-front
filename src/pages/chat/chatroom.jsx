@@ -16,6 +16,7 @@ export default function ChatRoom() {
   const [input, setInput] = useState("");
   const [image, setImage] = useState(null);
   const [isAuthor, setIsAuthor] = useState(false);
+  const [isImage, setIsImage] = useState(false);
 
   const stompClientRef = useRef(null);
   const isConnected = useRef(false);
@@ -28,16 +29,18 @@ export default function ChatRoom() {
   const fetchAuthorInfo = async () => {
     try {
       console.log("게시글 정보 요청 시작:", data.board_id);
-      const response = await fetch(`http://localhost/api/board/${data.type}/${data.board_id}`, {
-        credentials: 'include'
-      });
+      const response = await fetch(
+        `http://localhost/api/board/${data.type}/${data.board_id}`,
+        {
+          credentials: "include",
+        }
+      );
       console.log("API 응답 상태:", response.status);
       const boardData = await response.json();
-    
-      const isAuthorCheck = boardData.author_uuid === uuid;
-  
-      setIsAuthor(isAuthorCheck);
 
+      const isAuthorCheck = boardData.author_uuid === uuid;
+
+      setIsAuthor(isAuthorCheck);
     } catch (error) {
       console.error("글 작성자 정보 가져오기 실패:", error);
     }
@@ -66,11 +69,10 @@ export default function ChatRoom() {
 
       stompClient.subscribe(`/topic/chat/${data.room_id}`, function (message) {
         const data = JSON.parse(message.body);
-      
+
         if (data.type === "PAY") {
           try {
             const paymentData = JSON.parse(data.content);
-           
           } catch (error) {
             console.error("Payment data parsing error:", error);
           }
@@ -79,6 +81,7 @@ export default function ChatRoom() {
       });
     });
 
+    otherUserInfo();
     loadMessageData();
 
     return () => {
@@ -89,11 +92,21 @@ export default function ChatRoom() {
   }, []);
 
   /**
-   * 맨 처음, 메시지를 보낼 때 스크롤 맨 밑으로 고정
+   * 맨 처음 메시지를 보낼 때 스크롤 맨 밑으로 고정
    */
   useEffect(() => {
     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages]);
+
+  /**
+   * 상대방 user info 호출
+   */
+  const otherUserInfo = async () => {
+    console.log(data);
+    // if
+    // const user_info = await getOtherUserInfo();
+    // setMessages(user_info);
+  };
 
   /**
    * 이전 채팅 기록 50개를 호출
@@ -200,24 +213,26 @@ export default function ChatRoom() {
   const handlePay = async () => {
     try {
       // 게시글 정보 가져오기
-      const response = await fetch(`http://localhost/api/board/${data.type}/${data.board_id}`, {
-        credentials: 'include'
-      });
-      const boardData = await response.json();  
+      const response = await fetch(
+        `http://localhost/api/board/${data.type}/${data.board_id}`,
+        {
+          credentials: "include",
+        }
+      );
+      const boardData = await response.json();
 
       // 렌탈 게시글인 경우 deposit 값 확인
-      const deposit = data.type === 'RENTAL' ? (boardData.deposit || 0) : 0;
-   
+      const deposit = data.type === "RENTAL" ? boardData.deposit || 0 : 0;
 
       const paymentInfo = {
         price: boardData.price,
         deposit: deposit,
-        totalAmount: data.type === 'RENTAL' ? boardData.price + deposit : boardData.price,
-        actualPrice: boardData.price,  // 실제 결제금액 (보증금 제외)
+        totalAmount:
+          data.type === "RENTAL" ? boardData.price + deposit : boardData.price,
+        actualPrice: boardData.price, // 실제 결제금액 (보증금 제외)
         boardId: data.board_id,
-        type: data.type
+        type: data.type,
       };
-      
 
       const stompClient = stompClientRef.current;
       if (stompClient?.connected) {
@@ -233,7 +248,6 @@ export default function ChatRoom() {
           created_at: created_at,
           room_id: data.room_id,
         };
-        
 
         stompClient.send(
           `/app/chat/${data.room_id}`,
@@ -281,9 +295,12 @@ export default function ChatRoom() {
   const handleRefund = async () => {
     try {
       // 결제 정보 가져오기
-      const paymentResponse = await fetch(`http://localhost/api/payment/${data.board_id}`, {
-        credentials: 'include'
-      });
+      const paymentResponse = await fetch(
+        `http://localhost/api/payment/${data.board_id}`,
+        {
+          credentials: "include",
+        }
+      );
       const paymentData = await paymentResponse.json();
 
       if (!paymentData.orderId) {
@@ -292,18 +309,24 @@ export default function ChatRoom() {
       }
 
       // 게시글 정보 가져오기
-      const boardResponse = await fetch(`http://localhost/api/board/${data.type}/${data.board_id}`, {
-        credentials: 'include'
-      });
-      const boardData = await boardResponse.json();  
+      const boardResponse = await fetch(
+        `http://localhost/api/board/${data.type}/${data.board_id}`,
+        {
+          credentials: "include",
+        }
+      );
+      const boardData = await boardResponse.json();
 
       const refundInfo = {
         price: boardData.price,
-        deposit: data.type === 'RENTAL' ? (boardData.deposit || 0) : 0,
-        totalAmount: data.type === 'RENTAL' ? boardData.price + (boardData.deposit || 0) : boardData.price,
+        deposit: data.type === "RENTAL" ? boardData.deposit || 0 : 0,
+        totalAmount:
+          data.type === "RENTAL"
+            ? boardData.price + (boardData.deposit || 0)
+            : boardData.price,
         boardId: data.board_id,
         type: data.type,
-        orderId: paymentData.orderId
+        orderId: paymentData.orderId,
       };
 
       const stompClient = stompClientRef.current;
@@ -344,12 +367,13 @@ export default function ChatRoom() {
         board_id: data.board_id,
         room_id: data.room_id,
         room_name: data.name,
-        orderId: data.orderId
-      }
+        orderId: data.orderId,
+      },
     });
   };
 
   const addImage = (e) => {
+    setIsImage(true);
     setImage(e.target.files[0]);
   };
 
@@ -406,7 +430,10 @@ export default function ChatRoom() {
           paymentData = null;
         }
         return (
-          <div key={index} className={`message-wrapper ${isMine ? "me" : "other"}`}>
+          <div
+            key={index}
+            className={`message-wrapper ${isMine ? "me" : "other"}`}
+          >
             <div className={`message ${isMine ? "me" : "other"}`}>
               {isMine ? (
                 <div>결제 요청을 보냈어요</div>
@@ -415,16 +442,36 @@ export default function ChatRoom() {
                   <div>결제 요청을 받았어요</div>
                   {paymentData && (
                     <div className="payment-request-info">
-                      {data.type === 'RENTAL' ? (
+                      {data.type === "RENTAL" ? (
                         <>
-                          <p>결제 금액: {paymentData.actualPrice ? paymentData.actualPrice.toLocaleString() : (paymentData.price || 0).toLocaleString()}원</p>
+                          <p>
+                            결제 금액:{" "}
+                            {paymentData.actualPrice
+                              ? paymentData.actualPrice.toLocaleString()
+                              : (paymentData.price || 0).toLocaleString()}
+                            원
+                          </p>
                           {paymentData.deposit > 0 && (
-                            <p>보증금: {paymentData.deposit.toLocaleString()}원</p>
+                            <p>
+                              보증금: {paymentData.deposit.toLocaleString()}원
+                            </p>
                           )}
-                          <p>총 결제 금액: {paymentData.totalAmount ? paymentData.totalAmount.toLocaleString() : 0}원</p>
+                          <p>
+                            총 결제 금액:{" "}
+                            {paymentData.totalAmount
+                              ? paymentData.totalAmount.toLocaleString()
+                              : 0}
+                            원
+                          </p>
                         </>
                       ) : (
-                        <p>결제 금액: {paymentData.price ? paymentData.price.toLocaleString() : 0}원</p>
+                        <p>
+                          결제 금액:{" "}
+                          {paymentData.price
+                            ? paymentData.price.toLocaleString()
+                            : 0}
+                          원
+                        </p>
                       )}
                     </div>
                   )}
@@ -436,9 +483,17 @@ export default function ChatRoom() {
                           type: data.type,
                           room_id: data.room_id,
                           room_name: data.name,
-                          successUrl: `${window.location.origin}/success?orderId=${paymentData?.orderId}&amount=${paymentData?.totalAmount}&type=${data.type}&room_id=${data.room_id}&board_id=${data.board_id}&room_name=${encodeURIComponent(data.name)}`,
+                          successUrl: `${
+                            window.location.origin
+                          }/success?orderId=${paymentData?.orderId}&amount=${
+                            paymentData?.totalAmount
+                          }&type=${data.type}&room_id=${
+                            data.room_id
+                          }&board_id=${
+                            data.board_id
+                          }&room_name=${encodeURIComponent(data.name)}`,
                           failUrl: "/fail",
-                          return_to: null
+                          return_to: null,
                         },
                       });
                     }}
@@ -459,7 +514,10 @@ export default function ChatRoom() {
           refundData = null;
         }
         return (
-          <div key={index} className={`message-wrapper ${isMine ? "me" : "other"}`}>
+          <div
+            key={index}
+            className={`message-wrapper ${isMine ? "me" : "other"}`}
+          >
             <div className={`message ${isMine ? "me" : "other"}`}>
               {isMine ? (
                 <div>환불 요청을 보냈어요</div>
@@ -474,8 +532,8 @@ export default function ChatRoom() {
                           room_id: data.room_id,
                           room_name: data.name,
                           orderId: refundData?.orderId,
-                          type: data.type
-                        }
+                          type: data.type,
+                        },
                       });
                     }}
                   >
@@ -513,7 +571,7 @@ export default function ChatRoom() {
   return (
     <div className="chat-container">
       <div className="chat-header">
-        <span>{data.name}</span>
+        <span className="chat-title">{data.name}</span>
         <span>
           <button onClick={handleMap} className="pay-btn">
             위치 공유
@@ -528,7 +586,7 @@ export default function ChatRoom() {
               <button onClick={handlePay} className="pay-btn">
                 결제 요청
               </button>
-              {data.type === 'RENTAL' && (
+              {data.type === "RENTAL" && (
                 <button onClick={handleRefund} className="pay-btn">
                   환불 요청
                 </button>
@@ -551,12 +609,9 @@ export default function ChatRoom() {
           style={{ display: "none" }}
           onChange={addImage}
         />
-        <label htmlFor="image-upload" className="send-btn">
+        <label htmlFor="image-upload" className="send-btn send-image-btn">
           +
         </label>
-        <button className="send-btn" onClick={handleImage}>
-          임시 이미지 전송
-        </button>
         <input
           type="text"
           className="input-text"
@@ -565,7 +620,17 @@ export default function ChatRoom() {
           onKeyPress={activeEnter}
           placeholder="메시지를 입력하세요..."
         />
-        <button className="send-btn" onClick={handleSend}>
+        <button
+          className="send-btn"
+          onClick={() => {
+            if (isImage) {
+              handleImage();
+              setIsImage(false);
+            } else {
+              handleSend();
+            }
+          }}
+        >
           전송
         </button>
       </div>

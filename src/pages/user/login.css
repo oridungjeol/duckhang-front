@@ -32,10 +32,6 @@
   transition: box-shadow 0.2s;
 }
 
-.kakao-login-button:hover {
-  box-shadow: 0 0 0 2px #4169e1;
-}
-
 .kakao-login-button img {
   width: 100%;
   height: auto;
