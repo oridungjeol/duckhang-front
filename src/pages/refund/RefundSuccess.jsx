@@ -1,7 +1,5 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import SockJS from "sockjs-client";
-import { Client } from "@stomp/stompjs";
 
 function formatDate(dateString) {
   if (!dateString) return "";
@@ -17,119 +15,92 @@ function formatDate(dateString) {
 export default function RefundSuccess() {
   const location = useLocation();
   const navigate = useNavigate();
-  const refundInfo = location.state?.refundInfo;
-  console.log(refundInfo);
+  const { room_id, room_name, board_id, type, refundInfo } = location.state || {};
 
-  if (!refundInfo) {
-    // 환불 정보가 없으면 실패 페이지로 이동
-    navigate("/refund-fail", { state: { message: "환불 정보가 없습니다." } });
-    return null;
-  }
+  console.log("RefundSuccess state:", location.state);
 
-  const handleReturnToChat = async () => {
-    try {
-      // WebSocket 연결 및 메시지 전송
-      const socket = new SockJS("http://localhost:8080/ws");
-      const client = new Client({
-        webSocketFactory: () => socket,
-        onConnect: () => {
-          const now = new Date();
-          const kstOffset = now.getTime() + 9 * 60 * 60 * 1000;
-          const kstDate = new Date(kstOffset);
-          const created_at = kstDate.toISOString().slice(0, 19);
-
-          const messageContent = {
-            message: "환불이 완료되었습니다.",
-            orderId: refundInfo.orderId,
-            totalAmount: refundInfo.cancelAmount,
-            method: refundInfo.method || '카드',
-            approvedAt: refundInfo.refundedAt || now.toISOString()
-          };
-
-          console.log('Sending refund message:', messageContent);
-
-          client.publish({
-            destination: `/app/chat/${refundInfo.room_id}`,
-            body: JSON.stringify({
-              type: "COMPLETE_REFUND",
-              author_uuid: localStorage.getItem("uuid"),
-              content: JSON.stringify(messageContent),
-              created_at: created_at,
-              room_id: refundInfo.room_id,
-            })
-          });
-
-          // 메시지 전송 후 채팅방으로 이동
-          navigate(`/chat/${refundInfo.room_id}`, {
-            state: {
-              room_id: refundInfo.room_id,
-              name: refundInfo.room_name,
-              board_id: refundInfo.board_id,
-              type: refundInfo.type,
-              orderId: refundInfo.orderId
-            }
-          });
-
-          // 연결 종료
-          client.deactivate();
-        }
-      });
-
-      client.activate();
-    } catch (error) {
-      console.error("메시지 전송 실패:", error);
-      // 에러가 발생해도 채팅방으로 이동
-      navigate(`/chat/${refundInfo.room_id}`, {
-        state: {
-          room_id: refundInfo.room_id,
-          name: refundInfo.room_name,
-          board_id: refundInfo.board_id,
-          type: refundInfo.type,
-          orderId: refundInfo.orderId
-        }
-      });
+  const handleReturnToChat = () => {
+    if (!room_id || !room_name || !board_id || !type) {
+      console.error("Missing required data:", { room_id, room_name, board_id, type });
+      return;
     }
+
+    navigate(`/chat/${room_id}`, {
+      state: {
+        room_id,
+        name: room_name,
+        board_id,
+        type,
+        isBuyer: true
+      }
+    });
   };
 
   return (
-    <div className="result wrapper" style={{ flexDirection: "column" }}>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          marginTop: "40px",
-          marginBottom: "32px",
-        }}
-      >
-        <svg width="90" height="90" viewBox="0 0 100 100" fill="none">
+    <div style={{ 
+      display: "flex", 
+      flexDirection: "column", 
+      alignItems: "center", 
+      justifyContent: "center", 
+      height: "100vh",
+      backgroundColor: "#f9f8f7"
+    }}>
+      <div style={{
+        backgroundColor: "white",
+        padding: "2rem",
+        borderRadius: "12px",
+        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+        textAlign: "center",
+        maxWidth: "400px",
+        width: "90%"
+      }}>
+        <svg width="60" height="60" viewBox="0 0 100 100" fill="none" style={{ marginBottom: "1rem" }}>
           <circle cx="50" cy="50" r="45" fill="#5580e6" />
           <path d="M30 52L45 67L70 42" stroke="white" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-        <div className="box_section">
-          <h2>환불이 완료되었습니다.</h2>
-          <p>{`환불번호: ${refundInfo?.orderId}`}</p>
-          <p>{`환불금액: ${Number(refundInfo?.cancelAmount).toLocaleString()}원`}</p>
-          <p>{`환불일시: ${formatDate(refundInfo?.refundedAt)}`}</p>
-        </div>
+        <h2 style={{ color: "#5580e6", marginBottom: "1rem" }}>환불이 완료되었습니다</h2>
+        {refundInfo && (
+          <div style={{ 
+            backgroundColor: "#f8f9fa", 
+            padding: "1rem", 
+            borderRadius: "8px", 
+            marginBottom: "2rem",
+            textAlign: "left"
+          }}>
+            <p style={{ margin: "0.5rem 0", color: "#666" }}>
+              <span style={{ fontWeight: "bold" }}>환불번호:</span> {refundInfo.orderId}
+            </p>
+            <p style={{ margin: "0.5rem 0", color: "#666" }}>
+              <span style={{ fontWeight: "bold" }}>환불금액:</span> {Number(refundInfo.cancelAmount).toLocaleString()}원
+            </p>
+            <p style={{ margin: "0.5rem 0", color: "#666" }}>
+              <span style={{ fontWeight: "bold" }}>환불일시:</span> {formatDate(refundInfo.refundedAt)}
+            </p>
+          </div>
+        )}
+        <p style={{ color: "#666", marginBottom: "2rem" }}>
+          환불이 성공적으로 처리되었습니다.<br />
+          채팅방으로 돌아가시겠습니까?
+        </p>
+        <button
+          onClick={handleReturnToChat}
+          style={{
+            backgroundColor: "#5580e6",
+            color: "white",
+            border: "none",
+            padding: "0.8rem 2rem",
+            borderRadius: "25px",
+            fontSize: "1rem",
+            cursor: "pointer",
+            transition: "all 0.3s ease",
+            width: "100%"
+          }}
+          onMouseOver={(e) => e.target.style.backgroundColor = "#4a6fc9"}
+          onMouseOut={(e) => e.target.style.backgroundColor = "#5580e6"}
+        >
+          채팅방으로 돌아가기
+        </button>
       </div>
-      <button
-        onClick={handleReturnToChat}
-        style={{
-          marginTop: "20px",
-          padding: "10px 20px",
-          backgroundColor: "#ffca1a",
-          color: "#4a4a3c",
-          border: "none",
-          borderRadius: "8px",
-          cursor: "pointer",
-          fontSize: "16px",
-          fontWeight: "bold",
-          transition: "all 0.3s ease",
-        }}
-      >
-        채팅방으로 돌아가기
-      </button>
     </div>
   );
 } 

@@ -24,6 +24,11 @@ export async function getChatRoomList() {
  */
 export async function getChattingData(data, pageRef) {
   try {
+    if (!data || !data.room_id) {
+      console.error("채팅방 ID가 없습니다.");
+      return [];
+    }
+
     const response = await axios.get(
       `http://localhost/api/chat/recent/${data.room_id}?page=${pageRef.current}&size=50&sort=createdAt,desc`,
       {
@@ -34,6 +39,7 @@ export async function getChattingData(data, pageRef) {
     return response.data.reverse();
   } catch (error) {
     console.error("최근 채팅 기록 불러오기 중 오류 발생:", error);
+    return [];
   }
 }
 

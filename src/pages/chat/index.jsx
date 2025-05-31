@@ -29,22 +29,34 @@ export default function Chat() {
   const enterChatRoom = async (data) => {
     try {
       // 게시글 정보를 가져와서 보증금 정보를 포함
-      const response = await fetch(`http://localhost/api/board/rental/${data.board_id}`, {
+      const response = await fetch(`http://localhost/api/board/${data.type}/${data.board_id}`, {
         credentials: 'include'
       });
       const boardData = await response.json();
       
-      // 결제 정보 가져오기
-      const paymentResponse = await fetch(`http://localhost/api/payment/order/${data.board_id}`, {
-        credentials: 'include'
-      });
-      const paymentData = await paymentResponse.json();
+      // Determine if the current user is the buyer
+      const currentUserUuid = localStorage.getItem("uuid");
+      const isBuyer = boardData.author_uuid !== currentUserUuid; // User is buyer if not the author
+      
+      // 결제 정보 가져오기 (optional - only needed if paymentData is used in chatroom for initial state)
+      let paymentData = {};
+      try {
+          const paymentResponse = await fetch(`http://localhost/api/payment/order/${data.board_id}`, {
+              credentials: 'include'
+          });
+          if (paymentResponse.ok) {
+              paymentData = await paymentResponse.json();
+          }
+      } catch (paymentError) {
+          console.error("결제 정보 가져오기 실패:", paymentError);
+      }
 
       navigate(`/chat/${data.room_id}`, { 
         state: { 
           ...data,
           orderId: paymentData.orderId,
-          deposit: boardData.deposit
+          deposit: boardData.deposit,
+          isBuyer: isBuyer
         } 
       });
     } catch (error) {

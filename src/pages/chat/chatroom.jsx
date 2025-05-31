@@ -8,19 +8,29 @@ import "./chatroom.css";
 
 export default function ChatRoom() {
   const location = useLocation();
-  const data = location.state;
-  const uuid = localStorage.getItem("uuid");
   const navigate = useNavigate();
+  const uuid = localStorage.getItem("uuid");
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [image, setImage] = useState(null);
   const [isAuthor, setIsAuthor] = useState(false);
+  const [isBuyer, setIsBuyer] = useState(false);
 
   const stompClientRef = useRef(null);
   const isConnected = useRef(false);
   const scrollRef = useRef();
   const pageRef = useRef(0);
+
+  useEffect(() => {
+    if (!location.state || !location.state.room_id) {
+      console.error("채팅방 정보가 없습니다.");
+      navigate("/chat");  // 채팅 목록으로 리다이렉트
+      return;
+    }
+  }, [location.state, navigate]);
+
+  const data = location.state || {};
 
   /**
    * 글 작성자 정보 가져오기
@@ -39,6 +49,46 @@ export default function ChatRoom() {
       console.log("게시글 타입:", data.type);
   
       setIsAuthor(isAuthorCheck);
+      
+      if (data.type === 'RENTAL') {
+        try {
+          const paymentResponse = await fetch(`http://localhost/api/payment/${data.board_id}`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (paymentResponse.status === 404) {
+            console.log("결제 정보가 없습니다.");
+            setIsBuyer(false);
+            return;
+          }
+
+          if (!paymentResponse.ok) {
+            console.error("결제 정보 API 오류:", paymentResponse.status);
+            setIsBuyer(false);
+            return;
+          }
+
+          const paymentData = await paymentResponse.json();
+          console.log("결제 정보:", paymentData);
+          
+          if (paymentData && paymentData.orderId) {
+            setIsBuyer(true);
+            console.log("isBuyer 상태: true");
+          } else {
+            setIsBuyer(false);
+            console.log("isBuyer 상태: false");
+          }
+        } catch (error) {
+          console.error("결제 정보 가져오기 실패:", error);
+          setIsBuyer(false);
+        }
+      } else {
+        setIsBuyer(false);
+      }
 
     } catch (error) {
       console.error("글 작성자 정보 가져오기 실패:", error);
@@ -50,7 +100,7 @@ export default function ChatRoom() {
    * stomp 연결
    */
   useEffect(() => {
-    if (isConnected.current) return;
+    if (isConnected.current || !data.room_id) return;
 
     fetchAuthorInfo();
 
@@ -75,9 +125,7 @@ export default function ChatRoom() {
             }
           }
 
-          // 중복 메시지 체크
           setMessages((prev) => {
-            // 이미 동일한 메시지가 있는지 확인
             const isDuplicate = prev.some(
               (msg) => 
                 msg.type === newMessage.type && 
@@ -108,13 +156,15 @@ export default function ChatRoom() {
         client.deactivate();
       }
     };
-  }, []);
+  }, [data.room_id, uuid]);
 
   /**
    * 맨 처음, 메시지를 보낼 때 스크롤 맨 밑으로 고정
    */
   useEffect(() => {
-    scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
   }, [messages]);
 
   /**
@@ -365,6 +415,24 @@ export default function ChatRoom() {
   const addImage = (e) => {
     setImage(e.target.files[0]);
   };
+
+  // Check if a COMPLETE_PAYMENT message with approval info exists in the chat
+  const isPaymentApprovedInChat = (() => {
+    if (!Array.isArray(messages)) return false;
+    return messages.some(msg => {
+      if (!msg || !msg.type) return false;
+      if (msg.type === "COMPLETE_PAYMENT") {
+        try {
+          const paymentData = JSON.parse(msg.content);
+          return !!paymentData && !!paymentData.approvedAt;
+        } catch (error) {
+          console.error("Error parsing payment data for refund button check:", error);
+          return false;
+        }
+      }
+      return false;
+    });
+  })();
 
   /**
    * 타입별 메시지 UI 렌더링
@@ -649,18 +717,23 @@ export default function ChatRoom() {
           <button onClick={handleMap} className="pay-btn">
             위치 공유
           </button>
-          {!isAuthor && data.type === 'RENTAL' && data.isBuyer && (
-            <button onClick={handlePurchaseConfirm} className="pay-btn">
-              구매확정
+
+          {isAuthor && (
+            <button onClick={handlePay} className="pay-btn">
+              결제 요청
             </button>
           )}
-          <button onClick={handlePay} className="pay-btn">
-            결제 요청
-          </button>
-          {isAuthor && data.type === 'RENTAL' && (
-            <button onClick={handleRefund} className="pay-btn">
-              환불 요청
-            </button>
+
+          {data.type === 'RENTAL' && !isAuthor && isBuyer && (
+            <>
+              <button
+                onClick={handleRefund}
+                className="pay-btn"
+                disabled={!isPaymentApprovedInChat}
+              >
+                환불 요청
+              </button>
+            </>
           )}
         </span>
       </div>

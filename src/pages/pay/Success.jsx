@@ -14,7 +14,20 @@ export function Success() {
 
   const handleReturnToChat = async () => {
     try {
+      // URL 파라미터 확인
       const room_id = searchParams.get("room_id");
+      const room_name = searchParams.get("room_name");
+      const board_id = searchParams.get("board_id");
+      const type = searchParams.get("type");
+
+      console.log("URL 파라미터:", { room_id, room_name, board_id, type });
+
+      // 필수 데이터 확인
+      if (!room_id || !room_name || !board_id || !type) {
+        console.error("필수 데이터가 누락되었습니다:", { room_id, room_name, board_id, type });
+        return;
+      }
+
       const socket = new SockJS("http://localhost:8080/ws");
       const client = new Client({
         webSocketFactory: () => socket,
@@ -46,19 +59,19 @@ export function Success() {
           });
 
           // 메시지 전송 후 채팅방으로 이동
-          const room_name = searchParams.get("room_name");
-          const board_id = searchParams.get("board_id");
-          const type = searchParams.get("type");
-          navigate(`/chat/${room_id}`, {
-            state: {
-              room_id,
-              name: room_name,
-              board_id,
-              type,
-              orderId: paymentInfo.orderId,
-              fromPayment: true
-            }
-          });
+          const chatState = {
+            room_id,
+            name: room_name,
+            board_id,
+            type,
+            orderId: paymentInfo.orderId,
+            fromPayment: true,
+            paymentCompleted: true,
+            isBuyer: true
+          };
+
+          console.log("채팅방으로 이동:", chatState);
+          navigate(`/chat/${room_id}`, { state: chatState });
 
           // 연결 종료
           client.deactivate();
@@ -73,16 +86,25 @@ export function Success() {
       const room_name = searchParams.get("room_name");
       const board_id = searchParams.get("board_id");
       const type = searchParams.get("type");
-      navigate(`/chat/${room_id}`, {
-        state: {
-          room_id,
-          name: room_name,
-          board_id,
-          type,
-          orderId: paymentInfo.orderId,
-          fromPayment: true
-        }
-      });
+
+      // 필수 데이터 확인
+      if (!room_id || !room_name || !board_id || !type) {
+        console.error("필수 데이터가 누락되었습니다:", { room_id, room_name, board_id, type });
+        return;
+      }
+
+      const chatState = {
+        room_id,
+        name: room_name,
+        board_id,
+        type,
+        orderId: paymentInfo.orderId,
+        fromPayment: true,
+        isBuyer: true
+      };
+
+      console.log("에러 발생 후 채팅방으로 이동:", chatState);
+      navigate(`/chat/${room_id}`, { state: chatState });
     }
   };
 
@@ -98,7 +120,7 @@ export function Success() {
 
     async function confirm() {
       try {
-        const response = await fetch("http://localhost:8080/payment/confirm", {
+        const response = await fetch("http://localhost/api/payment/confirm", {
           method: "POST",
           credentials: 'include',
           headers: {
