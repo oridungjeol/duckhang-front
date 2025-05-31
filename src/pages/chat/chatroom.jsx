@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import SockJS from "sockjs-client";
-import { Stomp } from "@stomp/stompjs";
+import { Client } from "@stomp/stompjs";
 
 import { getChattingData, uploadImage } from "./hook";
 import "./chatroom.css";
@@ -35,6 +35,8 @@ export default function ChatRoom() {
       const boardData = await response.json();
     
       const isAuthorCheck = boardData.author_uuid === uuid;
+      console.log("isAuthor 상태:", isAuthorCheck);
+      console.log("게시글 타입:", data.type);
   
       setIsAuthor(isAuthorCheck);
 
@@ -53,38 +55,58 @@ export default function ChatRoom() {
     fetchAuthorInfo();
 
     const socket = new SockJS("http://localhost:8080/ws");
-    let stompClient = Stomp.over(socket);
-    stompClientRef.current = stompClient;
+    const client = new Client({
+      webSocketFactory: () => socket,
+      connectHeaders: {
+        uuid: uuid,
+      },
+      onConnect: () => {
+        console.log("Connected!");
+        isConnected.current = true;
 
-    const headers = {
-      uuid: uuid,
-    };
-
-    stompClient.connect(headers, function (frame) {
-      console.log("Connected: " + frame);
-      isConnected.current = true;
-
-      stompClient.subscribe(`/topic/chat/${data.room_id}`, function (message) {
-        const data = JSON.parse(message.body);
-      
-        if (data.type === "PAY") {
-          try {
-            const paymentData = JSON.parse(data.content);
-           
-          } catch (error) {
-            console.error("Payment data parsing error:", error);
+        client.subscribe(`/topic/chat/${data.room_id}`, (message) => {
+          const newMessage = JSON.parse(message.body);
+          
+          if (newMessage.type === "PAY") {
+            try {
+              const paymentData = JSON.parse(newMessage.content);
+            } catch (error) {
+              console.error("Payment data parsing error:", error);
+            }
           }
-        }
-        setMessages((prev) => [...prev, data]);
-      });
+
+          // 중복 메시지 체크
+          setMessages((prev) => {
+            // 이미 동일한 메시지가 있는지 확인
+            const isDuplicate = prev.some(
+              (msg) => 
+                msg.type === newMessage.type && 
+                msg.author_uuid === newMessage.author_uuid && 
+                msg.created_at === newMessage.created_at
+            );
+
+            if (isDuplicate) {
+              return prev;
+            }
+            return [...prev, newMessage];
+          });
+        });
+      },
+      onDisconnect: () => {
+        console.log("Disconnected");
+        isConnected.current = false;
+      }
     });
+
+    stompClientRef.current = client;
+    client.activate();
 
     loadMessageData();
 
     return () => {
-      stompClient.disconnect(() => {
-        console.log("Disconnected");
-      });
+      if (client.connected) {
+        client.deactivate();
+      }
     };
   }, []);
 
@@ -132,26 +154,25 @@ export default function ChatRoom() {
    * @returns
    */
   const handleSend = () => {
-    const stompClient = stompClientRef.current;
-    if (stompClient?.connected) {
+    const client = stompClientRef.current;
+    if (client?.connected) {
       if (input.trim() === "") return;
 
       const now = new Date();
-      const kstOffset = now.getTime() + 9 * 60 * 60 * 1000; // +9시간
+      const kstOffset = now.getTime() + 9 * 60 * 60 * 1000;
       const kstDate = new Date(kstOffset);
       const created_at = kstDate.toISOString().slice(0, 19);
 
-      stompClient.send(
-        `/app/chat/${data.room_id}`,
-        {},
-        JSON.stringify({
+      client.publish({
+        destination: `/app/chat/${data.room_id}`,
+        body: JSON.stringify({
           type: "TEXT",
           author_uuid: uuid,
           content: input,
           created_at: created_at,
           room_id: data.room_id,
         })
-      );
+      });
 
       setInput("");
     } else {
@@ -171,24 +192,23 @@ export default function ChatRoom() {
     const image_url = await uploadImage(formData);
     console.log(image_url);
 
-    const stompClient = stompClientRef.current;
-    if (stompClient?.connected) {
+    const client = stompClientRef.current;
+    if (client?.connected) {
       const now = new Date();
-      const kstOffset = now.getTime() + 9 * 60 * 60 * 1000; // +9시간
+      const kstOffset = now.getTime() + 9 * 60 * 60 * 1000;
       const kstDate = new Date(kstOffset);
       const created_at = kstDate.toISOString().slice(0, 19);
 
-      stompClient.send(
-        `/app/chat/${data.room_id}`,
-        {},
-        JSON.stringify({
+      client.publish({
+        destination: `/app/chat/${data.room_id}`,
+        body: JSON.stringify({
           type: "IMAGE",
           author_uuid: uuid,
           content: image_url,
           created_at: created_at,
           room_id: data.room_id,
         })
-      );
+      });
     } else {
       console.log("연결이 되지 않았습니다.");
     }
@@ -199,13 +219,11 @@ export default function ChatRoom() {
    */
   const handlePay = async () => {
     try {
-      // 게시글 정보 가져오기
       const response = await fetch(`http://localhost/api/board/${data.type}/${data.board_id}`, {
         credentials: 'include'
       });
       const boardData = await response.json();  
 
-      // 렌탈 게시글인 경우 deposit 값 확인
       const deposit = data.type === 'RENTAL' ? (boardData.deposit || 0) : 0;
    
 
@@ -219,10 +237,10 @@ export default function ChatRoom() {
       };
       
 
-      const stompClient = stompClientRef.current;
-      if (stompClient?.connected) {
+      const client = stompClientRef.current;
+      if (client?.connected) {
         const now = new Date();
-        const kstOffset = now.getTime() + 9 * 60 * 60 * 1000; // +9시간
+        const kstOffset = now.getTime() + 9 * 60 * 60 * 1000;
         const kstDate = new Date(kstOffset);
         const created_at = kstDate.toISOString().slice(0, 19);
 
@@ -235,11 +253,10 @@ export default function ChatRoom() {
         };
         
 
-        stompClient.send(
-          `/app/chat/${data.room_id}`,
-          {},
-          JSON.stringify(message)
-        );
+        client.publish({
+          destination: `/app/chat/${data.room_id}`,
+          body: JSON.stringify(message)
+        });
       } else {
         console.log("연결이 되지 않았습니다.");
       }
@@ -252,24 +269,23 @@ export default function ChatRoom() {
    * 지도 메시지 핸들러
    */
   const handleMap = () => {
-    const stompClient = stompClientRef.current;
-    if (stompClient?.connected) {
+    const client = stompClientRef.current;
+    if (client?.connected) {
       const now = new Date();
-      const kstOffset = now.getTime() + 9 * 60 * 60 * 1000; // +9시간
+      const kstOffset = now.getTime() + 9 * 60 * 60 * 1000;
       const kstDate = new Date(kstOffset);
       const created_at = kstDate.toISOString().slice(0, 19);
 
-      stompClient.send(
-        `/app/chat/${data.room_id}`,
-        {},
-        JSON.stringify({
+      client.publish({
+        destination: `/app/chat/${data.room_id}`,
+        body: JSON.stringify({
           type: "MAP",
           author_uuid: uuid,
           content: "",
           created_at: created_at,
           room_id: data.room_id,
         })
-      );
+      });
     } else {
       console.log("연결이 되지 않았습니다.");
     }
@@ -280,7 +296,6 @@ export default function ChatRoom() {
    */
   const handleRefund = async () => {
     try {
-      // 결제 정보 가져오기
       const paymentResponse = await fetch(`http://localhost/api/payment/${data.board_id}`, {
         credentials: 'include'
       });
@@ -291,7 +306,6 @@ export default function ChatRoom() {
         return;
       }
 
-      // 게시글 정보 가져오기
       const boardResponse = await fetch(`http://localhost/api/board/${data.type}/${data.board_id}`, {
         credentials: 'include'
       });
@@ -306,10 +320,10 @@ export default function ChatRoom() {
         orderId: paymentData.orderId
       };
 
-      const stompClient = stompClientRef.current;
-      if (stompClient?.connected) {
+      const client = stompClientRef.current;
+      if (client?.connected) {
         const now = new Date();
-        const kstOffset = now.getTime() + 9 * 60 * 60 * 1000; // +9시간
+        const kstOffset = now.getTime() + 9 * 60 * 60 * 1000;
         const kstDate = new Date(kstOffset);
         const created_at = kstDate.toISOString().slice(0, 19);
 
@@ -321,11 +335,10 @@ export default function ChatRoom() {
           room_id: data.room_id,
         };
 
-        stompClient.send(
-          `/app/chat/${data.room_id}`,
-          {},
-          JSON.stringify(message)
-        );
+        client.publish({
+          destination: `/app/chat/${data.room_id}`,
+          body: JSON.stringify(message)
+        });
       } else {
         console.log("연결이 되지 않았습니다.");
       }
@@ -407,45 +420,72 @@ export default function ChatRoom() {
         }
         return (
           <div key={index} className={`message-wrapper ${isMine ? "me" : "other"}`}>
-            <div className={`message ${isMine ? "me" : "other"}`}>
-              {isMine ? (
-                <div>결제 요청을 보냈어요</div>
-              ) : (
-                <>
-                  <div>결제 요청을 받았어요</div>
-                  {paymentData && (
-                    <div className="payment-request-info">
-                      {data.type === 'RENTAL' ? (
-                        <>
-                          <p>결제 금액: {paymentData.actualPrice ? paymentData.actualPrice.toLocaleString() : (paymentData.price || 0).toLocaleString()}원</p>
-                          {paymentData.deposit > 0 && (
-                            <p>보증금: {paymentData.deposit.toLocaleString()}원</p>
-                          )}
-                          <p>총 결제 금액: {paymentData.totalAmount ? paymentData.totalAmount.toLocaleString() : 0}원</p>
-                        </>
-                      ) : (
-                        <p>결제 금액: {paymentData.price ? paymentData.price.toLocaleString() : 0}원</p>
+            <div className={`payment-request-card ${isMine ? "me" : "other"}`}>
+              <div className="payment-request-header">
+                <h3>{isMine ? '결제 요청을 보냈어요' : '결제 요청을 받았어요'}</h3>
+              </div>
+              {paymentData && (
+                <div className="payment-request-content">
+                  <div className="payment-info-item">
+                    <span className="label">상품명</span>
+                    <span className="value">{data.name}</span>
+                  </div>
+                  {data.type === 'RENTAL' ? (
+                    <>
+                      <div className="payment-info-item">
+                        <span className="label">결제 금액</span>
+                        <span className="value">{paymentData.actualPrice ? paymentData.actualPrice.toLocaleString() : (paymentData.price || 0).toLocaleString()}원</span>
+                      </div>
+                      {paymentData.deposit > 0 && (
+                        <div className="payment-info-item">
+                          <span className="label">보증금</span>
+                          <span className="value">{paymentData.deposit.toLocaleString()}원</span>
+                        </div>
                       )}
+                      <div className="payment-info-item">
+                        <span className="label">총 결제 금액</span>
+                        <span className="value">{paymentData.totalAmount ? paymentData.totalAmount.toLocaleString() : 0}원</span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="payment-info-item">
+                      <span className="label">결제 금액</span>
+                      <span className="value">{paymentData.price ? paymentData.price.toLocaleString() : 0}원</span>
                     </div>
                   )}
-                  <button
-                    onClick={() => {
-                      navigate("/checkout", {
-                        state: {
-                          board_id: data.board_id,
-                          type: data.type,
-                          room_id: data.room_id,
-                          room_name: data.name,
-                          successUrl: `${window.location.origin}/success?orderId=${paymentData?.orderId}&amount=${paymentData?.totalAmount}&type=${data.type}&room_id=${data.room_id}&board_id=${data.board_id}&room_name=${encodeURIComponent(data.name)}`,
-                          failUrl: "/fail",
-                          return_to: null
-                        },
-                      });
-                    }}
-                  >
-                    결제하기
-                  </button>
-                </>
+                  {!isMine && (
+                    <div className="payment-request-buttons">
+                      <button
+                        onClick={() => {
+                          navigate(`/board/deal/${data.board_id}`, {
+                            state: { from: 'chat' }
+                          });
+                        }}
+                        className="detail-btn"
+                      >
+                        상품 상세 보기
+                      </button>
+                      <button
+                        onClick={() => {
+                          navigate("/checkout", {
+                            state: {
+                              board_id: data.board_id,
+                              type: data.type,
+                              room_id: data.room_id,
+                              room_name: data.name,
+                              successUrl: `${window.location.origin}/success?orderId=${paymentData?.orderId}&amount=${paymentData?.totalAmount}&type=${data.type}&room_id=${data.room_id}&board_id=${data.board_id}&room_name=${encodeURIComponent(data.name)}`,
+                              failUrl: "/fail",
+                              return_to: null
+                            },
+                          });
+                        }}
+                        className="pay-btn"
+                      >
+                        결제하기
+                      </button>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           </div>
@@ -487,6 +527,45 @@ export default function ChatRoom() {
           </div>
         );
 
+      case "COMPLETE_PAYMENT":
+        let completePaymentData;
+        try {
+          completePaymentData = msg.content ? JSON.parse(msg.content) : null;
+        } catch (error) {
+          completePaymentData = null;
+        }
+        // Determine position based on whether the current user is the author of the board
+        const displayOnRight = !isAuthor; // If current user is NOT the author (i.e., the buyer), display on the right
+        return (
+          <div key={index} className={`message-wrapper ${displayOnRight ? "me" : "other"}`}> {/* Apply me/other class based on displayOnRight */}
+            <div className={`payment-complete-card ${displayOnRight ? "me" : "other"}`}> {/* Apply me/other class to the card too */}
+              <div className="payment-complete-header">
+                <h3>결제가 완료되었습니다</h3>
+              </div>
+              {completePaymentData && (
+                <div className="payment-complete-content">
+                  <div className="payment-info-item">
+                    <span className="label">주문번호</span>
+                    <span className="value">{completePaymentData.orderId}</span>
+                  </div>
+                  <div className="payment-info-item">
+                    <span className="label">결제금액</span>
+                    <span className="value">{Number(completePaymentData.totalAmount).toLocaleString()}원</span>
+                  </div>
+                  <div className="payment-info-item">
+                    <span className="label">결제수단</span>
+                    <span className="value">{completePaymentData.method || '카드'}</span>
+                  </div>
+                  <div className="payment-info-item">
+                    <span className="label">승인일시</span>
+                    <span className="value">{completePaymentData.approvedAt ? new Date(completePaymentData.approvedAt).toLocaleString() : '-'}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+
       case "MAP":
         return (
           <div key={index} className="map-wrapper">
@@ -505,6 +584,58 @@ export default function ChatRoom() {
           </div>
         );
 
+      case "COMPLETE_REFUND":
+        let completeRefundData;
+        try {
+          console.log('Received refund message content:', msg.content);
+          if (typeof msg.content === 'string' && msg.content.startsWith('{')) {
+            completeRefundData = JSON.parse(msg.content);
+          } else {
+            completeRefundData = {
+              message: msg.content
+            };
+          }
+          console.log('Parsed refund data:', completeRefundData);
+        } catch (error) {
+          console.error('Error parsing refund data:', error);
+          completeRefundData = {
+            message: msg.content
+          };
+        }
+        return (
+          <div key={index} className="system-message">
+            <div style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              marginTop: "20px",
+              marginBottom: "20px",
+            }}>
+              <svg width="60" height="60" viewBox="0 0 100 100" fill="none">
+                <circle cx="50" cy="50" r="45" fill="#5580e6" />
+                <path d="M30 52L45 67L70 42" stroke="white" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <h2 style={{ marginTop: "15px", color: "#5580e6" }}>{completeRefundData.message}</h2>
+              {completeRefundData.orderId && (
+                <div style={{
+                  backgroundColor: "white",
+                  borderRadius: "8px",
+                  padding: "15px",
+                  marginTop: "15px",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                  width: "80%",
+                  maxWidth: "300px"
+                }}>
+                  <p style={{ margin: "5px 0", fontSize: "14px" }}>{`환불번호: ${completeRefundData.orderId || '-'}`}</p>
+                  <p style={{ margin: "5px 0", fontSize: "14px" }}>{`환불금액: ${Number(completeRefundData.totalAmount || 0).toLocaleString()}원`}</p>
+                  <p style={{ margin: "5px 0", fontSize: "14px" }}>{`환불수단: ${completeRefundData.method || '-'}`}</p>
+                  <p style={{ margin: "5px 0", fontSize: "14px" }}>{`환불일시: ${completeRefundData.approvedAt ? new Date(completeRefundData.approvedAt).toLocaleString() : '-'}`}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+
       default:
         return null;
     }
@@ -518,22 +649,18 @@ export default function ChatRoom() {
           <button onClick={handleMap} className="pay-btn">
             위치 공유
           </button>
-          {!isAuthor && (
+          {!isAuthor && data.type === 'RENTAL' && data.isBuyer && (
             <button onClick={handlePurchaseConfirm} className="pay-btn">
               구매확정
             </button>
           )}
-          {isAuthor && (
-            <>
-              <button onClick={handlePay} className="pay-btn">
-                결제 요청
-              </button>
-              {data.type === 'RENTAL' && (
-                <button onClick={handleRefund} className="pay-btn">
-                  환불 요청
-                </button>
-              )}
-            </>
+          <button onClick={handlePay} className="pay-btn">
+            결제 요청
+          </button>
+          {isAuthor && data.type === 'RENTAL' && (
+            <button onClick={handleRefund} className="pay-btn">
+              환불 요청
+            </button>
           )}
         </span>
       </div>

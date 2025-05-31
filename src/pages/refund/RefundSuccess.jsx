@@ -1,5 +1,7 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import SockJS from "sockjs-client";
+import { Client } from "@stomp/stompjs";
 
 function formatDate(dateString) {
   if (!dateString) return "";
@@ -24,6 +26,71 @@ export default function RefundSuccess() {
     return null;
   }
 
+  const handleReturnToChat = async () => {
+    try {
+      // WebSocket 연결 및 메시지 전송
+      const socket = new SockJS("http://localhost:8080/ws");
+      const client = new Client({
+        webSocketFactory: () => socket,
+        onConnect: () => {
+          const now = new Date();
+          const kstOffset = now.getTime() + 9 * 60 * 60 * 1000;
+          const kstDate = new Date(kstOffset);
+          const created_at = kstDate.toISOString().slice(0, 19);
+
+          const messageContent = {
+            message: "환불이 완료되었습니다.",
+            orderId: refundInfo.orderId,
+            totalAmount: refundInfo.cancelAmount,
+            method: refundInfo.method || '카드',
+            approvedAt: refundInfo.refundedAt || now.toISOString()
+          };
+
+          console.log('Sending refund message:', messageContent);
+
+          client.publish({
+            destination: `/app/chat/${refundInfo.room_id}`,
+            body: JSON.stringify({
+              type: "COMPLETE_REFUND",
+              author_uuid: localStorage.getItem("uuid"),
+              content: JSON.stringify(messageContent),
+              created_at: created_at,
+              room_id: refundInfo.room_id,
+            })
+          });
+
+          // 메시지 전송 후 채팅방으로 이동
+          navigate(`/chat/${refundInfo.room_id}`, {
+            state: {
+              room_id: refundInfo.room_id,
+              name: refundInfo.room_name,
+              board_id: refundInfo.board_id,
+              type: refundInfo.type,
+              orderId: refundInfo.orderId
+            }
+          });
+
+          // 연결 종료
+          client.deactivate();
+        }
+      });
+
+      client.activate();
+    } catch (error) {
+      console.error("메시지 전송 실패:", error);
+      // 에러가 발생해도 채팅방으로 이동
+      navigate(`/chat/${refundInfo.room_id}`, {
+        state: {
+          room_id: refundInfo.room_id,
+          name: refundInfo.room_name,
+          board_id: refundInfo.board_id,
+          type: refundInfo.type,
+          orderId: refundInfo.orderId
+        }
+      });
+    }
+  };
+
   return (
     <div className="result wrapper" style={{ flexDirection: "column" }}>
       <div
@@ -46,6 +113,23 @@ export default function RefundSuccess() {
           <p>{`환불일시: ${formatDate(refundInfo?.refundedAt)}`}</p>
         </div>
       </div>
+      <button
+        onClick={handleReturnToChat}
+        style={{
+          marginTop: "20px",
+          padding: "10px 20px",
+          backgroundColor: "#ffca1a",
+          color: "#4a4a3c",
+          border: "none",
+          borderRadius: "8px",
+          cursor: "pointer",
+          fontSize: "16px",
+          fontWeight: "bold",
+          transition: "all 0.3s ease",
+        }}
+      >
+        채팅방으로 돌아가기
+      </button>
     </div>
   );
 } 
