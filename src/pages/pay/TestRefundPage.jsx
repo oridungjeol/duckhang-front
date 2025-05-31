@@ -1,13 +1,17 @@
+import { useLocation } from "react-router-dom";
 import RefundButton from "../../components/RefundButton";
 
 export default function TestRefundPage() {
-  // 테스트용 orderId 직접 하드코딩 (실제 값으로 교체하세요)
-  const testOrderId = "202505261400119763732";
+  const location = useLocation();
+  const { orderId } = location.state || {};
 
   return (
     <div style={{ padding: "2rem" }}>
-   
-      <RefundButton orderId={testOrderId} />
+      {orderId ? (
+        <RefundButton orderId={orderId} />
+      ) : (
+        <div>주문 정보를 찾을 수 없습니다.</div>
+      )}
     </div>
   );
 }

@@ -9,19 +9,39 @@ import "./chatroom.css";
 export default function ChatRoom() {
   const location = useLocation();
   const data = location.state;
-
   const uuid = localStorage.getItem("uuid");
-
   const navigate = useNavigate();
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [image, setImage] = useState(null);
+  const [isAuthor, setIsAuthor] = useState(false);
 
   const stompClientRef = useRef(null);
   const isConnected = useRef(false);
   const scrollRef = useRef();
   const pageRef = useRef(0);
+
+  /**
+   * 글 작성자 정보 가져오기
+   */
+  const fetchAuthorInfo = async () => {
+    try {
+      console.log("게시글 정보 요청 시작:", data.board_id);
+      const response = await fetch(`http://localhost/api/board/${data.type}/${data.board_id}`, {
+        credentials: 'include'
+      });
+      console.log("API 응답 상태:", response.status);
+      const boardData = await response.json();
+    
+      const isAuthorCheck = boardData.author_uuid === uuid;
+  
+      setIsAuthor(isAuthorCheck);
+
+    } catch (error) {
+      console.error("글 작성자 정보 가져오기 실패:", error);
+    }
+  };
 
   /**
    * 이전 메시지 데이터 로드
@@ -30,7 +50,7 @@ export default function ChatRoom() {
   useEffect(() => {
     if (isConnected.current) return;
 
-    console.log(data);
+    fetchAuthorInfo();
 
     const socket = new SockJS("http://localhost:8080/ws");
     let stompClient = Stomp.over(socket);
@@ -46,6 +66,15 @@ export default function ChatRoom() {
 
       stompClient.subscribe(`/topic/chat/${data.room_id}`, function (message) {
         const data = JSON.parse(message.body);
+      
+        if (data.type === "PAY") {
+          try {
+            const paymentData = JSON.parse(data.content);
+           
+          } catch (error) {
+            console.error("Payment data parsing error:", error);
+          }
+        }
         setMessages((prev) => [...prev, data]);
       });
     });
@@ -168,27 +197,54 @@ export default function ChatRoom() {
   /**
    * 결제 메시지 핸들러
    */
-  const handlePay = () => {
-    const stompClient = stompClientRef.current;
-    if (stompClient?.connected) {
-      const now = new Date();
-      const kstOffset = now.getTime() + 9 * 60 * 60 * 1000; // +9시간
-      const kstDate = new Date(kstOffset);
-      const created_at = kstDate.toISOString().slice(0, 19);
+  const handlePay = async () => {
+    try {
+      // 게시글 정보 가져오기
+      const response = await fetch(`http://localhost/api/board/${data.type}/${data.board_id}`, {
+        credentials: 'include'
+      });
+      const boardData = await response.json();  
 
-      stompClient.send(
-        `/app/chat/${data.room_id}`,
-        {},
-        JSON.stringify({
+      // 렌탈 게시글인 경우 deposit 값 확인
+      const deposit = data.type === 'RENTAL' ? (boardData.deposit || 0) : 0;
+   
+
+      const paymentInfo = {
+        price: boardData.price,
+        deposit: deposit,
+        totalAmount: data.type === 'RENTAL' ? boardData.price + deposit : boardData.price,
+        actualPrice: boardData.price,  // 실제 결제금액 (보증금 제외)
+        boardId: data.board_id,
+        type: data.type
+      };
+      
+
+      const stompClient = stompClientRef.current;
+      if (stompClient?.connected) {
+        const now = new Date();
+        const kstOffset = now.getTime() + 9 * 60 * 60 * 1000; // +9시간
+        const kstDate = new Date(kstOffset);
+        const created_at = kstDate.toISOString().slice(0, 19);
+
+        const message = {
           type: "PAY",
           author_uuid: uuid,
-          content: "",
+          content: JSON.stringify(paymentInfo),
           created_at: created_at,
           room_id: data.room_id,
-        })
-      );
-    } else {
-      console.log("연결이 되지 않았습니다.");
+        };
+        
+
+        stompClient.send(
+          `/app/chat/${data.room_id}`,
+          {},
+          JSON.stringify(message)
+        );
+      } else {
+        console.log("연결이 되지 않았습니다.");
+      }
+    } catch (error) {
+      console.error("결제 정보 가져오기 실패:", error);
     }
   };
 
@@ -217,6 +273,80 @@ export default function ChatRoom() {
     } else {
       console.log("연결이 되지 않았습니다.");
     }
+  };
+
+  /**
+   * 환불 메시지 핸들러
+   */
+  const handleRefund = async () => {
+    try {
+      // 결제 정보 가져오기
+      const paymentResponse = await fetch(`http://localhost/api/payment/${data.board_id}`, {
+        credentials: 'include'
+      });
+      const paymentData = await paymentResponse.json();
+
+      if (!paymentData.orderId) {
+        alert("결제 정보를 찾을 수 없습니다.");
+        return;
+      }
+
+      // 게시글 정보 가져오기
+      const boardResponse = await fetch(`http://localhost/api/board/${data.type}/${data.board_id}`, {
+        credentials: 'include'
+      });
+      const boardData = await boardResponse.json();  
+
+      const refundInfo = {
+        price: boardData.price,
+        deposit: data.type === 'RENTAL' ? (boardData.deposit || 0) : 0,
+        totalAmount: data.type === 'RENTAL' ? boardData.price + (boardData.deposit || 0) : boardData.price,
+        boardId: data.board_id,
+        type: data.type,
+        orderId: paymentData.orderId
+      };
+
+      const stompClient = stompClientRef.current;
+      if (stompClient?.connected) {
+        const now = new Date();
+        const kstOffset = now.getTime() + 9 * 60 * 60 * 1000; // +9시간
+        const kstDate = new Date(kstOffset);
+        const created_at = kstDate.toISOString().slice(0, 19);
+
+        const message = {
+          type: "REFUND",
+          author_uuid: uuid,
+          content: JSON.stringify(refundInfo),
+          created_at: created_at,
+          room_id: data.room_id,
+        };
+
+        stompClient.send(
+          `/app/chat/${data.room_id}`,
+          {},
+          JSON.stringify(message)
+        );
+      } else {
+        console.log("연결이 되지 않았습니다.");
+      }
+    } catch (error) {
+      console.error("환불 요청 실패:", error);
+      alert("환불 요청 중 오류가 발생했습니다.");
+    }
+  };
+
+  /**
+   * 구매확정 핸들러
+   */
+  const handlePurchaseConfirm = () => {
+    navigate("/test-refund", {
+      state: {
+        board_id: data.board_id,
+        room_id: data.room_id,
+        room_name: data.name,
+        orderId: data.orderId
+      }
+    });
   };
 
   const addImage = (e) => {
@@ -269,26 +399,87 @@ export default function ChatRoom() {
         );
 
       case "PAY":
+        let paymentData;
+        try {
+          paymentData = msg.content ? JSON.parse(msg.content) : null;
+        } catch (error) {
+          paymentData = null;
+        }
         return (
-          <div
-            key={index}
-            className={`message-wrapper ${isMine ? "me" : "other"}`}
-          >
+          <div key={index} className={`message-wrapper ${isMine ? "me" : "other"}`}>
             <div className={`message ${isMine ? "me" : "other"}`}>
               {isMine ? (
                 <div>결제 요청을 보냈어요</div>
               ) : (
                 <>
                   <div>결제 요청을 받았어요</div>
+                  {paymentData && (
+                    <div className="payment-request-info">
+                      {data.type === 'RENTAL' ? (
+                        <>
+                          <p>결제 금액: {paymentData.actualPrice ? paymentData.actualPrice.toLocaleString() : (paymentData.price || 0).toLocaleString()}원</p>
+                          {paymentData.deposit > 0 && (
+                            <p>보증금: {paymentData.deposit.toLocaleString()}원</p>
+                          )}
+                          <p>총 결제 금액: {paymentData.totalAmount ? paymentData.totalAmount.toLocaleString() : 0}원</p>
+                        </>
+                      ) : (
+                        <p>결제 금액: {paymentData.price ? paymentData.price.toLocaleString() : 0}원</p>
+                      )}
+                    </div>
+                  )}
                   <button
                     onClick={() => {
                       navigate("/checkout", {
-                        state: { board_id: data.board_id, type: data.type },
+                        state: {
+                          board_id: data.board_id,
+                          type: data.type,
+                          room_id: data.room_id,
+                          room_name: data.name,
+                          successUrl: `${window.location.origin}/success?orderId=${paymentData?.orderId}&amount=${paymentData?.totalAmount}&type=${data.type}&room_id=${data.room_id}&board_id=${data.board_id}&room_name=${encodeURIComponent(data.name)}`,
+                          failUrl: "/fail",
+                          return_to: null
+                        },
                       });
                     }}
                   >
-                    {" "}
-                    결제하기{" "}
+                    결제하기
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        );
+
+      case "REFUND":
+        let refundData;
+        try {
+          refundData = msg.content ? JSON.parse(msg.content) : null;
+        } catch (error) {
+          refundData = null;
+        }
+        return (
+          <div key={index} className={`message-wrapper ${isMine ? "me" : "other"}`}>
+            <div className={`message ${isMine ? "me" : "other"}`}>
+              {isMine ? (
+                <div>환불 요청을 보냈어요</div>
+              ) : (
+                <>
+                  <div>환불 요청을 받았어요</div>
+                  <button
+                    onClick={() => {
+                      navigate("/test-refund", {
+                        state: {
+                          board_id: data.board_id,
+                          room_id: data.room_id,
+                          room_name: data.name,
+                          orderId: refundData?.orderId,
+                          type: data.type
+                        }
+                      });
+                    }}
+                  >
+                    환불하기
                   </button>
                 </>
               )}
@@ -327,9 +518,23 @@ export default function ChatRoom() {
           <button onClick={handleMap} className="pay-btn">
             위치 공유
           </button>
-          <button onClick={handlePay} className="pay-btn">
-            결제 요청
-          </button>
+          {!isAuthor && (
+            <button onClick={handlePurchaseConfirm} className="pay-btn">
+              구매확정
+            </button>
+          )}
+          {isAuthor && (
+            <>
+              <button onClick={handlePay} className="pay-btn">
+                결제 요청
+              </button>
+              {data.type === 'RENTAL' && (
+                <button onClick={handleRefund} className="pay-btn">
+                  환불 요청
+                </button>
+              )}
+            </>
+          )}
         </span>
       </div>
       <div className="chat-box" ref={scrollRef}>
