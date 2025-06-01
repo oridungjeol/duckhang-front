@@ -8,6 +8,10 @@ import "./chatroom.css";
 
 export default function ChatRoom() {
   const location = useLocation();
+
+  const data = location.state;
+  const uuid = localStorage.getItem("uuid");
+
   const navigate = useNavigate();
   const uuid = localStorage.getItem("uuid");
 
@@ -15,6 +19,7 @@ export default function ChatRoom() {
   const [input, setInput] = useState("");
   const [image, setImage] = useState(null);
   const [isAuthor, setIsAuthor] = useState(false);
+
   const [isBuyer, setIsBuyer] = useState(false);
 
   const stompClientRef = useRef(null);
@@ -96,6 +101,27 @@ export default function ChatRoom() {
   };
 
   /**
+   * 글 작성자 정보 가져오기
+   */
+  const fetchAuthorInfo = async () => {
+    try {
+      console.log("게시글 정보 요청 시작:", data.board_id);
+      const response = await fetch(`http://localhost/api/board/${data.type}/${data.board_id}`, {
+        credentials: 'include'
+      });
+      console.log("API 응답 상태:", response.status);
+      const boardData = await response.json();
+    
+      const isAuthorCheck = boardData.author_uuid === uuid;
+  
+      setIsAuthor(isAuthorCheck);
+
+    } catch (error) {
+      console.error("글 작성자 정보 가져오기 실패:", error);
+    }
+  };
+
+  /**
    * 이전 메시지 데이터 로드
    * stomp 연결
    */
@@ -105,6 +131,7 @@ export default function ChatRoom() {
     fetchAuthorInfo();
 
     const socket = new SockJS("http://localhost:8080/ws");
+
     const client = new Client({
       webSocketFactory: () => socket,
       connectHeaders: {
@@ -144,6 +171,7 @@ export default function ChatRoom() {
         console.log("Disconnected");
         isConnected.current = false;
       }
+
     });
 
     stompClientRef.current = client;
@@ -269,11 +297,15 @@ export default function ChatRoom() {
    */
   const handlePay = async () => {
     try {
+
+      // 게시글 정보 가져오기
+
       const response = await fetch(`http://localhost/api/board/${data.type}/${data.board_id}`, {
         credentials: 'include'
       });
       const boardData = await response.json();  
 
+      // 렌탈 게시글인 경우 deposit 값 확인
       const deposit = data.type === 'RENTAL' ? (boardData.deposit || 0) : 0;
    
 
@@ -291,6 +323,7 @@ export default function ChatRoom() {
       if (client?.connected) {
         const now = new Date();
         const kstOffset = now.getTime() + 9 * 60 * 60 * 1000;
+
         const kstDate = new Date(kstOffset);
         const created_at = kstDate.toISOString().slice(0, 19);
 
@@ -302,11 +335,11 @@ export default function ChatRoom() {
           room_id: data.room_id,
         };
         
-
         client.publish({
           destination: `/app/chat/${data.room_id}`,
           body: JSON.stringify(message)
         });
+
       } else {
         console.log("연결이 되지 않았습니다.");
       }
@@ -346,6 +379,8 @@ export default function ChatRoom() {
    */
   const handleRefund = async () => {
     try {
+
+      // 결제 정보 가져오기
       const paymentResponse = await fetch(`http://localhost/api/payment/${data.board_id}`, {
         credentials: 'include'
       });
@@ -355,6 +390,9 @@ export default function ChatRoom() {
         alert("결제 정보를 찾을 수 없습니다.");
         return;
       }
+
+
+      // 게시글 정보 가져오기
 
       const boardResponse = await fetch(`http://localhost/api/board/${data.type}/${data.board_id}`, {
         credentials: 'include'
@@ -374,6 +412,7 @@ export default function ChatRoom() {
       if (client?.connected) {
         const now = new Date();
         const kstOffset = now.getTime() + 9 * 60 * 60 * 1000;
+
         const kstDate = new Date(kstOffset);
         const created_at = kstDate.toISOString().slice(0, 19);
 
@@ -389,6 +428,7 @@ export default function ChatRoom() {
           destination: `/app/chat/${data.room_id}`,
           body: JSON.stringify(message)
         });
+
       } else {
         console.log("연결이 되지 않았습니다.");
       }
@@ -568,6 +608,7 @@ export default function ChatRoom() {
         }
         return (
           <div key={index} className={`message-wrapper ${isMine ? "me" : "other"}`}>
+
             <div className={`message ${isMine ? "me" : "other"}`}>
               {isMine ? (
                 <div>환불 요청을 보냈어요</div>
@@ -576,6 +617,7 @@ export default function ChatRoom() {
                   <div>환불 요청을 받았어요</div>
                   <button
                     onClick={() => {
+
                       navigate("/test-refund", {
                         state: {
                           board_id: data.board_id,
@@ -733,6 +775,7 @@ export default function ChatRoom() {
               >
                 환불 요청
               </button>
+
             </>
           )}
         </span>

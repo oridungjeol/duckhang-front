@@ -220,6 +220,7 @@ export function Success() {
 
         <div className="box_section">
           <h1>결제를 완료했어요</h1>
+
         </div>
         
         <button
@@ -269,6 +270,7 @@ export function Success() {
           }
         `}
       </style>
+
     </div>
   );
 }

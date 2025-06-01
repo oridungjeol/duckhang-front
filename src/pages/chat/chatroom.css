@@ -396,6 +396,7 @@
    color: #4a4a3c;
    font-weight: 500;
    font-size: 0.85rem;
+
 }
 
 .refund-accept-btn {
@@ -415,6 +416,7 @@
   background-color: #45a049;
   transform: translateY(-2px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
 }
 
 .payment-request-info {
@@ -725,4 +727,5 @@
 
 .refund-request-card.me .refund-request-buttons .pay-btn:hover {
    background-color: #333; /* Darker background on hover for sender's button */
+
 }
