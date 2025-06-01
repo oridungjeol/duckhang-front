@@ -29,7 +29,9 @@ export default function Chat() {
   const enterChatRoom = async (data) => {
     try {
       // 게시글 정보를 가져와서 보증금 정보를 포함
+
       const response = await fetch(`http://localhost/api/board/${data.type}/${data.board_id}`, {
+
         credentials: 'include'
       });
       const boardData = await response.json();
@@ -51,12 +53,15 @@ export default function Chat() {
           console.error("결제 정보 가져오기 실패:", paymentError);
       }
 
+
       navigate(`/chat/${data.room_id}`, { 
         state: { 
           ...data,
           orderId: paymentData.orderId,
+
           deposit: boardData.deposit,
           isBuyer: isBuyer
+
         } 
       });
     } catch (error) {

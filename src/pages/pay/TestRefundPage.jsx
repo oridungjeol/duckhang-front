@@ -19,6 +19,7 @@ export default function TestRefundPage() {
         board_id={board_id}
         type={type}
       />
+
     </div>
   );
 }

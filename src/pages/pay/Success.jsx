@@ -122,7 +122,7 @@ export function Success() {
       try {
         const response = await fetch("http://localhost/api/payment/confirm", {
           method: "POST",
-          credentials: 'include',
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
@@ -134,7 +134,11 @@ export function Success() {
         if (!response.ok) {
           const errorMessage = json.message || "결제 확인 실패";
           setError(errorMessage);
-          navigate(`/fail?message=${encodeURIComponent(errorMessage)}&code=${json.code || 'UNKNOWN'}`);
+          navigate(
+            `/fail?message=${encodeURIComponent(errorMessage)}&code=${
+              json.code || "UNKNOWN"
+            }`
+          );
           return;
         }
 
@@ -143,7 +147,9 @@ export function Success() {
         const errorMessage = "네트워크 오류가 발생했습니다.";
         setError(errorMessage);
         console.error("결제 확인 중 오류 발생:", err);
-        navigate(`/fail?message=${encodeURIComponent(errorMessage)}&code=NETWORK_ERROR`);
+        navigate(
+          `/fail?message=${encodeURIComponent(errorMessage)}&code=NETWORK_ERROR`
+        );
       } finally {
         setIsLoading(false);
       }
@@ -202,12 +208,19 @@ export function Success() {
         
         <svg width="85" height="85" viewBox="0 0 100 100" fill="none">
           <circle cx="50" cy="50" r="45" fill="#5580e6" />
-          <path d="M30 52L45 67L70 42" stroke="white" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />
+          <path
+            d="M30 52L45 67L70 42"
+            stroke="white"
+            strokeWidth="7"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
         
 
         <div className="box_section">
           <h1>결제를 완료했어요</h1>
+
         </div>
         
         <button
@@ -257,6 +270,7 @@ export function Success() {
           }
         `}
       </style>
+
     </div>
   );
 }
