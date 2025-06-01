@@ -8,18 +8,14 @@ import "./chatroom.css";
 
 export default function ChatRoom() {
   const location = useLocation();
-
-  const data = location.state;
-  const uuid = localStorage.getItem("uuid");
-
   const navigate = useNavigate();
+  const data = location.state || {};
   const uuid = localStorage.getItem("uuid");
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [image, setImage] = useState(null);
   const [isAuthor, setIsAuthor] = useState(false);
-
   const [isBuyer, setIsBuyer] = useState(false);
 
   const stompClientRef = useRef(null);
@@ -34,8 +30,6 @@ export default function ChatRoom() {
       return;
     }
   }, [location.state, navigate]);
-
-  const data = location.state || {};
 
   /**
    * 글 작성자 정보 가져오기
@@ -94,27 +88,6 @@ export default function ChatRoom() {
       } else {
         setIsBuyer(false);
       }
-
-    } catch (error) {
-      console.error("글 작성자 정보 가져오기 실패:", error);
-    }
-  };
-
-  /**
-   * 글 작성자 정보 가져오기
-   */
-  const fetchAuthorInfo = async () => {
-    try {
-      console.log("게시글 정보 요청 시작:", data.board_id);
-      const response = await fetch(`http://localhost/api/board/${data.type}/${data.board_id}`, {
-        credentials: 'include'
-      });
-      console.log("API 응답 상태:", response.status);
-      const boardData = await response.json();
-    
-      const isAuthorCheck = boardData.author_uuid === uuid;
-  
-      setIsAuthor(isAuthorCheck);
 
     } catch (error) {
       console.error("글 작성자 정보 가져오기 실패:", error);
