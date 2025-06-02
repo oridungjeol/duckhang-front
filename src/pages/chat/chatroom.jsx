@@ -33,6 +33,9 @@ export default function ChatRoom() {
   const [refundData, setRefundData] = useState(null);
   const [openPaymentDetail, setOpenPaymentDetail] = useState({});
   const [openRefundDetail, setOpenRefundDetail] = useState({});
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const messageRefs = useRef({});
 
   const stompClientRef = useRef(null);
   const isConnected = useRef(false);
@@ -644,6 +647,39 @@ export default function ChatRoom() {
     });
   };
 
+  const handleSearch = () => {
+    if (!searchKeyword.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    const results = messages.filter(msg => {
+      if (msg.type === "TEXT") {
+        return msg.content.toLowerCase().includes(searchKeyword.toLowerCase());
+      }
+      return false;
+    });
+
+    setSearchResults(results);
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
+
+  const scrollToMessage = (index) => {
+    const messageElements = document.querySelectorAll('.message-wrapper');
+    if (messageElements[index]) {
+      messageElements[index].scrollIntoView({ behavior: "smooth", block: "center" });
+      messageElements[index].style.backgroundColor = "#ffeb3b";
+      setTimeout(() => {
+        messageElements[index].style.backgroundColor = "";
+      }, 2000);
+    }
+  };
+
   /**
    * 타입별 메시지 UI 렌더링
    * @param {*} msg
@@ -652,24 +688,24 @@ export default function ChatRoom() {
    */
   const renderMessage = (msg, index) => {
     const isMine = msg.author_uuid === uuid;
+    const messageId = `message-${index}`;
 
     switch (msg.type) {
       case "SYSTEM":
         return (
-          <div key={index} className="system-message">
+          <div key={index} className="system-message" ref={el => messageRefs.current[messageId] = el}>
             {msg.content}
           </div>
         );
 
       case "WARNNING":
         return (
-          <div>
+          <div ref={el => messageRefs.current[messageId] = el}>
             {!isMine && (
               <div key={index} className="system-message">
                 {msg.content === "EXTERNAL" && (
                   <div key={index} className="warnning-message">
-                    거래를 외부에서 유도하면 사기 가능성이 있어요. 주의해
-                    주세요.
+                    거래를 외부에서 유도하면 사기 가능성이 있어요. 주의해 주세요.
                   </div>
                 )}
                 {msg.content === "DEPOSIT" && (
@@ -690,14 +726,14 @@ export default function ChatRoom() {
         );
 
       case "TEXT":
-        return <TextMessage key={index} msg={msg} isMine={isMine} />;
+        return <TextMessage key={index} msg={msg} isMine={isMine} ref={el => messageRefs.current[messageId] = el} />;
 
       case "IMAGE":
-        return <ImageMessage key={index} msg={msg} isMine={isMine} />;
+        return <ImageMessage key={index} msg={msg} isMine={isMine} ref={el => messageRefs.current[messageId] = el} />;
 
       case "PAY":
         return (
-          <PaymentMessage key={index} msg={msg} isMine={isMine} data={data} />
+          <PaymentMessage key={index} msg={msg} isMine={isMine} data={data} ref={el => messageRefs.current[messageId] = el} />
         );
 
       case "REFUND":
@@ -708,6 +744,7 @@ export default function ChatRoom() {
             isMine={isMine}
             data={data}
             onRefund={handleRefund}
+            ref={el => messageRefs.current[messageId] = el}
           />
         );
 
@@ -719,6 +756,7 @@ export default function ChatRoom() {
             isMine={isMine}
             openPaymentDetail={openPaymentDetail[index]}
             togglePaymentDetail={() => togglePaymentDetail(index)}
+            ref={el => messageRefs.current[messageId] = el}
           />
         );
 
@@ -729,12 +767,13 @@ export default function ChatRoom() {
             msg={msg}
             openRefundDetail={openRefundDetail[index]}
             toggleRefundDetail={() => toggleRefundDetail(index)}
+            ref={el => messageRefs.current[messageId] = el}
           />
         );
 
       case "MAP":
         return (
-          <div key={index} className="map-wrapper">
+          <div key={index} className="map-wrapper" ref={el => messageRefs.current[messageId] = el}>
             <div className="map">
               <div>지도로 상대방의 위치를 확인하세요</div>
               <button
@@ -765,6 +804,39 @@ export default function ChatRoom() {
         handlePay={handlePay}
         handleRefundRequest={handleRefundRequest}
       />
+      <div className="search-box">
+        <input
+          type="text"
+          value={searchKeyword}
+          onChange={(e) => setSearchKeyword(e.target.value)}
+          onKeyPress={handleKeyPress}
+          placeholder="채팅 내용 검색..."
+          className="search-input"
+        />
+        <button onClick={handleSearch} className="search-button">
+          검색
+        </button>
+      </div>
+      {searchResults.length > 0 && (
+        <div className="search-results">
+          <h3>검색 결과 ({searchResults.length})</h3>
+          {searchResults.map((msg, index) => {
+            const messageIndex = messages.findIndex(m => m === msg);
+            return (
+              <div 
+                key={`search-${index}`} 
+                className="search-result-item"
+                onClick={() => scrollToMessage(messageIndex)}
+              >
+                <span className="search-result-time">
+                  {new Date(msg.created_at).toLocaleString()}
+                </span>
+                <span className="search-result-content">{msg.content}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
       <div className="chat-box" ref={scrollRef}>
         <button className="load-more-btn" onClick={loadMoreMessageData}>
           이전 대화 더보기
