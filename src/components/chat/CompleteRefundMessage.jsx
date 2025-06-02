@@ -120,7 +120,7 @@ const CompleteRefundMessage = ({ msg, openRefundDetail, toggleRefundDetail }) =>
               maxHeight: openRefundDetail ? 500 : 0,
               overflow: "hidden",
               transition: "max-height 0.4s cubic-bezier(0.4,0,0.2,1)",
-              background: "#f8f9fa",
+              background: openRefundDetail ? "#e8f5e9" : "#fff",
               borderRadius: "10px",
               border: openRefundDetail ? "1.5px solid #81c784" : "none",
               boxShadow: openRefundDetail ? "0 2px 8px rgba(76,175,80,0.08)" : "none",
@@ -132,7 +132,7 @@ const CompleteRefundMessage = ({ msg, openRefundDetail, toggleRefundDetail }) =>
                 display: "flex",
                 justifyContent: "space-between",
                 padding: "6px 0",
-                borderBottom: "1px solid #e9ecef"
+                borderBottom: "1px solid #c8e6c9"
               }}>
                 <span style={{
                   fontWeight: '600',
@@ -148,7 +148,7 @@ const CompleteRefundMessage = ({ msg, openRefundDetail, toggleRefundDetail }) =>
                 display: "flex",
                 justifyContent: "space-between",
                 padding: "6px 0",
-                borderBottom: "1px solid #e9ecef"
+                borderBottom: "1px solid #c8e6c9"
               }}>
                 <span style={{
                   fontWeight: '600',
@@ -169,7 +169,7 @@ const CompleteRefundMessage = ({ msg, openRefundDetail, toggleRefundDetail }) =>
                 display: "flex",
                 justifyContent: "space-between",
                 padding: "6px 0",
-                borderBottom: "1px solid #e9ecef"
+                borderBottom: "1px solid #c8e6c9"
               }}>
                 <span style={{
                   fontWeight: '600',
