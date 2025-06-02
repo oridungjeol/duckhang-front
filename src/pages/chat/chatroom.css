@@ -164,6 +164,14 @@
   animation: fadeIn 0.5s ease-out;
 }
 
+.warnning-message {
+  text-align: center;
+  color: rgb(251, 55, 55);
+  font-size: 16px;
+  margin: 8px 0;
+  animation: fadeIn 0.5s ease-out;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;

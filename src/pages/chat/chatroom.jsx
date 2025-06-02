@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
 
-import { getChattingData, uploadImage } from "./hook";
+import { getcheckFraud, getChattingData, uploadImage } from "./hook";
 import "./chatroom.css";
 
 export default function ChatRoom() {
@@ -81,7 +81,6 @@ export default function ChatRoom() {
       });
     });
 
-    otherUserInfo();
     loadMessageData();
 
     return () => {
@@ -97,16 +96,6 @@ export default function ChatRoom() {
   useEffect(() => {
     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages]);
-
-  /**
-   * 상대방 user info 호출
-   */
-  const otherUserInfo = async () => {
-    console.log(data);
-    // if
-    // const user_info = await getOtherUserInfo();
-    // setMessages(user_info);
-  };
 
   /**
    * 이전 채팅 기록 50개를 호출
@@ -391,6 +380,34 @@ export default function ChatRoom() {
         return (
           <div key={index} className="system-message">
             {msg.content}
+          </div>
+        );
+
+      case "WARNNING":
+        return (
+          <div>
+            {!isMine && (
+              <div key={index} className="system-message">
+                {msg.content === "EXTERNAL" && (
+                  <div key={index} className="warnning-message">
+                    거래를 외부에서 유도하면 사기 가능성이 있어요. 주의해
+                    주세요.
+                  </div>
+                )}
+                {msg.content === "DEPOSIT" && (
+                  <div key={index} className="warnning-message">
+                    안전을 위해 서비스 내 결제 기능을 이용하는 것을 권장해요.
+                    <br />
+                    선입금 요구에 주의하세요.
+                  </div>
+                )}
+                {msg.content === "PERSONAL_INFO" && (
+                  <div key={index} className="warnning-message">
+                    개인정보를 요구하면 사기일 가능성이 높아요. 주의해주세요.
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         );
 
