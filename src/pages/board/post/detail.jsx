@@ -4,6 +4,8 @@ import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import Cookies from 'js-cookie';
 import './detail.css';
+import SockJS from 'sockjs-client';
+import { Client } from '@stomp/stompjs';
 
 // 채팅방 생성 함수 (예시)
 // 실제로는 별도 api/chat.js 파일 등에 정의되어야 함
@@ -21,6 +23,7 @@ export default function BoardDetail() {
   const { type, board_id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const fromChat = location.state?.from === 'chat';
 
   const [board, setBoard] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -95,16 +98,21 @@ export default function BoardDetail() {
           
           // JWT 토큰에서 현재 사용자의 UUID 가져오기
           const token = Cookies.get('accessToken');
+          console.log('Token:', token);
           if (token) {
             try {
               const decoded = jwtDecode(token);
               const currentUserUuid = decoded.sub;
+              console.log('Current User UUID:', currentUserUuid);
+              console.log('Author UUID:', response.data.author_uuid);
               setIsAuthor(currentUserUuid === response.data.author_uuid);
+              console.log('Is Author:', currentUserUuid === response.data.author_uuid);
             } catch (error) {
               console.error('JWT 디코딩 실패:', error);
               setIsAuthor(false);
             }
           } else {
+            console.log('No token found');
             setIsAuthor(false);
           }
           return;
@@ -129,6 +137,7 @@ export default function BoardDetail() {
         board.type,
         board.author_uuid
       );
+      
       navigate(`/chat/${info.room_id}`, { state: info });
     } catch (err) {
       console.error('채팅방 생성 오류:', err);
@@ -205,6 +214,11 @@ export default function BoardDetail() {
 
   return (
     <div className="board-detail-container">
+      {fromChat && (
+        <button className="back-btn" onClick={() => navigate(-1)}>
+          ←
+        </button>
+      )}
       <div className="board-detail-content">
         <div className="board-image">
           <img
@@ -259,14 +273,16 @@ export default function BoardDetail() {
         </div>
 
         <div className="board-actions">
-          {isAuthor && (
+          {isAuthor && !fromChat && (
             <button className="edit-btn" onClick={handleEdit}>
               수정하기
             </button>
           )}
-          <button className="chat-start-btn" onClick={createRoom}>
-            채팅 시작하기
-          </button>
+          {!fromChat && (
+            <button className="chat-start-btn" onClick={createRoom}>
+              채팅 시작하기
+            </button>
+          )}
         </div>
       </div>
     </div>
