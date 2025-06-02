@@ -20,6 +20,16 @@ export default function RefundSuccess() {
   console.log("RefundSuccess state:", location.state);
 
   const handleReturnToChat = () => {
+    console.log('handleReturnToChat called in RefundSuccess.jsx');
+    if (window.parent) {
+      const messageData = {
+        type: 'closeRefundModal',
+        refundInfo: refundInfo
+      };
+      console.log('Sending message to parent with refundInfo:', messageData);
+      window.parent.postMessage(messageData, window.location.origin);
+    }
+
     if (!room_id || !room_name || !board_id || !type) {
       console.error("Missing required data:", { room_id, room_name, board_id, type });
       return;

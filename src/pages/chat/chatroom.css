@@ -693,39 +693,173 @@
   transition: all 0.2s;
 }
 
-/* Specific button styling within refund request card (referencing pay-btn styles) */
-.refund-request-buttons .pay-btn {
-  background-color: #007bff; /* Example: Blue color for action */
-  color: white;
+.refund-request-card .payment-info-item .refund-amount {
+  color: #ff4d4d !important;
+  font-weight: bold !important;
 }
 
-.refund-request-buttons .pay-btn:hover {
-  background-color: #0056b3; /* Darker blue on hover */
+.payment-divider {
+  height: 1px;
+  background-color: #e0e0e0;
+  margin: 8px 0;
+  width: 100%;
 }
 
-/* Style for the button in the receiver's refund request card */
-.refund-request-card.other .refund-request-buttons .pay-btn {
-  background-color: #ffca1a; /* Yellow background */
-  color: #4a4a3c; /* Dark text */
+.total-amount .label,
+.total-amount .value {
+  font-weight: bold !important;
+  font-size: 0.95em;
 }
 
-.refund-request-card.other .refund-request-buttons .pay-btn:hover {
-  background-color: #fba337; /* Darker yellow on hover */
-  color: #ffffff; /* White text on hover */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
 }
 
-.refund-request-card.me .refund-request-header h3,
-.refund-request-card.me .refund-request-info p,
-.refund-request-card.me .refund-request-buttons .pay-btn {
-  color: #4a4a3c; /* Text color for sender's card */
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  animation: slideIn 0.3s ease-out;
 }
 
-.refund-request-card.me .refund-request-buttons .pay-btn {
-   background-color: #4a4a3c; /* Background color for sender's button */
-   color: #ffca1a; /* Text color for sender's button */
+.modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.refund-request-card.me .refund-request-buttons .pay-btn:hover {
-   background-color: #333; /* Darker background on hover for sender's button */
+.modal-header h2 {
+  margin: 0;
+  color: #4a4a3c;
+  font-size: 1.2rem;
+}
 
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #666;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.modal-close:hover {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.modal-body {
+  padding: 20px;
+  overflow: hidden;
+  flex: 1;
+}
+
+.refund-iframe {
+  width: 100%;
+  height: 500px;
+  border: none;
+  border-radius: 8px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.button {
+  background-color: #ffca1a;
+  color: #4a4a3c;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  margin-top: 10px;
+}
+
+.button:hover {
+  background-color: #fba337;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.button:disabled {
+  background-color: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.button:disabled:hover {
+  background-color: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  text-align: center;
+}
+
+.loading-container h2 {
+  color: #4a4a3c;
+  margin: 10px 0;
+  font-size: 1.2rem;
+}
+
+.loading-container p {
+  color: #666;
+  margin: 5px 0;
+  font-size: 0.9rem;
 }
