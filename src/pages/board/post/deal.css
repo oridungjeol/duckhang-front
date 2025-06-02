@@ -2,6 +2,41 @@
   background-color: #ffffff;
   border-radius: 12px;
   padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 200px); /* 상단 여백 고려한 높이 */
+}
+
+.deal-items {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 10px;
+  margin-right: -10px; /* 스크롤바 공간 확보 */
+}
+
+/* 스크롤바 스타일링 */
+.deal-items::-webkit-scrollbar {
+  width: 8px;
+}
+
+.deal-items::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.deal-items::-webkit-scrollbar-thumb {
+  background: #fba337;
+  border-radius: 4px;
+}
+
+.deal-items::-webkit-scrollbar-thumb:hover {
+  background: #ffca1a;
+}
+
+.pagination-container {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
 }
 
 /* 로딩 애니메이션 스타일 */
@@ -21,7 +56,7 @@
   margin-bottom: 1rem;
 }
 
-.duck-body {
+.duck-loading .duck-body {
   width: 40px;
   height: 30px;
   background-color: #FFD700;
@@ -32,7 +67,7 @@
   animation: bounce 0.6s infinite alternate;
 }
 
-.duck-head {
+.duck-loading .duck-head {
   width: 25px;
   height: 25px;
   background-color: #FFD700;
@@ -42,7 +77,7 @@
   left: 35px;
 }
 
-.duck-beak {
+.duck-loading .duck-beak {
   width: 15px;
   height: 8px;
   background-color: #FF6B6B;
@@ -53,7 +88,7 @@
   transform: rotate(-10deg);
 }
 
-.duck-leg {
+.duck-loading .duck-leg {
   width: 4px;
   height: 15px;
   background-color: #FF6B6B;
@@ -61,12 +96,12 @@
   bottom: 0;
 }
 
-.duck-leg.left {
+.duck-loading .duck-leg.left {
   left: 20px;
   transform: rotate(-15deg);
 }
 
-.duck-leg.right {
+.duck-loading .duck-leg.right {
   left: 30px;
   transform: rotate(15deg);
 }
@@ -76,6 +111,14 @@
   font-size: 1.1rem;
   margin-top: 1rem;
   animation: fadeInOut 1.5s infinite;
+}
+
+.no-result-text {
+  color: #666;
+  font-size: 1.1rem;
+  margin-top: 1rem;
+  opacity: 0;
+  animation: fadeIn 0.5s ease-in forwards 1s;
 }
 
 @keyframes bounce {
@@ -221,4 +264,222 @@
   background-color: #ffca1a;
   transform: translateY(-2px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 검색 결과 없음 오리 스타일 */
+.no-result-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  min-height: 200px;
+}
+
+.no-result-duck {
+  width: 100px;
+  height: 100px;
+  position: relative;
+  margin-bottom: 1.5rem;
+  animation: fallAndBreak 1s ease-in forwards;
+}
+
+.no-result-duck .duck-body {
+  width: 60px;
+  height: 40px;
+  background-color: #FFD700;
+  border-radius: 50% 50% 45% 45%;
+  position: absolute;
+  top: 30px;
+  left: 20px;
+  transform: rotate(-5deg);
+  animation: bodyFall 1s ease-in forwards;
+}
+
+.no-result-duck .duck-head {
+  width: 38px;
+  height: 38px;
+  background-color: #FFD700;
+  border-radius: 50%;
+  position: absolute;
+  top: 20px;
+  left: 55px;
+  transform: rotate(3deg);
+  animation: headFall 1s ease-in forwards;
+}
+
+.no-result-duck .duck-beak {
+  width: 20px;
+  height: 12px;
+  background-color: #FF6B6B;
+  border-radius: 50% 50% 0 0;
+  position: absolute;
+  top: 32px;
+  left: 88px;
+  transform: rotate(-5deg);
+  animation: beakFall 1s ease-in forwards;
+}
+
+.no-result-duck .duck-leg {
+  width: 6px;
+  height: 22px;
+  background-color: #FF6B6B;
+  position: absolute;
+  bottom: 8px;
+}
+
+.no-result-duck .duck-leg.left {
+  left: 35px;
+  transform: rotate(25deg);
+  animation: leftLegFall 1s ease-in forwards;
+}
+
+.no-result-duck .duck-leg.right {
+  left: 55px;
+  transform: rotate(-25deg);
+  animation: rightLegFall 1s ease-in forwards;
+}
+
+@keyframes fallAndBreak {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(20px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes bodyFall {
+  0% {
+    transform: rotate(-5deg);
+  }
+  50% {
+    transform: rotate(-15deg) translateX(-5px);
+  }
+  100% {
+    transform: rotate(-25deg) translateX(-10px);
+  }
+}
+
+@keyframes headFall {
+  0% {
+    transform: rotate(3deg);
+  }
+  50% {
+    transform: rotate(15deg) translateX(5px);
+  }
+  100% {
+    transform: rotate(25deg) translateX(10px);
+  }
+}
+
+@keyframes beakFall {
+  0% {
+    transform: rotate(-5deg);
+  }
+  50% {
+    transform: rotate(-15deg) translateX(5px);
+  }
+  100% {
+    transform: rotate(-25deg) translateX(10px);
+  }
+}
+
+@keyframes leftLegFall {
+  0% {
+    transform: rotate(25deg);
+  }
+  50% {
+    transform: rotate(45deg) translateX(-5px);
+  }
+  100% {
+    transform: rotate(65deg) translateX(-10px);
+  }
+}
+
+@keyframes rightLegFall {
+  0% {
+    transform: rotate(-25deg);
+  }
+  50% {
+    transform: rotate(-45deg) translateX(5px);
+  }
+  100% {
+    transform: rotate(-65deg) translateX(10px);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+}
+
+.pagination button {
+  min-width: 40px;
+  height: 40px;
+  padding: 0 0.8rem;
+  border: 2px solid #fba337;
+  background-color: white;
+  color: #fba337;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination button:hover {
+  background-color: #fff3e0;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(251, 163, 55, 0.2);
+}
+
+.pagination button.active {
+  background-color: #fba337;
+  color: white;
+  border-color: #fba337;
+}
+
+.pagination button:disabled {
+  border-color: #e0e0e0;
+  color: #e0e0e0;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.pagination button:disabled:hover {
+  background-color: white;
+  transform: none;
+  box-shadow: none;
+}
+
+.pagination .page-numbers {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.pagination .page-numbers button {
+  min-width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 6px;
 }
