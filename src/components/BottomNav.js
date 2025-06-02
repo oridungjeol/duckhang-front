@@ -1,22 +1,29 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import './BottomNav.css';
+import Cookies from 'js-cookie';
 
 export default function BottomNav() {
+  const location = useLocation();
+  const uuid = Cookies.get('uuid');
+
   return (
     <nav className="bottom-nav">
-      <NavLink to="/menu" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
-        메뉴
-      </NavLink>
-      <NavLink to="/search" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
-        검색
-      </NavLink>
-      <NavLink to="/" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
-        홈
-      </NavLink>
-      <NavLink to="/chat" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+      <NavLink 
+        to="/chat" 
+        className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+      >
         채팅
       </NavLink>
-      <NavLink to="/profile" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+      <NavLink 
+        to="/board" 
+        className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+      >
+        게시판
+      </NavLink>
+      <NavLink 
+        to={`/user/${uuid}`}
+        className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+      >
         내정보
       </NavLink>
     </nav>

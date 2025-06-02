@@ -18,6 +18,8 @@ import TestRefundPage from "./pages/pay/TestRefundPage";
 import RefundSuccess from "./pages/refund/RefundSuccess";
 import RefundFail from "./pages/refund/RefundFail";
 
+import BottomNav from "./components/BottomNav";
+
 import "./App.css";
 
 function App() {
@@ -51,6 +53,7 @@ function App() {
           <Route path="/refund-success" element={<RefundSuccess />} />
           <Route path="/refund-fail" element={<RefundFail />} />
         </Routes>
+        <BottomNav />
       </div>
     </Router>
   );

@@ -9,8 +9,8 @@
   display: flex;
   justify-content: space-around;
   align-items: center;
-  border-top: 1px solid #ddd;
-  background-color: white;
+  background-color: #f9f8f7;
+  border-top: 1px solid #efefef;
   z-index: 1000;
   border-bottom-left-radius: 24px;
   border-bottom-right-radius: 24px;
@@ -18,15 +18,21 @@
 }
 
 .nav-item {
-  color: #333;
-  text-decoration: none;
+  background: none;
   display: flex;
   flex-direction: column;
+  text-decoration: none;
+  border: none;
+  font-size: 16px;
   align-items: center;
+  color: #222;
+  padding: 8px 12px;
+  cursor: pointer;
   font-size: 16px;
   font-weight: 500;
 }
 
 .nav-item.active {
-  color: orange;
+  color: #FF9A42; /* active 상태에서 색상 강조 */
+  font-weight: bold;
 }
