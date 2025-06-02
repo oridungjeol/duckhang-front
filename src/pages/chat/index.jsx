@@ -5,6 +5,8 @@ import { getChatRoomList } from "./hook";
 
 import "./index.css";
 
+import BottomNav from "../../components/BottomNav";
+
 export default function Chat() {
   const navigate = useNavigate();
   const [datas, setDatas] = useState([]);
@@ -29,27 +31,32 @@ export default function Chat() {
     try {
       // 게시글 정보를 가져와서 보증금 정보를 포함
 
-      const response = await fetch(`http://localhost/api/board/${data.type}/${data.board_id}`, {
-
-        credentials: 'include'
-      });
+      const response = await fetch(
+        `http://localhost/api/board/${data.type}/${data.board_id}`,
+        {
+          credentials: "include",
+        }
+      );
       const boardData = await response.json();
-      
+
       // Determine if the current user is the buyer
       const currentUserUuid = localStorage.getItem("uuid");
       const isBuyer = boardData.author_uuid !== currentUserUuid; // User is buyer if not the author
-      
+
       // 결제 정보 가져오기 (optional - only needed if paymentData is used in chatroom for initial state)
       let paymentData = {};
       try {
-          const paymentResponse = await fetch(`http://localhost/api/payment/order/${data.board_id}`, {
-              credentials: 'include'
-          });
-          if (paymentResponse.ok) {
-              paymentData = await paymentResponse.json();
+        const paymentResponse = await fetch(
+          `http://localhost/api/payment/order/${data.board_id}`,
+          {
+            credentials: "include",
           }
+        );
+        if (paymentResponse.ok) {
+          paymentData = await paymentResponse.json();
+        }
       } catch (paymentError) {
-          console.error("결제 정보 가져오기 실패:", paymentError);
+        console.error("결제 정보 가져오기 실패:", paymentError);
       }
 
       navigate(`/chat/${data.room_id}`, {
@@ -57,9 +64,8 @@ export default function Chat() {
           ...data,
           orderId: paymentData.orderId,
           deposit: boardData.deposit,
-          isBuyer: isBuyer
-
-        } 
+          isBuyer: isBuyer,
+        },
       });
     } catch (error) {
       console.error("게시글 정보 가져오기 실패:", error);
@@ -94,6 +100,7 @@ export default function Chat() {
           </div>
         ))}
       </div>
+      <BottomNav />
     </div>
   );
 }
