@@ -22,12 +22,13 @@ const PaymentMessage = ({ msg, isMine, data, onPay }) => {
               <span className="label">상품명</span>
               <span className="value">{data.name}</span>
             </div>
+            <div className="payment-info-item">
+              <span className="label">결제 금액</span>
+              <span className="value">{paymentData.actualPrice ? paymentData.actualPrice.toLocaleString() : (paymentData.price || 0).toLocaleString()}원</span>
+            </div>
             {data.type === 'RENTAL' && (
               <>
-                <div className="payment-info-item">
-                  <span className="label">결제 금액</span>
-                  <span className="value">{paymentData.actualPrice ? paymentData.actualPrice.toLocaleString() : (paymentData.price || 0).toLocaleString()}원</span>
-                </div>
+                
                 {paymentData.deposit > 0 && (
                   <div className="payment-info-item">
                     <span className="label">보증금</span>

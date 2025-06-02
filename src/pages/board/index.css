@@ -98,6 +98,8 @@
   display: flex;
   gap: 0.5rem;
   align-items: center;
+  margin-left: -10px;
+  background-color: transparent;
 }
 
 .search-box input {
@@ -109,6 +111,7 @@
   transition: width 0.3s ease;
   height: 36px;
   box-sizing: border-box;
+  background-color: #fff;
 }
 
 .search-box input:focus {

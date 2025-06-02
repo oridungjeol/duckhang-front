@@ -35,6 +35,9 @@ export default function ChatRoom() {
   const [openRefundDetail, setOpenRefundDetail] = useState({});
   const [searchKeyword, setSearchKeyword] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [currentSearchIndex, setCurrentSearchIndex] = useState(-1);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
   const messageRefs = useRef({});
 
   const stompClientRef = useRef(null);
@@ -156,7 +159,9 @@ export default function ChatRoom() {
             }
 
             console.log("New message received:", newMessage);
-            return [...prev, newMessage];
+            const updatedMessages = [...prev, newMessage];
+            updatedMessages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+            return updatedMessages;
           });
         });
       },
@@ -192,6 +197,8 @@ export default function ChatRoom() {
    */
   const loadMessageData = async () => {
     const message_list = await getChattingData(data, pageRef);
+    // 불러온 메시지를 created_at 기준으로 오름차순 정렬
+    message_list.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
     setMessages(message_list);
   };
 
@@ -201,8 +208,11 @@ export default function ChatRoom() {
   const loadMoreMessageData = async () => {
     try {
       pageRef.current += 1;
-      const message_list = await getChattingData(data, pageRef);
-      setMessages((prev) => [...message_list, ...prev]);
+      const more_message_list = await getChattingData(data, pageRef);
+      // 새로 불러온 메시지를 기존 메시지 앞에 추가하고 전체를 다시 정렬
+      const combinedMessages = [...more_message_list, ...messages];
+      combinedMessages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      setMessages(combinedMessages);
     } catch (error) {
       console.error("과거 채팅 기록 불러오기 중 오류 발생:", error);
     }
@@ -650,17 +660,23 @@ export default function ChatRoom() {
   const handleSearch = () => {
     if (!searchKeyword.trim()) {
       setSearchResults([]);
+      setCurrentSearchIndex(-1);
+      setIsSearching(false);
       return;
     }
 
-    const results = messages.filter(msg => {
-      if (msg.type === "TEXT") {
-        return msg.content.toLowerCase().includes(searchKeyword.toLowerCase());
-      }
-      return false;
-    });
+    const results = messages
+      .map((msg, index) => ({ ...msg, index }))
+      .filter(msg => {
+        if (msg.type === "TEXT") {
+          return msg.content.toLowerCase().includes(searchKeyword.toLowerCase());
+        }
+        return false;
+      });
 
     setSearchResults(results);
+    setCurrentSearchIndex(results.length > 0 ? 0 : -1);
+    setIsSearching(true);
   };
 
   const handleKeyPress = (e) => {
@@ -669,15 +685,84 @@ export default function ChatRoom() {
     }
   };
 
-  const scrollToMessage = (index) => {
-    const messageElements = document.querySelectorAll('.message-wrapper');
-    if (messageElements[index]) {
-      messageElements[index].scrollIntoView({ behavior: "smooth", block: "center" });
-      messageElements[index].style.backgroundColor = "#ffeb3b";
-      setTimeout(() => {
-        messageElements[index].style.backgroundColor = "";
-      }, 2000);
+  const scrollToMessage = (messageToScroll) => {
+    // Find the current index of the message in the messages array
+    const currentIndex = messages.findIndex(msg => 
+      msg.content === messageToScroll.content && 
+      msg.author_uuid === messageToScroll.author_uuid &&
+      msg.created_at === messageToScroll.created_at
+      // Add other unique properties if available and necessary
+    );
+
+    if (currentIndex === -1) {
+      console.warn("Target message not found in current messages list.", messageToScroll);
+      return;
     }
+
+    const messageWrappers = document.querySelectorAll('.message-wrapper');
+    if (messageWrappers[currentIndex]) {
+      // 이전 강조 효과 제거 (애니메이션 클래스 제거)
+      document.querySelectorAll('.message.highlighted-message').forEach(el => {
+        el.classList.remove('highlighted-message');
+      });
+      document.querySelectorAll('.message-wrapper.highlight').forEach(el => {
+        el.classList.remove('highlight');
+      });
+
+      const messageElement = messageWrappers[currentIndex].querySelector('.message');
+      if (messageElement) {
+        // 해당 메시지 내용 요소에 볼드 스타일 클래스 추가
+        messageElement.classList.add('bolded-message');
+        messageWrappers[currentIndex].scrollIntoView({ behavior: "smooth", block: "center" });
+
+        // 2초 후 볼드 스타일 클래스 제거
+        setTimeout(() => {
+          messageElement.classList.remove('bolded-message');
+        }, 2000);
+
+        // 메시지 자체 배경색 강조 제거 (이전 로직에서 추가되었을 수 있음)
+         messageWrappers[currentIndex].style.backgroundColor = "";
+      }
+    } else {
+       console.warn("Message wrapper not found for index:", currentIndex);
+    }
+  };
+
+  const handleNextResult = () => {
+    if (searchResults.length === 0) return;
+    // 다음 (더 최신) 결과로 이동 -> currentSearchIndex 증가
+    const nextIndex = (currentSearchIndex + 1) % searchResults.length;
+    setCurrentSearchIndex(nextIndex);
+    scrollToMessage(searchResults[nextIndex]);
+  };
+
+  const handlePrevResult = () => {
+    if (searchResults.length === 0) return;
+    // 이전 (더 오래된) 결과로 이동 -> currentSearchIndex 감소
+    // 인덱스가 음수가 되지 않도록 처리
+    const prevIndex = (currentSearchIndex - 1 + searchResults.length) % searchResults.length;
+    setCurrentSearchIndex(prevIndex);
+    scrollToMessage(searchResults[prevIndex]);
+  };
+
+  const clearSearch = () => {
+    setSearchKeyword("");
+    setSearchResults([]);
+    setCurrentSearchIndex(-1);
+    setIsSearching(false);
+     // 남아있는 강조 효과 제거 (애니메이션 및 볼드 클래스 제거)
+     document.querySelectorAll('.message.highlighted-message').forEach(el => {
+       el.classList.remove('highlighted-message');
+     });
+     document.querySelectorAll('.message-wrapper.highlight').forEach(el => {
+       el.classList.remove('highlight');
+     });
+     document.querySelectorAll('.message.bolded-message').forEach(el => { // bolded-message 클래스 제거 추가
+       el.classList.remove('bolded-message');
+     });
+      document.querySelectorAll('.message-wrapper').forEach(el => {
+        el.style.backgroundColor = "";
+      });
   };
 
   /**
@@ -726,7 +811,16 @@ export default function ChatRoom() {
         );
 
       case "TEXT":
-        return <TextMessage key={index} msg={msg} isMine={isMine} ref={el => messageRefs.current[messageId] = el} />;
+        const renderContent = (content, keyword) => {
+          if (!keyword || !content || typeof content !== 'string') return content;
+          const parts = content.split(new RegExp(`(${keyword})`, 'gi'));
+          return parts.map((part, i) => 
+            part.toLowerCase() === keyword.toLowerCase() ? 
+            <span key={i} className="highlighted-keyword">{part}</span> : 
+            part
+          );
+        };
+        return <TextMessage key={index} msg={{...msg, content: renderContent(msg.content, searchKeyword)}} isMine={isMine} ref={el => messageRefs.current[messageId] = el} />;
 
       case "IMAGE":
         return <ImageMessage key={index} msg={msg} isMine={isMine} ref={el => messageRefs.current[messageId] = el} />;
@@ -803,38 +897,38 @@ export default function ChatRoom() {
         handleMap={handleMap}
         handlePay={handlePay}
         handleRefundRequest={handleRefundRequest}
+        onSearchClick={() => setShowSearch(!showSearch)}
       />
-      <div className="search-box">
-        <input
-          type="text"
-          value={searchKeyword}
-          onChange={(e) => setSearchKeyword(e.target.value)}
-          onKeyPress={handleKeyPress}
-          placeholder="채팅 내용 검색..."
-          className="search-input"
-        />
-        <button onClick={handleSearch} className="search-button">
-          검색
-        </button>
-      </div>
-      {searchResults.length > 0 && (
-        <div className="search-results">
-          <h3>검색 결과 ({searchResults.length})</h3>
-          {searchResults.map((msg, index) => {
-            const messageIndex = messages.findIndex(m => m === msg);
-            return (
-              <div 
-                key={`search-${index}`} 
-                className="search-result-item"
-                onClick={() => scrollToMessage(messageIndex)}
-              >
-                <span className="search-result-time">
-                  {new Date(msg.created_at).toLocaleString()}
-                </span>
-                <span className="search-result-content">{msg.content}</span>
-              </div>
-            );
-          })}
+      {showSearch && (
+        <div className="search-box">
+          <input
+            type="text"
+            value={searchKeyword}
+            onChange={(e) => setSearchKeyword(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="채팅 내용 검색..."
+            className="search-input"
+          />
+          <button onClick={handleSearch} className="search-button">
+            검색
+          </button>
+          {isSearching && searchResults.length > 0 && (
+            <>
+              <button onClick={handlePrevResult} className="search-nav-button">
+                ↑
+              </button>
+              <button onClick={handleNextResult} className="search-nav-button">
+                ↓
+              </button>
+              <span className="search-count">
+                {/* 작성일자가 오래된 순서대로 카운트 표시 (첫 번째 결과가 1/총 개수) */}
+                {`${currentSearchIndex + 1}/${searchResults.length}`}
+              </span>
+              <button onClick={clearSearch} className="clear-search-button">
+                ✕
+              </button>
+            </>
+          )}
         </div>
       )}
       <div className="chat-box" ref={scrollRef}>
