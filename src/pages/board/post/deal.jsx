@@ -54,7 +54,13 @@ export default function Deal({ keyword = '', category }) {
   }, [category]);
 
   const handleItemClick = (post) => {
-    navigate(`/board/deal/${post.id}`, { state: post });
+    // boardType을 state로 전달 (category를 대문자로 변환)
+    navigate(`/board/deal/${post.id}`, { 
+      state: { 
+        boardType: category.toUpperCase(),
+        board: post 
+      } 
+    });
   };
 
   const filteredPosts = posts.filter((post) => {
