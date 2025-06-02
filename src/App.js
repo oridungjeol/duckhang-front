@@ -18,8 +18,6 @@ import TestRefundPage from "./pages/pay/TestRefundPage";
 import RefundSuccess from "./pages/refund/RefundSuccess";
 import RefundFail from "./pages/refund/RefundFail";
 
-import BottomNav from "./components/BottomNav";
-
 import "./App.css";
 
 function App() {
