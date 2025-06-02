@@ -1,37 +1,40 @@
 .form-container {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding: 3rem;
+  gap: 1.5rem;
+  padding: 2rem;
   max-width: 800px;
-  margin: 0 auto;
-  background-color: #f9f8f7;
-  min-height: 100vh;
+  margin: 2rem auto;
+  background-color: #ffffff;
+  min-height: calc(100vh - 4rem);
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
 }
 
 .form-group {
   width: 100%;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .radio-group {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
   flex-wrap: wrap;
 }
 
 .radio-label {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
   position: relative;
-  padding: 8px 16px;
+  width: 42px;
+  height: 22px;
   background-color: #ffffff;
-  border: 2px solid #fba337;
-  border-radius: 20px;
+  border: 1.5px solid #fba337;
+  border-radius: 30px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .radio-label input[type="radio"] {
@@ -40,8 +43,9 @@
 
 .radio-text {
   color: #fba337;
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: 500;
+  font-size: 13px;
+  transition: all 0.2s ease;
 }
 
 .radio-label.active {
@@ -50,66 +54,208 @@
 
 .radio-label.active .radio-text {
   color: #ffffff;
+  font-weight: 600;
+}
+
+.radio-label:hover {
+  background-color: #fff5e6;
+}
+
+.radio-label.active:hover {
+  background-color: #fba337;
 }
 
 .title-input,
 .content-input {
   width: 100%;
   padding: 12px 16px;
-  font-size: 16px;
-  border: 2px solid #fba337;
-  border-radius: 20px;
-  transition: all 0.3s ease;
+  font-size: 15px;
+  border: 1.5px solid #e9ecef;
+  border-radius: 12px;
+  transition: all 0.2s ease;
   background-color: #ffffff;
   box-sizing: border-box;
+  color: #495057;
 }
 
 .title-input:focus,
 .content-input:focus {
   outline: none;
   border-color: #fba337;
-  box-shadow: 0 0 0 2px rgba(251, 163, 55, 0.2);
+  box-shadow: 0 0 0 3px rgba(251, 163, 55, 0.1);
 }
 
 .content-input {
   min-height: 200px;
   resize: vertical;
+  line-height: 1.5;
+}
+
+/* 이미지 업로드 스타일 */
+.form-group input[type="file"] {
+  display: none;
+}
+
+.image-upload-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 160px;
+  height: 160px;
+  border: 2px dashed #fba337;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: #ffffff;
+  position: relative;
+  overflow: visible;
+  box-shadow: 0 2px 8px rgba(251, 163, 55, 0.1);
+}
+
+.image-upload-label:hover {
+  background-color: #fff5e6;
+  border-color: #ffca1a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(251, 163, 55, 0.15);
+}
+
+.image-upload-label::before,
+.image-upload-label::after {
+  content: '';
+  position: absolute;
+  background-color: #fba337;
+  transition: all 0.2s ease;
+}
+
+.image-upload-label:empty::before {
+  width: 2px;
+  height: 40px;
+}
+
+.image-upload-label:empty::after {
+  width: 40px;
+  height: 2px;
+}
+
+.image-upload-label:hover::before,
+.image-upload-label:hover::after {
+  background-color: #ffca1a;
+}
+
+.image-upload-label img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.image-upload-label:hover img {
+  transform: scale(1.02);
+}
+
+.image-upload-label .delete-image-btn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background-color: #ff4444;
+  color: white;
+  border: none;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(255, 68, 68, 0.2);
+  transition: all 0.2s ease;
+  z-index: 1;
+}
+
+.image-upload-label .delete-image-btn:hover {
+  background-color: #ff0000;
+  transform: scale(1.1) rotate(90deg);
 }
 
 .preview-container {
   display: flex;
   flex-direction: row;
-  align-items: center;
   gap: 1rem;
   overflow-x: auto;
-  padding: 1rem 0;
+  padding: 0.5rem 0;
+  margin-top: 0.5rem;
+}
+
+.preview-item-wrapper {
+  position: relative;
+  width: 160px;
+  height: 160px;
 }
 
 .preview-item {
-  width: 200px;
-  height: 200px;
+  width: 160px;
+  height: 160px;
   object-fit: cover;
-  border-radius: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.image-label {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  color: #666;
+  white-space: nowrap;
+}
+
+.delete-image-btn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #ff4444;
+  color: white;
+  border: none;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(255, 68, 68, 0.2);
+  transition: all 0.2s ease;
+}
+
+.delete-image-btn:hover {
+  background-color: #ff0000;
+  transform: scale(1.1);
 }
 
 .button-container {
   display: flex;
   justify-content: center;
-  gap: 2rem;
+  gap: 1.5rem;
   margin-top: 2rem;
 }
 
 .submit-button,
 .cancel-button {
-  width: 200px;
+  width: 180px;
   padding: 12px 24px;
-  border: 2px solid #fba337;
-  border-radius: 20px;
-  font-size: 16px;
-  font-weight: 600;
+  border: 1.5px solid #fba337;
+  border-radius: 30px;
+  font-size: 15px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   background-color: #ffffff;
   color: #fba337;
 }
@@ -117,8 +263,6 @@
 .submit-button:hover {
   background-color: #fba337;
   color: #ffffff;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .cancel-button:hover {
@@ -132,15 +276,17 @@
   border-color: #d9d9d9;
   color: #999;
   cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
 }
 
 .error-message {
   color: #ff4444;
-  font-size: 14px;
+  font-size: 13px;
   margin-top: 0.5rem;
   text-align: center;
+  padding: 0.5rem;
+  background-color: #fff5f5;
+  border-radius: 8px;
+  border: 1px solid #ffdddd;
 }
 
 /* 로딩 애니메이션 스타일 */
@@ -212,7 +358,7 @@
 
 .loading-text {
   color: #666;
-  font-size: 1.1rem;
+  font-size: 14px;
   margin-top: 1rem;
   animation: fadeInOut 1.5s infinite;
 }
