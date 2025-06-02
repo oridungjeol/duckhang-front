@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-import Login from "./pages/user/login";
-import Profile from "./pages/user/profile";
+import Login from "./pages/user/login"
+import Profile from "./pages/user/Profile";
 import Board from "./pages/board";
 import BoardDetail from "./pages/board/post/detail";
 import Chat from "./pages/chat";
@@ -34,7 +34,8 @@ function App() {
       <div className="min-h-screen bg-gray-50 layout">
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route path="/user/:uuid" element={<Profile />} />
+          <Route path="/user/:userId" element={<Profile />} />
+          <Route path="/board" element={<Board />} />
           <Route path="/board/:type" element={<Board />} />
           <Route path="/board/:type/write" element={<Write />} />
           <Route path="/board/:type/:board_id" element={<BoardDetail />} />
