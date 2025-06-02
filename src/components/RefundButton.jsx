@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-export default function RefundButton({ orderId }) {
+export default function RefundButton({ orderId, room_id, room_name, board_id, type }) {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -31,12 +31,16 @@ export default function RefundButton({ orderId }) {
 
       navigate("/refund-success", {
         state: {
+          room_id,
+          room_name,
+          board_id,
+          type,
           refundInfo: {
             orderId: data.orderId || orderId,
             cancelAmount: data.cancelAmount,
-            refundedAt: data.refundedAt ?? data.canceledAt ?? new Date().toISOString(),
-          },
-        },
+            refundedAt: data.refundedAt ?? data.canceledAt ?? new Date().toISOString()
+          }
+        }
       });
     } catch (error) {
       const errorMessage = error.message || "보증금 환불 실패";

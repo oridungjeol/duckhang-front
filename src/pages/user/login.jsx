@@ -12,7 +12,7 @@ import "swiper/css/pagination";
 import { Pagination } from "swiper/modules";
 
 const handleKakaoLogin = () => {
-  window.location.href = "http://localhost:8080/oauth2/authorization/kakao";
+  window.location.href = 'http://localhost/oauth2/authorization/kakao';
 };
 
 const Login = () => {

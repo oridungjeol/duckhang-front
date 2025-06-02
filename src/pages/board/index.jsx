@@ -1,5 +1,5 @@
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Deal from './post/deal';
 import Person from './post/person';
 import './index.css';
@@ -14,6 +14,12 @@ export default function Board() {
   const [searchType, setSearchType] = useState(searchParams.get('fieldType') || 'ALL');
   const [searchKeyword, setSearchKeyword] = useState(searchParams.get('keyword') || '');
   const [currentKeyword, setCurrentKeyword] = useState(searchParams.get('keyword') || '');
+
+  useEffect(() => {
+    if (type === 'deal' && !searchParams.get('filter')) {
+      navigate(`/board/deal?filter=purchase`, { replace: true });
+    }
+  }, [type, searchParams, navigate]);
 
   const handleWriteClick = () => {
     navigate(`/board/${type}/write`);
