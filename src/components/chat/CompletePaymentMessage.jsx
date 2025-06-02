@@ -19,10 +19,10 @@ const CompletePaymentMessage = ({ msg, isMine, openPaymentDetail, togglePaymentD
         marginTop: "20px",
         marginBottom: "20px",
         backgroundColor: "#ffffff",
-        padding: "20px",
+        padding: "16px",
         borderRadius: "16px",
         boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-        maxWidth: '70%',
+        maxWidth: '60%',
         width: 'auto',
         margin: "20px auto",
         border: "1px solid #e0e0e0"
@@ -65,10 +65,10 @@ const CompletePaymentMessage = ({ msg, isMine, openPaymentDetail, togglePaymentD
                 justifyContent: "space-between",
                 alignItems: "center",
                 cursor: "pointer",
-                padding: "14px 20px",
+                padding: "12px 16px",
                 background: openPaymentDetail ? "#e3f2fd" : "#fff",
                 borderRadius: "10px",
-                marginBottom: "12px",
+                marginBottom: "10px",
                 border: "2px solid #90caf9",
                 boxShadow: openPaymentDetail ? "0 2px 8px rgba(30,136,229,0.08)" : "none",
                 transition: "all 0.3s"
@@ -78,11 +78,11 @@ const CompletePaymentMessage = ({ msg, isMine, openPaymentDetail, togglePaymentD
               <span style={{
                 fontWeight: "700",
                 color: "#1976d2",
-                fontSize: "16px"
+                fontSize: "15px"
               }}>결제 상세 정보</span>
               <svg
-                width="24"
-                height="24"
+                width="20"
+                height="20"
                 viewBox="0 0 24 24"
                 style={{
                   transform: openPaymentDetail ? "rotate(180deg)" : "rotate(0deg)",
@@ -109,69 +109,69 @@ const CompletePaymentMessage = ({ msg, isMine, openPaymentDetail, togglePaymentD
                 marginBottom: openPaymentDetail ? "10px" : "0"
               }}
             >
-              <div style={{ padding: openPaymentDetail ? "18px" : "0 18px" }}>
+              <div style={{ padding: openPaymentDetail ? "14px" : "0 14px" }}>
                 <div style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  padding: "8px 0",
+                  padding: "6px 0",
                   borderBottom: "1px solid #e3f2fd"
                 }}>
                   <span style={{
                     fontWeight: '600',
                     color: '#1976d2',
-                    fontSize: "15px"
+                    fontSize: "14px"
                   }}>주문번호</span>
                   <span style={{
                     color: '#333',
-                    fontSize: "15px"
+                    fontSize: "14px"
                   }}>{completePaymentData.orderId}</span>
                 </div>
                 <div style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  padding: "8px 0",
+                  padding: "6px 0",
                   borderBottom: "1px solid #e3f2fd"
                 }}>
                   <span style={{
                     fontWeight: '600',
                     color: '#1976d2',
-                    fontSize: "15px"
+                    fontSize: "14px"
                   }}>결제금액</span>
                   <span style={{
                     color: '#333',
-                    fontSize: "15px",
+                    fontSize: "14px",
                     fontWeight: "600"
                   }}>{Number(completePaymentData.totalAmount).toLocaleString()}원</span>
                 </div>
                 <div style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  padding: "8px 0",
+                  padding: "6px 0",
                   borderBottom: "1px solid #e3f2fd"
                 }}>
                   <span style={{
                     fontWeight: '600',
                     color: '#1976d2',
-                    fontSize: "15px"
+                    fontSize: "14px"
                   }}>결제수단</span>
                   <span style={{
                     color: '#333',
-                    fontSize: "15px"
+                    fontSize: "14px"
                   }}>{completePaymentData.method || '카드'}</span>
                 </div>
                 <div style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  padding: "8px 0"
+                  padding: "6px 0"
                 }}>
                   <span style={{
                     fontWeight: '600',
                     color: '#1976d2',
-                    fontSize: "15px"
+                    fontSize: "14px"
                   }}>승인일시</span>
                   <span style={{
                     color: '#333',
-                    fontSize: "15px"
+                    fontSize: "14px"
                   }}>{completePaymentData.approvedAt ? new Date(completePaymentData.approvedAt).toLocaleString() : '-'}</span>
                 </div>
               </div>

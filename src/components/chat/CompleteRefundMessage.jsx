@@ -3,22 +3,29 @@ import React from 'react';
 const CompleteRefundMessage = ({ msg, openRefundDetail, toggleRefundDetail }) => {
   let completeRefundData;
   try {
-    completeRefundData = JSON.parse(msg.content);
-    
-    // content가 한 번 더 JSON으로 감싸져 있으면 파싱
-    if (completeRefundData && typeof completeRefundData.content === 'string') {
-      completeRefundData = JSON.parse(completeRefundData.content);
+    // content가 이미 JSON 문자열인 경우
+    if (typeof msg.content === 'string') {
+      try {
+        completeRefundData = JSON.parse(msg.content);
+      } catch (parseError) {
+        completeRefundData = null;
+      }
+    } else {
+      completeRefundData = msg.content;
     }
     
     // 혹시라도 orderId/totalAmount가 없으면 msg에서 fallback
-    if (!completeRefundData.orderId && msg.orderId) {
-      completeRefundData.orderId = msg.orderId;
+    if (!completeRefundData?.orderId && msg.orderId) {
+      completeRefundData = { ...completeRefundData, orderId: msg.orderId };
     }
-    if (!completeRefundData.totalAmount && msg.totalAmount) {
-      completeRefundData.totalAmount = msg.totalAmount;
+    if (!completeRefundData?.totalAmount && msg.totalAmount) {
+      completeRefundData = { ...completeRefundData, totalAmount: msg.totalAmount };
+    }
+    // deposit이 있으면 totalAmount로 설정
+    if (completeRefundData?.deposit) {
+      completeRefundData = { ...completeRefundData, totalAmount: completeRefundData.deposit };
     }
   } catch (error) {
-    console.error("Error parsing refund data:", error);
     completeRefundData = null;
   }
 
@@ -31,10 +38,10 @@ const CompleteRefundMessage = ({ msg, openRefundDetail, toggleRefundDetail }) =>
         marginTop: "20px",
         marginBottom: "20px",
         backgroundColor: "#ffffff",
-        padding: "20px",
+        padding: "16px",
         borderRadius: "16px",
         boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-        maxWidth: '70%',
+        maxWidth: '60%',
         width: 'auto',
         margin: "20px auto",
         border: "1px solid #e0e0e0"
@@ -76,10 +83,10 @@ const CompleteRefundMessage = ({ msg, openRefundDetail, toggleRefundDetail }) =>
               justifyContent: "space-between",
               alignItems: "center",
               cursor: "pointer",
-              padding: "14px 20px",
+              padding: "12px 16px",
               background: openRefundDetail ? "#e8f5e9" : "#fff",
               borderRadius: "10px",
-              marginBottom: "12px",
+              marginBottom: "10px",
               border: "2px solid #81c784",
               boxShadow: openRefundDetail ? "0 2px 8px rgba(76,175,80,0.08)" : "none",
               transition: "all 0.3s"
@@ -89,11 +96,11 @@ const CompleteRefundMessage = ({ msg, openRefundDetail, toggleRefundDetail }) =>
             <span style={{
               fontWeight: "700",
               color: "#2e7d32",
-              fontSize: "16px"
+              fontSize: "15px"
             }}>환불 상세 정보</span>
             <svg
-              width="24"
-              height="24"
+              width="20"
+              height="20"
               viewBox="0 0 24 24"
               style={{
                 transform: openRefundDetail ? "rotate(180deg)" : "rotate(0deg)",
@@ -120,69 +127,73 @@ const CompleteRefundMessage = ({ msg, openRefundDetail, toggleRefundDetail }) =>
               marginBottom: openRefundDetail ? "10px" : "0"
             }}
           >
-            <div style={{ padding: openRefundDetail ? "18px" : "0 18px" }}>
+            <div style={{ padding: openRefundDetail ? "14px" : "0 14px" }}>
               <div style={{
                 display: "flex",
                 justifyContent: "space-between",
-                padding: "8px 0",
+                padding: "6px 0",
                 borderBottom: "1px solid #e9ecef"
               }}>
                 <span style={{
                   fontWeight: '600',
                   color: '#2e7d32',
-                  fontSize: "15px"
+                  fontSize: "14px"
                 }}>주문번호</span>
                 <span style={{
                   color: '#333',
-                  fontSize: "15px"
+                  fontSize: "14px"
                 }}>{completeRefundData?.orderId || '-'}</span>
               </div>
               <div style={{
                 display: "flex",
                 justifyContent: "space-between",
-                padding: "8px 0",
+                padding: "6px 0",
                 borderBottom: "1px solid #e9ecef"
               }}>
                 <span style={{
                   fontWeight: '600',
                   color: '#2e7d32',
-                  fontSize: "15px"
+                  fontSize: "14px"
                 }}>보증금</span>
                 <span style={{
                   color: '#333',
-                  fontSize: "15px",
+                  fontSize: "14px",
                   fontWeight: "600"
-                }}>{completeRefundData?.totalAmount ? Number(completeRefundData.totalAmount).toLocaleString() : '-'}원</span>
+                }}>
+                  {completeRefundData?.totalAmount ? 
+                    `${Number(completeRefundData.totalAmount).toLocaleString()}원` : 
+                    '-'}
+                </span>
               </div>
               <div style={{
                 display: "flex",
                 justifyContent: "space-between",
-                padding: "8px 0",
+                padding: "6px 0",
                 borderBottom: "1px solid #e9ecef"
               }}>
                 <span style={{
                   fontWeight: '600',
                   color: '#2e7d32',
-                  fontSize: "15px"
+                  fontSize: "14px"
                 }}>환불수단</span>
                 <span style={{
                   color: '#333',
-                  fontSize: "15px"
+                  fontSize: "14px"
                 }}>{completeRefundData?.method || '간편결제'}</span>
               </div>
               <div style={{
                 display: "flex",
                 justifyContent: "space-between",
-                padding: "8px 0"
+                padding: "6px 0"
               }}>
                 <span style={{
                   fontWeight: '600',
                   color: '#2e7d32',
-                  fontSize: "15px"
+                  fontSize: "14px"
                 }}>환불일시</span>
                 <span style={{
                   color: '#333',
-                  fontSize: "15px"
+                  fontSize: "14px"
                 }}>{completeRefundData?.approvedAt ? new Date(completeRefundData.approvedAt).toLocaleString() : '-'}</span>
               </div>
             </div>

@@ -473,7 +473,6 @@ export default function ChatRoom() {
 
           // 보증금 반환 완료 STOMP 메시지 전송
           const refundCompleteInfo = event.data.refundInfo;
-          console.log(refundCompleteInfo);
           if (refundCompleteInfo) {
              const client = stompClientRef.current;
               if (client?.connected) {
@@ -485,7 +484,7 @@ export default function ChatRoom() {
                 const refundMessage = {
                   message: "보증금 반환이 완료되었습니다.",
                   orderId: refundCompleteInfo.orderId,
-                  totalAmount: refundCompleteInfo.deposit || 0,
+                  totalAmount: refundCompleteInfo.totalAmount || refundCompleteInfo.deposit || 0,
                   method: "간편결제",
                   approvedAt: refundCompleteInfo.approvedAt || created_at
                 };

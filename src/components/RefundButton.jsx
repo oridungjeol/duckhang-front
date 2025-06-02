@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './RefundButton.css';
 
@@ -6,6 +6,16 @@ const RefundButton = ({ orderId, room_id, room_name, board_id, type, refundInfo 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+
+  console.log("RefundButton props:", { orderId, room_id, room_name, board_id, type, refundInfo });
+
+  // 모달이 열려있을 때 body에 modal-open 클래스 추가
+  useEffect(() => {
+    document.body.classList.add('modal-open');
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
+  }, []);
 
   const handleRefund = async () => {
     setIsLoading(true);
@@ -22,7 +32,7 @@ const RefundButton = ({ orderId, room_id, room_name, board_id, type, refundInfo 
           room_name,
           board_id,
           type,
-          amount: refundInfo?.deposit || 0
+          amount: refundInfo.deposit || 0
         }),
       });
 
@@ -32,6 +42,7 @@ const RefundButton = ({ orderId, room_id, room_name, board_id, type, refundInfo 
       }
 
       const data = await response.json();
+      console.log("Refund API response:", data);
       alert('환불이 성공적으로 처리되었습니다.');
       
       // 부모 창에 환불 완료 메시지 전송
@@ -41,19 +52,31 @@ const RefundButton = ({ orderId, room_id, room_name, board_id, type, refundInfo 
         const kstDate = new Date(kstOffset);
         const created_at = kstDate.toISOString().slice(0, 19);
 
+        // API 응답에서 환불 금액 가져오기
+        const refundAmount = data.cancelAmount || data.amount || refundInfo?.deposit || 0;
+        console.log("Refund amount:", refundAmount);
+
         const refundMessage = {
-          message: "보증금 반환이 완료되었습니다.",
-          orderId: orderId,
-          totalAmount: refundInfo?.deposit || 0,
-          method: "간편결제",
-          approvedAt: created_at
+          type: "COMPLETE_REFUNDED",
+          content: JSON.stringify({
+            message: "보증금 반환이 완료되었습니다.",
+            orderId: orderId,
+            totalAmount: refundInfo.deposit || 0,
+            method: "간편결제",
+            approvedAt: created_at
+          }),
+          created_at: created_at
         };
 
         console.log("Refund Message being sent:", refundMessage);
 
         window.parent.postMessage({
           type: 'closeRefundModal',
-          refundInfo: refundMessage
+          refundInfo: {
+            orderId: orderId,
+            totalAmount: refundInfo.deposit || 0,
+            approvedAt: created_at
+          }
         }, window.location.origin);
 
         // 채팅방으로 이동
@@ -64,11 +87,22 @@ const RefundButton = ({ orderId, room_id, room_name, board_id, type, refundInfo 
             board_id,
             type,
             isBuyer: true,
-            refundMessage: refundMessage
+            refundMessage: {
+              type: "COMPLETE_REFUNDED",
+              content: JSON.stringify({
+                message: "보증금 반환이 완료되었습니다.",
+                orderId: orderId,
+                totalAmount: refundInfo.deposit || 0,
+                method: "간편결제",
+                approvedAt: created_at
+              }),
+              created_at: created_at
+            }
           }
         });
       }
     } catch (err) {
+      console.error("Refund error:", err);
       setError(err.message);
       alert('환불 처리 중 오류가 발생했습니다.');
     } finally {
@@ -79,8 +113,22 @@ const RefundButton = ({ orderId, room_id, room_name, board_id, type, refundInfo 
   if (isLoading) {
     return (
       <div className="loading-container">
-        <div className="loading-spinner"></div>
-        <p>처리 중...</p>
+        <div className="loading-spinner">
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+        <h2>환불 처리 중...</h2>
+        <p>잠시만 기다려주세요.</p>
       </div>
     );
   }
