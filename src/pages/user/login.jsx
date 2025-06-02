@@ -29,9 +29,9 @@ const Login = () => {
           <div className="swiper-group">
             <div className="text-group">
               <h1 className="swiper-title">Fandom. Fast. Real-time.</h1>
-              <h1 className="swiper-text">
+              <span className="swiper-text">
                 실시간 채팅으로 굿즈 거래도 덕질처럼 빠르게!
-              </h1>
+              </span>
               <DotLottieReact
                 src="https://lottie.host/78375728-d51f-463b-9b2a-6bea2de0325a/CW0GZA4FVT.lottie"
                 loop
@@ -44,9 +44,9 @@ const Login = () => {
           <div className="swiper-group">
             <div className="text-group">
               <h1 className="swiper-title">Fandom. Fast. Real-time.</h1>
-              <h1 className="swiper-text">
+              <span className="swiper-text">
                 위치 공유를 통한 직거래 편의성 향상
-              </h1>
+              </span>
               <div className="map-icon">
                 <img src={mapIcon} alt="지도" />
               </div>

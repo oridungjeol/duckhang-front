@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 
-import { getChattingData, uploadImage } from "./hook";
+import { getcheckFraud, getChattingData, uploadImage } from "./hook";
 import "./chatroom.css";
 
 // Import new components
@@ -26,6 +26,7 @@ export default function ChatRoom() {
   const [input, setInput] = useState("");
   const [image, setImage] = useState(null);
   const [isAuthor, setIsAuthor] = useState(false);
+  const [isImage, setIsImage] = useState(false);
   const [isBuyer, setIsBuyer] = useState(false);
   const [showRefundModal, setShowRefundModal] = useState(false);
   const [refundData, setRefundData] = useState(null);
@@ -54,8 +55,9 @@ export default function ChatRoom() {
         credentials: 'include'
       });
       const boardData = await response.json();
-    
+
       const isAuthorCheck = boardData.author_uuid === uuid;
+
       setIsAuthor(isAuthorCheck);
       
       if (data.type === 'RENTAL') {
@@ -92,6 +94,7 @@ export default function ChatRoom() {
         setIsBuyer(false);
       }
 
+      setIsAuthor(isAuthorCheck);
     } catch (error) {
       console.error("글 작성자 정보 가져오기 실패:", error);
     }
@@ -152,6 +155,18 @@ export default function ChatRoom() {
         isConnected.current = false;
       }
 
+      stompClient.subscribe(`/topic/chat/${data.room_id}`, function (message) {
+        const data = JSON.parse(message.body);
+
+        if (data.type === "PAY") {
+          try {
+            const paymentData = JSON.parse(data.content);
+          } catch (error) {
+            console.error("Payment data parsing error:", error);
+          }
+        }
+        setMessages((prev) => [...prev, data]);
+      });
     });
 
     stompClientRef.current = client;
@@ -167,7 +182,7 @@ export default function ChatRoom() {
   }, [data.room_id, uuid]);
 
   /**
-   * 맨 처음, 메시지를 보낼 때 스크롤 맨 밑으로 고정
+   * 맨 처음 메시지를 보낼 때 스크롤 맨 밑으로 고정
    */
   useEffect(() => {
     if (scrollRef.current) {
@@ -279,25 +294,23 @@ export default function ChatRoom() {
     try {
 
       // 게시글 정보 가져오기
-
       const response = await fetch(`http://localhost/api/board/${data.type}/${data.board_id}`, {
         credentials: 'include'
       });
       const boardData = await response.json();  
 
       // 렌탈 게시글인 경우 deposit 값 확인
-      const deposit = data.type === 'RENTAL' ? (boardData.deposit || 0) : 0;
-   
+      const deposit = data.type === "RENTAL" ? boardData.deposit || 0 : 0;
 
       const paymentInfo = {
         price: boardData.price,
         deposit: deposit,
-        totalAmount: data.type === 'RENTAL' ? boardData.price + deposit : boardData.price,
-        actualPrice: boardData.price,  // 실제 결제금액 (보증금 제외)
+        totalAmount:
+          data.type === "RENTAL" ? boardData.price + deposit : boardData.price,
+        actualPrice: boardData.price, // 실제 결제금액 (보증금 제외)
         boardId: data.board_id,
-        type: data.type
+        type: data.type,
       };
-      
 
       const client = stompClientRef.current;
       if (client?.connected) {
@@ -584,7 +597,22 @@ export default function ChatRoom() {
     }
   };
 
-  /**
+  const handlePurchaseConfirm = () => {
+    navigate("/test-refund", {
+      state: {
+        board_id: data.board_id,
+        room_id: data.room_id,
+        room_name: data.name,
+        orderId: data.orderId,
+      },
+    });
+  };
+
+  const addImage = (e) => {
+    setIsImage(true);
+    setImage(e.target.files[0]);
+  };
+
    * 타입별 메시지 UI 렌더링
    * @param {*} msg
    * @param {*} index
@@ -598,6 +626,34 @@ export default function ChatRoom() {
         return (
           <div key={index} className="system-message">
             {msg.content}
+          </div>
+        );
+
+      case "WARNNING":
+        return (
+          <div>
+            {!isMine && (
+              <div key={index} className="system-message">
+                {msg.content === "EXTERNAL" && (
+                  <div key={index} className="warnning-message">
+                    거래를 외부에서 유도하면 사기 가능성이 있어요. 주의해
+                    주세요.
+                  </div>
+                )}
+                {msg.content === "DEPOSIT" && (
+                  <div key={index} className="warnning-message">
+                    안전을 위해 서비스 내 결제 기능을 이용하는 것을 권장해요.
+                    <br />
+                    선입금 요구에 주의하세요.
+                  </div>
+                )}
+                {msg.content === "PERSONAL_INFO" && (
+                  <div key={index} className="warnning-message">
+                    개인정보를 요구하면 사기일 가능성이 높아요. 주의해주세요.
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         );
 
