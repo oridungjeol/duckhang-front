@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 
-import { getcheckFraud, getChattingData, uploadImage } from "./hook";
+import { getChattingData, uploadImage } from "./hook";
 import "./chatroom.css";
 
 // Import new components
@@ -15,6 +15,7 @@ import CompletePaymentMessage from "../../components/chat/CompletePaymentMessage
 import CompleteRefundMessage from "../../components/chat/CompleteRefundMessage";
 import ChatInput from "../../components/chat/ChatInput";
 import ChatHeader from "../../components/chat/ChatHeader";
+import BottomNav from "../../components/BottomNav";
 
 export default function ChatRoom() {
   const location = useLocation();
@@ -41,7 +42,7 @@ export default function ChatRoom() {
   useEffect(() => {
     if (!location.state || !location.state.room_id) {
       console.error("채팅방 정보가 없습니다.");
-      navigate("/chat");  // 채팅 목록으로 리다이렉트
+      navigate("/chat"); // 채팅 목록으로 리다이렉트
       return;
     }
   }, [location.state, navigate]);
@@ -51,24 +52,30 @@ export default function ChatRoom() {
    */
   const fetchAuthorInfo = async () => {
     try {
-      const response = await fetch(`http://localhost/api/board/${data.type}/${data.board_id}`, {
-        credentials: 'include'
-      });
+      const response = await fetch(
+        `http://localhost/api/board/${data.type}/${data.board_id}`,
+        {
+          credentials: "include",
+        }
+      );
       const boardData = await response.json();
 
       const isAuthorCheck = boardData.author_uuid === uuid;
 
       setIsAuthor(isAuthorCheck);
-      
-      if (data.type === 'RENTAL') {
+
+      if (data.type === "RENTAL") {
         try {
-          const paymentResponse = await fetch(`http://localhost/api/payment/${data.board_id}`, {
-            method: 'GET',
-            credentials: 'include',
-            headers: {
-              'Content-Type': 'application/json'
+          const paymentResponse = await fetch(
+            `http://localhost/api/payment/${data.board_id}`,
+            {
+              method: "GET",
+              credentials: "include",
+              headers: {
+                "Content-Type": "application/json",
+              },
             }
-          });
+          );
 
           if (paymentResponse.status === 404) {
             setIsBuyer(false);
@@ -81,7 +88,7 @@ export default function ChatRoom() {
           }
 
           const paymentData = await paymentResponse.json();
-          
+
           if (paymentData && paymentData.orderId) {
             setIsBuyer(true);
           } else {
@@ -122,7 +129,7 @@ export default function ChatRoom() {
 
         client.subscribe(`/topic/chat/${data.room_id}`, (message) => {
           const newMessage = JSON.parse(message.body);
-          
+
           if (newMessage.type === "PAY") {
             try {
               const paymentData = JSON.parse(newMessage.content);
@@ -133,9 +140,9 @@ export default function ChatRoom() {
 
           setMessages((prev) => {
             const isDuplicate = prev.some(
-              (msg) => 
-                msg.type === newMessage.type && 
-                msg.author_uuid === newMessage.author_uuid && 
+              (msg) =>
+                msg.type === newMessage.type &&
+                msg.author_uuid === newMessage.author_uuid &&
                 msg.created_at === newMessage.created_at &&
                 msg.content === newMessage.content
             );
@@ -153,20 +160,7 @@ export default function ChatRoom() {
       onDisconnect: () => {
         console.log("Disconnected");
         isConnected.current = false;
-      }
-
-      stompClient.subscribe(`/topic/chat/${data.room_id}`, function (message) {
-        const data = JSON.parse(message.body);
-
-        if (data.type === "PAY") {
-          try {
-            const paymentData = JSON.parse(data.content);
-          } catch (error) {
-            console.error("Payment data parsing error:", error);
-          }
-        }
-        setMessages((prev) => [...prev, data]);
-      });
+      },
     });
 
     stompClientRef.current = client;
@@ -244,7 +238,7 @@ export default function ChatRoom() {
           content: input,
           created_at: created_at,
           room_id: data.room_id,
-        })
+        }),
       });
 
       setInput("");
@@ -280,7 +274,7 @@ export default function ChatRoom() {
           content: image_url,
           created_at: created_at,
           room_id: data.room_id,
-        })
+        }),
       });
     } else {
       console.log("연결이 되지 않았습니다.");
@@ -292,12 +286,14 @@ export default function ChatRoom() {
    */
   const handlePay = async () => {
     try {
-
       // 게시글 정보 가져오기
-      const response = await fetch(`http://localhost/api/board/${data.type}/${data.board_id}`, {
-        credentials: 'include'
-      });
-      const boardData = await response.json();  
+      const response = await fetch(
+        `http://localhost/api/board/${data.type}/${data.board_id}`,
+        {
+          credentials: "include",
+        }
+      );
+      const boardData = await response.json();
 
       // 렌탈 게시글인 경우 deposit 값 확인
       const deposit = data.type === "RENTAL" ? boardData.deposit || 0 : 0;
@@ -327,12 +323,11 @@ export default function ChatRoom() {
           created_at: created_at,
           room_id: data.room_id,
         };
-        
+
         client.publish({
           destination: `/app/chat/${data.room_id}`,
-          body: JSON.stringify(message)
+          body: JSON.stringify(message),
         });
-
       } else {
         console.log("연결이 되지 않았습니다.");
       }
@@ -360,7 +355,7 @@ export default function ChatRoom() {
           content: "",
           created_at: created_at,
           room_id: data.room_id,
-        })
+        }),
       });
     } else {
       console.log("연결이 되지 않았습니다.");
@@ -381,35 +376,43 @@ export default function ChatRoom() {
       try {
         refundMessageData = JSON.parse(refundMessage.content);
         console.log("Refund Message Data:", refundMessageData);
-        if (!refundMessageData || typeof refundMessageData !== 'object') {
+        if (!refundMessageData || typeof refundMessageData !== "object") {
           throw new Error("보증금 반환 요청 데이터 형식이 올바르지 않습니다.");
         }
       } catch (error) {
         console.error("Refund message parsing error:", error);
-        alert("보증금 반환 요청 정보를 처리하는데 실패했습니다. 다시 시도해주세요.");
+        alert(
+          "보증금 반환 요청 정보를 처리하는데 실패했습니다. 다시 시도해주세요."
+        );
         return;
       }
 
       // 게시글 정보 가져오기
-      const boardResponse = await fetch(`http://localhost/api/board/${data.type}/${data.board_id}`, {
-        credentials: 'include'
-      });
-      
+      const boardResponse = await fetch(
+        `http://localhost/api/board/${data.type}/${data.board_id}`,
+        {
+          credentials: "include",
+        }
+      );
+
       if (!boardResponse.ok) {
-        throw new Error('게시글 정보를 가져오는데 실패했습니다.');
+        throw new Error("게시글 정보를 가져오는데 실패했습니다.");
       }
-      
+
       const boardData = await boardResponse.json();
       console.log("Board Data:", boardData);
 
-      const paymentResponse = await fetch(`http://localhost/api/payment/${data.board_id}`, {
-        credentials: 'include'
-      });
-      
+      const paymentResponse = await fetch(
+        `http://localhost/api/payment/${data.board_id}`,
+        {
+          credentials: "include",
+        }
+      );
+
       if (!paymentResponse.ok) {
-        throw new Error('결제 정보를 가져오는데 실패했습니다.');
+        throw new Error("결제 정보를 가져오는데 실패했습니다.");
       }
-      
+
       const paymentData = await paymentResponse.json();
       console.log("Payment Data:", paymentData);
 
@@ -424,17 +427,29 @@ export default function ChatRoom() {
         room_name: data.name,
         board_id: data.board_id,
         type: data.type,
-        deposit: boardData.deposit || 0
+        deposit: boardData.deposit || 0,
       };
 
       console.log("Refund Info:", refundInfo);
 
       // 필수 정보 확인
-      const requiredFields = ['orderId', 'room_id', 'room_name', 'board_id', 'type'];
-      const missingFields = requiredFields.filter(field => !refundInfo[field]);
-      
+      const requiredFields = [
+        "orderId",
+        "room_id",
+        "room_name",
+        "board_id",
+        "type",
+      ];
+      const missingFields = requiredFields.filter(
+        (field) => !refundInfo[field]
+      );
+
       if (missingFields.length > 0) {
-        alert(`보증금 반환 요청에 필요한 정보가 누락되었습니다: ${missingFields.join(', ')}`);
+        alert(
+          `보증금 반환 요청에 필요한 정보가 누락되었습니다: ${missingFields.join(
+            ", "
+          )}`
+        );
         return;
       }
 
@@ -442,10 +457,11 @@ export default function ChatRoom() {
       setShowRefundModal(true);
     } catch (error) {
       console.error("Refund handling error:", error);
-      alert(error.message || "보증금 반환 요청 정보를 가져오는데 실패했습니다.");
+      alert(
+        error.message || "보증금 반환 요청 정보를 가져오는데 실패했습니다."
+      );
     }
   };
-
 
   const addImage = (e) => {
     setImage(e.target.files[0]);
@@ -453,14 +469,17 @@ export default function ChatRoom() {
 
   const isPaymentApprovedInChat = (() => {
     if (!Array.isArray(messages)) return false;
-    return messages.some(msg => {
+    return messages.some((msg) => {
       if (!msg || !msg.type) return false;
       if (msg.type === "COMPLETE_PAYMENT") {
         try {
           const paymentData = JSON.parse(msg.content);
           return !!paymentData && !!paymentData.approvedAt;
         } catch (error) {
-          console.error("Error parsing payment data for refund button check:", error);
+          console.error(
+            "Error parsing payment data for refund button check:",
+            error
+          );
           return false;
         }
       }
@@ -477,74 +496,88 @@ export default function ChatRoom() {
   useEffect(() => {
     window.closeRefundModal = closeRefundModal;
 
-
     const handleMessage = (event) => {
-
       if (event.origin === window.location.origin) {
-        if (typeof event.data === 'object' && event.data !== null && event.data.type === 'closeRefundModal') {
+        if (
+          typeof event.data === "object" &&
+          event.data !== null &&
+          event.data.type === "closeRefundModal"
+        ) {
           closeRefundModal();
 
           // 보증금 반환 완료 STOMP 메시지 전송
           const refundCompleteInfo = event.data.refundInfo;
           if (refundCompleteInfo) {
-             const client = stompClientRef.current;
-              if (client?.connected) {
-                const now = new Date();
-                const kstOffset = now.getTime() + 9 * 60 * 60 * 1000;
-                const kstDate = new Date(kstOffset);
-                const created_at = kstDate.toISOString().slice(0, 19);
+            const client = stompClientRef.current;
+            if (client?.connected) {
+              const now = new Date();
+              const kstOffset = now.getTime() + 9 * 60 * 60 * 1000;
+              const kstDate = new Date(kstOffset);
+              const created_at = kstDate.toISOString().slice(0, 19);
 
-                const refundMessage = {
-                  message: "보증금 반환이 완료되었습니다.",
-                  orderId: refundCompleteInfo.orderId,
-                  totalAmount: refundCompleteInfo.totalAmount || refundCompleteInfo.deposit || 0,
-                  method: "간편결제",
-                  approvedAt: refundCompleteInfo.approvedAt || created_at
-                };
+              const refundMessage = {
+                message: "보증금 반환이 완료되었습니다.",
+                orderId: refundCompleteInfo.orderId,
+                totalAmount:
+                  refundCompleteInfo.totalAmount ||
+                  refundCompleteInfo.deposit ||
+                  0,
+                method: "간편결제",
+                approvedAt: refundCompleteInfo.approvedAt || created_at,
+              };
 
-                client.publish({
-                  destination: `/app/chat/${data.room_id}`,
-                  body: JSON.stringify({
-                    type: "COMPLETE_REFUNDED",
-                    author_uuid: uuid,
-                    content: JSON.stringify(refundMessage),
-                    created_at: created_at,
-                    room_id: data.room_id,
-                  })
-                });
-              } else {
-                 console.error('STOMP client not connected, cannot send COMPLETE_REFUNDED message.');
-              }
+              client.publish({
+                destination: `/app/chat/${data.room_id}`,
+                body: JSON.stringify({
+                  type: "COMPLETE_REFUNDED",
+                  author_uuid: uuid,
+                  content: JSON.stringify(refundMessage),
+                  created_at: created_at,
+                  room_id: data.room_id,
+                }),
+              });
+            } else {
+              console.error(
+                "STOMP client not connected, cannot send COMPLETE_REFUNDED message."
+              );
+            }
           } else {
-             console.error('Refund info not found in message data, cannot send COMPLETE_REFUNDED.');
+            console.error(
+              "Refund info not found in message data, cannot send COMPLETE_REFUNDED."
+            );
           }
-
-        } else if (typeof event.data === 'string' && event.data === 'closeRefundModal') { // 레거시 메시지 처리 로직 제거
-           console.log('Legacy close refund modal message received with matching origin, closing modal.');
-           closeRefundModal();
+        } else if (
+          typeof event.data === "string" &&
+          event.data === "closeRefundModal"
+        ) {
+          // 레거시 메시지 처리 로직 제거
+          console.log(
+            "Legacy close refund modal message received with matching origin, closing modal."
+          );
+          closeRefundModal();
         }
       }
     };
 
-    window.addEventListener('message', handleMessage);
+    window.addEventListener("message", handleMessage);
 
     return () => {
       delete window.closeRefundModal;
-      window.removeEventListener('message', handleMessage);
+      window.removeEventListener("message", handleMessage);
     };
   }, []);
 
   const togglePaymentDetail = (idx) => {
     setOpenPaymentDetail((prev) => ({
       ...prev,
-      [idx]: !prev[idx]
+      [idx]: !prev[idx],
     }));
   };
 
   const toggleRefundDetail = (idx) => {
     setOpenRefundDetail((prev) => ({
       ...prev,
-      [idx]: !prev[idx]
+      [idx]: !prev[idx],
     }));
   };
 
@@ -554,14 +587,17 @@ export default function ChatRoom() {
   const handleRefundRequest = async () => {
     try {
       // 게시글 정보 가져오기
-      const response = await fetch(`http://localhost/api/board/${data.type}/${data.board_id}`, {
-        credentials: 'include'
-      });
-      
+      const response = await fetch(
+        `http://localhost/api/board/${data.type}/${data.board_id}`,
+        {
+          credentials: "include",
+        }
+      );
+
       if (!response.ok) {
-        throw new Error('게시글 정보를 가져오는데 실패했습니다.');
+        throw new Error("게시글 정보를 가져오는데 실패했습니다.");
       }
-      
+
       const boardData = await response.json();
 
       // 환불 요청 메시지 전송
@@ -581,7 +617,7 @@ export default function ChatRoom() {
             totalAmount: boardData.price + boardData.deposit,
             actualPrice: boardData.price,
             boardId: data.board_id,
-            type: data.type
+            type: data.type,
           }),
           created_at: created_at,
           room_id: data.room_id,
@@ -589,7 +625,7 @@ export default function ChatRoom() {
 
         client.publish({
           destination: `/app/chat/${data.room_id}`,
-          body: JSON.stringify(refundMessage)
+          body: JSON.stringify(refundMessage),
         });
       }
     } catch (error) {
@@ -608,11 +644,7 @@ export default function ChatRoom() {
     });
   };
 
-  const addImage = (e) => {
-    setIsImage(true);
-    setImage(e.target.files[0]);
-  };
-
+  /**
    * 타입별 메시지 UI 렌더링
    * @param {*} msg
    * @param {*} index
@@ -664,10 +696,20 @@ export default function ChatRoom() {
         return <ImageMessage key={index} msg={msg} isMine={isMine} />;
 
       case "PAY":
-        return <PaymentMessage key={index} msg={msg} isMine={isMine} data={data} />;
+        return (
+          <PaymentMessage key={index} msg={msg} isMine={isMine} data={data} />
+        );
 
       case "REFUND":
-        return <RefundMessage key={index} msg={msg} isMine={isMine} data={data} onRefund={handleRefund} />;
+        return (
+          <RefundMessage
+            key={index}
+            msg={msg}
+            isMine={isMine}
+            data={data}
+            onRefund={handleRefund}
+          />
+        );
 
       case "COMPLETE_PAYMENT":
         return (
@@ -736,17 +778,22 @@ export default function ChatRoom() {
         handleImage={handleImage}
         addImage={addImage}
       />
-      
+      <BottomNav />
+
       {showRefundModal && refundData && (
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
               <h2>환불 처리</h2>
-              <button className="modal-close" onClick={closeRefundModal}>×</button>
+              <button className="modal-close" onClick={closeRefundModal}>
+                ×
+              </button>
             </div>
             <div className="modal-body">
               <iframe
-                src={`/test-refund?data=${encodeURIComponent(JSON.stringify(refundData))}`}
+                src={`/test-refund?data=${encodeURIComponent(
+                  JSON.stringify(refundData)
+                )}`}
                 title="환불 처리"
                 className="refund-iframe"
               />

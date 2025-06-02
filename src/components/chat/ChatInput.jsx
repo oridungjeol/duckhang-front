@@ -1,6 +1,10 @@
-import React from 'react';
+import { useState } from "react";
+
+import "./chatInput.css";
 
 const ChatInput = ({ input, setInput, handleSend, handleImage, addImage }) => {
+  const [isImage, setIsImage] = useState(false);
+
   const activeEnter = (e) => {
     if (e.key === "Enter") {
       handleSend();
@@ -14,27 +18,39 @@ const ChatInput = ({ input, setInput, handleSend, handleImage, addImage }) => {
         className="image-btn"
         id="image-upload"
         style={{ display: "none" }}
-        onChange={addImage}
+        onChange={(e) => {
+          addImage(e);
+          setIsImage(true);
+        }}
       />
-      <label htmlFor="image-upload" className="send-btn">
+      <label htmlFor="image-upload" className="send-btn send-image-btn">
         +
       </label>
-      <button className="send-btn" onClick={handleImage}>
-        임시 이미지 전송
-      </button>
       <input
         type="text"
         className="input-text"
         value={input}
-        onChange={(e) => setInput(e.target.value)}
+        onChange={(e) => {
+          setInput(e.target.value);
+        }}
         onKeyPress={activeEnter}
         placeholder="메시지를 입력하세요..."
       />
-      <button className="send-btn" onClick={handleSend}>
+      <button
+        className="send-btn"
+        onClick={() => {
+          if (isImage) {
+            handleImage();
+            setIsImage(false);
+          } else {
+            handleSend();
+          }
+        }}
+      >
         전송
       </button>
     </div>
   );
 };
 
-export default ChatInput; 
+export default ChatInput;

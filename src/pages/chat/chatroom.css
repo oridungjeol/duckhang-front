@@ -3,7 +3,7 @@
   margin: 0 auto;
   padding: 1rem;
   background-color: #f9f8f7;
-  height: 95vh;
+  height: 90vh;
   display: flex;
   flex-direction: column;
 }
@@ -406,10 +406,9 @@
 }
 
 .refund-request-info p span.value {
-   color: #4a4a3c;
-   font-weight: 500;
-   font-size: 0.85rem;
-
+  color: #4a4a3c;
+  font-weight: 500;
+  font-size: 0.85rem;
 }
 
 .refund-accept-btn {
@@ -429,7 +428,6 @@
   background-color: #45a049;
   transform: translateY(-2px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-
 }
 
 .payment-request-info {
