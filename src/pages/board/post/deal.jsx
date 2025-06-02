@@ -52,24 +52,50 @@ export default function Deal({ keyword = '', category }) {
       size: pageSize.toString()
     });
 
-    fetch(`/board/${category.toUpperCase()}?${params}`)
-      .then((res) => {
-        if (!res.ok) throw new Error('게시글을 불러오지 못했습니다');
-        return res.json();
-      })
-      .then((data) => {
-        setPosts(data.content || []);
-        setTotalPages(data.totalPages || 0);
-        setTotalElements(data.totalElements || 0);
-      })
-      .catch((err) => {
-        console.error(err);
-        setPosts([]);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [category, currentPage, pageSize]);
+    // 검색어가 있는 경우 검색 API 사용
+    if (keyword) {
+      params.append('keyword', keyword);
+      params.append('boardType', category.toUpperCase());
+      params.append('searchFieldType', 'CONTENT');
+
+      fetch(`/board/search?${params}`)
+        .then((res) => {
+          if (!res.ok) throw new Error('게시글을 불러오지 못했습니다');
+          return res.json();
+        })
+        .then((data) => {
+          setPosts(data.content || []);
+          setTotalPages(data.totalPages || 0);
+          setTotalElements(data.totalElements || 0);
+        })
+        .catch((err) => {
+          console.error(err);
+          setPosts([]);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    } else {
+      // 검색어가 없는 경우 일반 게시글 목록 API 사용
+      fetch(`/board/${category.toUpperCase()}?${params}`)
+        .then((res) => {
+          if (!res.ok) throw new Error('게시글을 불러오지 못했습니다');
+          return res.json();
+        })
+        .then((data) => {
+          setPosts(data.content || []);
+          setTotalPages(data.totalPages || 0);
+          setTotalElements(data.totalElements || 0);
+        })
+        .catch((err) => {
+          console.error(err);
+          setPosts([]);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
+  }, [category, currentPage, pageSize, keyword]);
 
   useEffect(() => {
     // 카테고리가 변경될 때 페이지를 0으로 초기화
@@ -101,16 +127,8 @@ export default function Deal({ keyword = '', category }) {
     }
   };
 
-  const filteredPosts = posts.filter((post) => {
-    const keywordLower = keyword.toLowerCase().trim();
-    const matchesKeyword =
-      keywordLower === '' ||
-      (post.title?.toLowerCase().includes(keywordLower)) ||
-      (post.content?.toLowerCase().includes(keywordLower)) ||
-      (post.nickname?.toLowerCase().includes(keywordLower));
-
-    return matchesKeyword;
-  });
+  // 클라이언트 사이드 필터링 제거
+  const filteredPosts = posts;
 
   // 페이지네이션 버튼 생성
   const renderPagination = () => {
