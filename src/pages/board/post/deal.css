@@ -1,0 +1,224 @@
+.deal-board {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+/* 로딩 애니메이션 스타일 */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  min-height: 200px;
+}
+
+.duck-loading {
+  width: 60px;
+  height: 60px;
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.duck-body {
+  width: 40px;
+  height: 30px;
+  background-color: #FFD700;
+  border-radius: 50% 50% 45% 45%;
+  position: absolute;
+  top: 15px;
+  left: 10px;
+  animation: bounce 0.6s infinite alternate;
+}
+
+.duck-head {
+  width: 25px;
+  height: 25px;
+  background-color: #FFD700;
+  border-radius: 50%;
+  position: absolute;
+  top: 10px;
+  left: 35px;
+}
+
+.duck-beak {
+  width: 15px;
+  height: 8px;
+  background-color: #FF6B6B;
+  border-radius: 50% 50% 0 0;
+  position: absolute;
+  top: 18px;
+  left: 55px;
+  transform: rotate(-10deg);
+}
+
+.duck-leg {
+  width: 4px;
+  height: 15px;
+  background-color: #FF6B6B;
+  position: absolute;
+  bottom: 0;
+}
+
+.duck-leg.left {
+  left: 20px;
+  transform: rotate(-15deg);
+}
+
+.duck-leg.right {
+  left: 30px;
+  transform: rotate(15deg);
+}
+
+.loading-text {
+  color: #666;
+  font-size: 1.1rem;
+  margin-top: 1rem;
+  animation: fadeInOut 1.5s infinite;
+}
+
+@keyframes bounce {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.4;
+  }
+}
+
+.deal-item {
+  display: flex;
+  flex-direction: row;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  border-bottom: 1px solid #eee;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.deal-item:hover {
+  background-color: #f9f8f7;
+}
+
+.deal-item-image {
+  width: 120px;
+  height: 120px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.deal-item-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.deal-item-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.deal-item-header {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: 0.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.deal-type {
+  background-color: #fba337;
+  color: #ffffff;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.deal-item-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+  margin: 0;
+}
+
+.deal-item-price {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #fba337;
+}
+
+.deal-item-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.deal-nickname {
+  font-weight: 500;
+  color: #333;
+}
+
+.deal-time {
+  color: #888;
+  font-size: 0.85rem;
+}
+
+.deal-status {
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.deal-status.available {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.deal-status.reserved {
+  background-color: #fff3e0;
+  color: #ef6c00;
+}
+
+.deal-status.completed {
+  background-color: #f5f5f5;
+  color: #757575;
+}
+
+.chat-start-btn {
+  background-color: #fba337;
+  color: #ffffff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 0.5rem;
+  align-self: flex-start;
+}
+
+.chat-start-btn:hover {
+  background-color: #ffca1a;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}

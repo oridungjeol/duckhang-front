@@ -24,6 +24,11 @@ export async function getChatRoomList() {
  */
 export async function getChattingData(data, pageRef) {
   try {
+    if (!data || !data.room_id) {
+      console.error("채팅방 ID가 없습니다.");
+      return [];
+    }
+
     const response = await axios.get(
       `http://localhost/api/chat/recent/${data.room_id}?page=${pageRef.current}&size=50&sort=createdAt,desc`,
       {
@@ -34,5 +39,24 @@ export async function getChattingData(data, pageRef) {
     return response.data.reverse();
   } catch (error) {
     console.error("최근 채팅 기록 불러오기 중 오류 발생:", error);
+    return [];
+  }
+}
+
+export async function uploadImage(image) {
+  try {
+    const response = await axios.post(
+      `http://localhost/api/chat/upload/image`,
+      image,
+      { withCredentials: true },
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("이미지 firebase에 업로드 중 오류 발생:", error);
   }
 }
