@@ -6,6 +6,16 @@ import { Client } from "@stomp/stompjs";
 import { getChattingData, uploadImage } from "./hook";
 import "./chatroom.css";
 
+// Import new components
+import TextMessage from "../../components/chat/TextMessage";
+import ImageMessage from "../../components/chat/ImageMessage";
+import PaymentMessage from "../../components/chat/PaymentMessage";
+import RefundMessage from "../../components/chat/RefundMessage";
+import CompletePaymentMessage from "../../components/chat/CompletePaymentMessage";
+import CompleteRefundMessage from "../../components/chat/CompleteRefundMessage";
+import ChatInput from "../../components/chat/ChatInput";
+import ChatHeader from "../../components/chat/ChatHeader";
+
 export default function ChatRoom() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -527,13 +537,62 @@ export default function ChatRoom() {
   };
 
   /**
+   * 보증금 반환 요청 핸들러
+   */
+  const handleRefundRequest = async () => {
+    try {
+      // 게시글 정보 가져오기
+      const response = await fetch(`http://localhost/api/board/${data.type}/${data.board_id}`, {
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error('게시글 정보를 가져오는데 실패했습니다.');
+      }
+      
+      const boardData = await response.json();
+
+      // 환불 요청 메시지 전송
+      const client = stompClientRef.current;
+      if (client?.connected) {
+        const now = new Date();
+        const kstOffset = now.getTime() + 9 * 60 * 60 * 1000;
+        const kstDate = new Date(kstOffset);
+        const created_at = kstDate.toISOString().slice(0, 19);
+
+        const refundMessage = {
+          type: "REFUND",
+          author_uuid: uuid,
+          content: JSON.stringify({
+            price: boardData.price,
+            deposit: boardData.deposit,
+            totalAmount: boardData.price + boardData.deposit,
+            actualPrice: boardData.price,
+            boardId: data.board_id,
+            type: data.type
+          }),
+          created_at: created_at,
+          room_id: data.room_id,
+        };
+
+        client.publish({
+          destination: `/app/chat/${data.room_id}`,
+          body: JSON.stringify(refundMessage)
+        });
+      }
+    } catch (error) {
+      alert(error.message || "보증금 반환 요청을 처리하는데 실패했습니다.");
+    }
+  };
+
+  /**
    * 타입별 메시지 UI 렌더링
    * @param {*} msg
    * @param {*} index
    * @returns
    */
   const renderMessage = (msg, index) => {
-    const isMine = msg.author_uuid === uuid; // isMine를 함수 스코프 시작 부분에 한 번만 선언합니다. // 주석 정리
+    const isMine = msg.author_uuid === uuid;
 
     switch (msg.type) {
       case "SYSTEM":
@@ -544,342 +603,36 @@ export default function ChatRoom() {
         );
 
       case "TEXT":
-        return (
-          <div
-            key={index}
-            className={`message-wrapper ${isMine ? "me" : "other"}`}
-          >
-            <div className={`message ${isMine ? "me" : "other"}`}>
-              {msg.content}
-            </div>
-          </div>
-        );
+        return <TextMessage key={index} msg={msg} isMine={isMine} />;
 
       case "IMAGE":
-        return (
-          <div
-            key={index}
-            className={`message-wrapper ${isMine ? "me" : "other"}`}
-          >
-            <div className={`message ${isMine ? "me" : "other"}`}>
-              <img
-                src={msg.content}
-                alt="이미지 메시지"
-                style={{ maxWidth: "200px" }}
-              />
-            </div>
-          </div>
-        );
+        return <ImageMessage key={index} msg={msg} isMine={isMine} />;
 
       case "PAY":
-        let paymentData;
-        try {
-          paymentData = msg.content ? JSON.parse(msg.content) : null;
-        } catch (error) {
-          paymentData = null;
-        }
-        return (
-          <div key={index} className={`message-wrapper ${isMine ? "me" : "other"}`}>
-            <div className={`payment-request-card ${isMine ? "me" : "other"}`}>
-              <div className="payment-request-header">
-                <h3>{isMine ? '결제 요청을 보냈어요' : '결제 요청을 받았어요'}</h3>
-              </div>
-              {paymentData && (
-                <div className="payment-request-content">
-                  <div className="payment-info-item">
-                    <span className="label">상품명</span>
-                    <span className="value">{data.name}</span>
-                  </div>
-                  {data.type === 'RENTAL' && (
-                    <>
-                      <div className="payment-info-item">
-                        <span className="label">결제 금액</span>
-                        <span className="value">{paymentData.actualPrice ? paymentData.actualPrice.toLocaleString() : (paymentData.price || 0).toLocaleString()}원</span>
-                      </div>
-                      {paymentData.deposit > 0 && (
-                        <div className="payment-info-item">
-                          <span className="label">보증금</span>
-                          <span className="value">{paymentData.deposit.toLocaleString()}원</span>
-                        </div>
-                      )}
-                      <div className="payment-divider"></div>
-                      <div className="payment-info-item total-amount">
-                        <span className="label">총 결제 금액</span>
-                        <span className="value">{paymentData.totalAmount ? paymentData.totalAmount.toLocaleString() : 0}원</span>
-                      </div>
-                    </>
-                  )}
-                  {!isMine && (
-                    <div className="payment-request-buttons">
-                      <button
-                        onClick={() => {
-                          navigate(`/board/deal/${data.board_id}`, {
-                            state: { from: 'chat' }
-                          });
-                        }}
-                        className="detail-btn"
-                      >
-                        상품 상세 보기
-                      </button>
-                      <button
-                        onClick={() => {
-                          navigate("/checkout", {
-                            state: {
-                              board_id: data.board_id,
-                              type: data.type,
-                              room_id: data.room_id,
-                              room_name: data.name,
-                              successUrl: `${window.location.origin}/success?orderId=${paymentData?.orderId}&amount=${paymentData?.totalAmount}&type=${data.type}&room_id=${data.room_id}&board_id=${data.board_id}&room_name=${encodeURIComponent(data.name)}`,
-                              failUrl: "/fail",
-                              return_to: null
-                            },
-                          });
-                        }}
-                        className="pay-btn"
-                      >
-                        결제하기
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        );
+        return <PaymentMessage key={index} msg={msg} isMine={isMine} data={data} />;
 
       case "REFUND":
-        let refundData;
-        try {
-          refundData = msg.content ? JSON.parse(msg.content) : null;
-        } catch (error) {
-          refundData = null;
-        }
-        return (
-          <div key={index} className={`message-wrapper ${isMine ? "me" : "other"}`}> 
-            <div className={`refund-request-card ${isMine ? "me" : "other"}`}> 
-              <div className="refund-request-header">
-                <h3>{isMine ? '보증금 반환 요청을 보냈어요' : '보증금 반환 요청을 받았어요'}</h3> 
-              </div>
-              {refundData && (
-                <div className="refund-request-content">
-                  <div className="payment-info-item">
-                    <span className="label">상품명</span>
-                    <span className="value">{data.name}</span>
-                  </div>
-                  {data.type === 'RENTAL' && (
-                    <>
-                      <div className="payment-info-item">
-                        <span className="label">상품 금액</span>
-                        <span className="value">{refundData.actualPrice ? refundData.actualPrice.toLocaleString() : (refundData.price || 0).toLocaleString()}원</span>
-                      </div>
-                      {refundData.deposit > 0 && (
-                        <div className="payment-info-item">
-                          <span className="label">보증금</span>
-                          <span className="value">{refundData.deposit.toLocaleString()}원</span>
-                        </div>
-                      )}
-                      <div className="payment-info-item">
-                        <span className="label">보증금 반환 금액</span>
-                        <span className="value refund-amount">-{refundData.deposit ? refundData.deposit.toLocaleString() : 0}원</span>
-                      </div>
-                    </>
-                  )}
-                  {!isMine && (
-                    <div className="refund-request-buttons">
-                      <button
-                        onClick={() => handleRefund(msg)}
-                        className="pay-btn"
-                      >
-                        요청 수락
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        );
+        return <RefundMessage key={index} msg={msg} isMine={isMine} data={data} onRefund={handleRefund} />;
 
       case "COMPLETE_PAYMENT":
-        let completePaymentData;
-        try {
-          completePaymentData = msg.content ? JSON.parse(msg.content) : null;
-        } catch (error) {
-          completePaymentData = null;
-        }
-    
-        const displayOnRight = !isAuthor; 
-
         return (
-          <div key={index} className={`message-wrapper ${displayOnRight ? "me" : "other"}`}> 
-            <div className={`payment-complete-card ${displayOnRight ? "me" : "other"}`} style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              marginTop: "20px",
-              marginBottom: "20px",
-              backgroundColor: "#ffffff",
-              padding: "20px",
-              borderRadius: "16px",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-              maxWidth: '70%',
-              width: 'auto',
-              margin: "20px auto",
-              border: "1px solid #e0e0e0"
-            }}>
-              <div style={{
-                width: "60px",
-                height: "60px",
-                backgroundColor: "#e3f2fd",
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                marginBottom: "16px"
-              }}>
-                <svg width="40" height="40" viewBox="0 0 100 100" fill="none"> 
-                  <circle cx="50" cy="50" r="45" fill="#1e88e5" />
-                  <path d="M30 52L45 67L70 42" stroke="white" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </div>
-              <h3 style={{ 
-                marginTop: "8px", 
-                color: "#1565c0", 
-                textAlign: "center",
-                fontSize: "18px",
-                fontWeight: "600",
-                marginBottom: "16px"
-              }}>결제가 완료되었습니다</h3> 
-              {completePaymentData && (
-                <div className="payment-complete-content" style={{ 
-                  backgroundColor: "#f8f9fa",
-                  borderRadius: "12px",
-                  padding: "16px",
-                  marginTop: "8px",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.04)", 
-                  width: "100%",
-                }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      cursor: "pointer",
-                      padding: "14px 20px",
-                      background: openPaymentDetail[index] ? "#e3f2fd" : "#fff",
-                      borderRadius: "10px",
-                      marginBottom: "12px",
-                      border: "2px solid #90caf9",
-                      boxShadow: openPaymentDetail[index] ? "0 2px 8px rgba(30,136,229,0.08)" : "none",
-                      transition: "all 0.3s"
-                    }}
-                    onClick={() => togglePaymentDetail(index)}
-                  >
-                    <span style={{
-                      fontWeight: "700",
-                      color: "#1976d2",
-                      fontSize: "16px"
-                    }}>결제 상세 정보</span>
-                    <svg
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      style={{
-                        transform: openPaymentDetail[index] ? "rotate(180deg)" : "rotate(0deg)",
-                        transition: "transform 0.3s"
-                      }}
-                      fill="none"
-                      stroke="#1976d2"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M6 9l6 6 6-6" />
-                    </svg>
-                  </div>
-                  <div
-                    style={{
-                      maxHeight: openPaymentDetail[index] ? 500 : 0,
-                      overflow: "hidden",
-                      transition: "max-height 0.4s cubic-bezier(0.4,0,0.2,1)",
-                      background: "#f5faff",
-                      borderRadius: "10px",
-                      border: openPaymentDetail[index] ? "1.5px solid #90caf9" : "none",
-                      boxShadow: openPaymentDetail[index] ? "0 2px 8px rgba(30,136,229,0.08)" : "none",
-                      marginBottom: openPaymentDetail[index] ? "10px" : "0"
-                    }}
-                  >
-                    <div style={{ padding: openPaymentDetail[index] ? "18px" : "0 18px" }}>
-                      <div style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        padding: "8px 0",
-                        borderBottom: "1px solid #e3f2fd"
-                      }}>
-                        <span style={{
-                          fontWeight: '600',
-                          color: '#1976d2',
-                          fontSize: "15px"
-                        }}>주문번호</span>
-                        <span style={{
-                          color: '#333',
-                          fontSize: "15px"
-                        }}>{completePaymentData.orderId}</span>
-                      </div>
-                      <div style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        padding: "8px 0",
-                        borderBottom: "1px solid #e3f2fd"
-                      }}>
-                        <span style={{
-                          fontWeight: '600',
-                          color: '#1976d2',
-                          fontSize: "15px"
-                        }}>결제금액</span>
-                        <span style={{
-                          color: '#333',
-                          fontSize: "15px",
-                          fontWeight: "600"
-                        }}>{Number(completePaymentData.totalAmount).toLocaleString()}원</span>
-                      </div>
-                      <div style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        padding: "8px 0",
-                        borderBottom: "1px solid #e3f2fd"
-                      }}>
-                        <span style={{
-                          fontWeight: '600',
-                          color: '#1976d2',
-                          fontSize: "15px"
-                        }}>결제수단</span>
-                        <span style={{
-                          color: '#333',
-                          fontSize: "15px"
-                        }}>{completePaymentData.method || '카드'}</span>
-                      </div>
-                      <div style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        padding: "8px 0"
-                      }}>
-                        <span style={{
-                          fontWeight: '600',
-                          color: '#1976d2',
-                          fontSize: "15px"
-                        }}>승인일시</span>
-                        <span style={{
-                          color: '#333',
-                          fontSize: "15px"
-                        }}>{completePaymentData.approvedAt ? new Date(completePaymentData.approvedAt).toLocaleString() : '-'}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+          <CompletePaymentMessage
+            key={index}
+            msg={msg}
+            isMine={isMine}
+            openPaymentDetail={openPaymentDetail[index]}
+            togglePaymentDetail={() => togglePaymentDetail(index)}
+          />
+        );
+
+      case "COMPLETE_REFUNDED":
+        return (
+          <CompleteRefundMessage
+            key={index}
+            msg={msg}
+            openRefundDetail={openRefundDetail[index]}
+            toggleRefundDetail={() => toggleRefundDetail(index)}
+          />
         );
 
       case "MAP":
@@ -900,198 +653,6 @@ export default function ChatRoom() {
           </div>
         );
 
-      case "COMPLETE_REFUNDED":
-        let completeRefundData;
-        try {
-          completeRefundData = JSON.parse(msg.content);
-          
-          // content가 한 번 더 JSON으로 감싸져 있으면 파싱
-          if (completeRefundData && typeof completeRefundData.content === 'string') {
-            completeRefundData = JSON.parse(completeRefundData.content);
-          }
-          
-          // 혹시라도 orderId/totalAmount가 없으면 msg에서 fallback
-          if (!completeRefundData.orderId && msg.orderId) {
-            completeRefundData.orderId = msg.orderId;
-          }
-          if (!completeRefundData.totalAmount && msg.totalAmount) {
-            completeRefundData.totalAmount = msg.totalAmount;
-          }
-        } catch (error) {
-          console.error("Error parsing refund data:", error);
-          completeRefundData = null;
-        }
-
-        return (
-           <div key={index} className="message-wrapper me"> 
-            <div style={{ 
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              marginTop: "20px",
-              marginBottom: "20px",
-              backgroundColor: "#ffffff",
-              padding: "20px",
-              borderRadius: "16px",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-              maxWidth: '70%',
-              width: 'auto',
-              margin: "20px auto",
-              border: "1px solid #e0e0e0"
-            }}>
-              <div style={{
-                width: "60px",
-                height: "60px",
-                backgroundColor: "#e8f5e9",
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                marginBottom: "16px"
-              }}>
-                <svg width="40" height="40" viewBox="0 0 100 100" fill="none"> 
-                  <circle cx="50" cy="50" r="45" fill="#4caf50" /> 
-                  <path d="M30 52L45 67L70 42" stroke="white" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </div>
-              <h3 style={{ 
-                marginTop: "8px", 
-                color: "#388e3c", 
-                textAlign: "center",
-                fontSize: "18px",
-                fontWeight: "600",
-                marginBottom: "16px"
-              }}>{completeRefundData?.message || "보증금 반환 완료"}</h3> 
-              <div style={{ 
-                backgroundColor: "#f8f9fa",
-                borderRadius: "12px",
-                padding: "16px",
-                marginTop: "8px",
-                boxShadow: "0 2px 8px rgba(76,175,80,0.04)", 
-                width: "100%",
-              }}>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    cursor: "pointer",
-                    padding: "14px 20px",
-                    background: openRefundDetail[index] ? "#e8f5e9" : "#fff",
-                    borderRadius: "10px",
-                    marginBottom: "12px",
-                    border: "2px solid #81c784",
-                    boxShadow: openRefundDetail[index] ? "0 2px 8px rgba(76,175,80,0.08)" : "none",
-                    transition: "all 0.3s"
-                  }}
-                  onClick={() => toggleRefundDetail(index)}
-                >
-                  <span style={{
-                    fontWeight: "700",
-                    color: "#2e7d32",
-                    fontSize: "16px"
-                  }}>환불 상세 정보</span>
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    style={{
-                      transform: openRefundDetail[index] ? "rotate(180deg)" : "rotate(0deg)",
-                      transition: "transform 0.3s"
-                    }}
-                    fill="none"
-                    stroke="#2e7d32"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M6 9l6 6 6-6" />
-                  </svg>
-                </div>
-                <div
-                  style={{
-                    maxHeight: openRefundDetail[index] ? 500 : 0,
-                    overflow: "hidden",
-                    transition: "max-height 0.4s cubic-bezier(0.4,0,0.2,1)",
-                    background: "#f8f9fa",
-                    borderRadius: "10px",
-                    border: openRefundDetail[index] ? "1.5px solid #81c784" : "none",
-                    boxShadow: openRefundDetail[index] ? "0 2px 8px rgba(76,175,80,0.08)" : "none",
-                    marginBottom: openRefundDetail[index] ? "10px" : "0"
-                  }}
-                >
-                  <div style={{ padding: openRefundDetail[index] ? "18px" : "0 18px" }}>
-                    <div style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      padding: "8px 0",
-                      borderBottom: "1px solid #e9ecef"
-                    }}>
-                      <span style={{
-                        fontWeight: '600',
-                        color: '#2e7d32',
-                        fontSize: "15px"
-                      }}>주문번호</span>
-                      <span style={{
-                        color: '#333',
-                        fontSize: "15px"
-                      }}>{completeRefundData?.orderId || '-'}</span>
-                    </div>
-                    <div style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      padding: "8px 0",
-                      borderBottom: "1px solid #e9ecef"
-                    }}>
-                      <span style={{
-                        fontWeight: '600',
-                        color: '#2e7d32',
-                        fontSize: "15px"
-                      }}>보증금</span>
-                      <span style={{
-                        color: '#333',
-                        fontSize: "15px",
-                        fontWeight: "600"
-                      }}>{completeRefundData?.totalAmount ? Number(completeRefundData.totalAmount).toLocaleString() : '-'}원</span>
-                    </div>
-                    <div style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      padding: "8px 0",
-                      borderBottom: "1px solid #e9ecef"
-                    }}>
-                      <span style={{
-                        fontWeight: '600',
-                        color: '#2e7d32',
-                        fontSize: "15px"
-                      }}>환불수단</span>
-                      <span style={{
-                        color: '#333',
-                        fontSize: "15px"
-                      }}>{completeRefundData?.method || '간편결제'}</span>
-                    </div>
-                    <div style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      padding: "8px 0"
-                    }}>
-                      <span style={{
-                        fontWeight: '600',
-                        color: '#2e7d32',
-                        fontSize: "15px"
-                      }}>환불일시</span>
-                      <span style={{
-                        color: '#333',
-                        fontSize: "15px"
-                      }}>{completeRefundData?.approvedAt ? new Date(completeRefundData.approvedAt).toLocaleString() : '-'}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-
       default:
         return null;
     }
@@ -1099,118 +660,27 @@ export default function ChatRoom() {
 
   return (
     <div className="chat-container">
-      <div className="chat-header">
-        <span>{data.name}</span>
-        <span>
-          <button onClick={handleMap} className="pay-btn">
-            위치 공유
-          </button>
-
-          {data.type === 'SELL' && isAuthor && (
-            <button onClick={handlePay} className="pay-btn">
-              결제 요청
-            </button>
-          )}
-
-          {data.type === 'PURCHASE' && !isAuthor && (
-            <button onClick={handlePay} className="pay-btn">
-              결제 요청
-            </button>
-          )}
-
-          {data.type === 'RENTAL' && isAuthor && (
-            <button onClick={handlePay} className="pay-btn">
-              결제 요청
-            </button>
-          )}
-
-          {data.type === 'RENTAL' && !isAuthor && (
-            <button
-              onClick={async () => {
-                try {
-                  // 게시글 정보 가져오기
-                  const response = await fetch(`http://localhost/api/board/${data.type}/${data.board_id}`, {
-                    credentials: 'include'
-                  });
-                  
-                  if (!response.ok) {
-                    throw new Error('게시글 정보를 가져오는데 실패했습니다.');
-                  }
-                  
-                  const boardData = await response.json();
-
-                  // 환불 요청 메시지 전송
-                  const client = stompClientRef.current;
-                  if (client?.connected) {
-                    const now = new Date();
-                    const kstOffset = now.getTime() + 9 * 60 * 60 * 1000;
-                    const kstDate = new Date(kstOffset);
-                    const created_at = kstDate.toISOString().slice(0, 19);
-
-                    const refundMessage = {
-                      type: "REFUND",
-                      author_uuid: uuid,
-                      content: JSON.stringify({
-                        price: boardData.price,
-                        deposit: boardData.deposit,
-                        totalAmount: boardData.price + boardData.deposit,
-                        actualPrice: boardData.price,
-                        boardId: data.board_id,
-                        type: data.type
-                      }),
-                      created_at: created_at,
-                      room_id: data.room_id,
-                    };
-
-                    client.publish({
-                      destination: `/app/chat/${data.room_id}`,
-                      body: JSON.stringify(refundMessage)
-                    });
-                  }
-                } catch (error) {
-                  alert(error.message || "보증금 반환 요청을 처리하는데 실패했습니다.");
-                }
-              }}
-              className="pay-btn"
-              disabled={!isPaymentApprovedInChat}
-            >
-              보증금 반환 요청
-            </button>
-          )}
-        </span>
-      </div>
+      <ChatHeader
+        data={data}
+        isAuthor={isAuthor}
+        isPaymentApprovedInChat={isPaymentApprovedInChat}
+        handleMap={handleMap}
+        handlePay={handlePay}
+        handleRefundRequest={handleRefundRequest}
+      />
       <div className="chat-box" ref={scrollRef}>
         <button className="load-more-btn" onClick={loadMoreMessageData}>
           이전 대화 더보기
         </button>
         {messages.map((msg, index) => renderMessage(msg, index))}
       </div>
-      <div className="input-container">
-        <input
-          type="file"
-          className="image-btn"
-          id="image-upload"
-          style={{ display: "none" }}
-          onChange={addImage}
-        />
-        <label htmlFor="image-upload" className="send-btn">
-          +
-        </label>
-        <button className="send-btn" onClick={handleImage}>
-          임시 이미지 전송
-        </button>
-        <input
-          type="text"
-          className="input-text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyPress={activeEnter}
-          placeholder="메시지를 입력하세요..."
-        />
-        <button className="send-btn" onClick={handleSend}>
-          전송
-        </button>
-      </div>
+      <ChatInput
+        input={input}
+        setInput={setInput}
+        handleSend={handleSend}
+        handleImage={handleImage}
+        addImage={addImage}
+      />
       
       {showRefundModal && refundData && (
         <div className="modal-overlay">
@@ -1224,8 +694,6 @@ export default function ChatRoom() {
                 src={`/test-refund?data=${encodeURIComponent(JSON.stringify(refundData))}`}
                 title="환불 처리"
                 className="refund-iframe"
-                onLoad={(e) => {
-                }}
               />
             </div>
           </div>
