@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
+import axios from "axios";
+import Cookies from "js-cookie";
 import "./index.css";
 
 export default function EditBoardForm() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { type, board_id } = useParams(); // board_id는 문자열
+  const { type, board_id } = useParams();
   const { board } = location.state || {};
 
   const [dealType, setDealType] = useState(board?.type?.toLowerCase() || "purchase");
@@ -13,48 +15,95 @@ export default function EditBoardForm() {
   const [content, setContent] = useState(board?.content || "");
   const [price, setPrice] = useState(board?.price || "");
   const [deposit, setDeposit] = useState(board?.deposit || "");
-  const [imageUrl, setImageUrl] = useState(board?.imageUrl ? [board.imageUrl] : []);
+  const [imageFile, setImageFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState("");
+  const [currentImage, setCurrentImage] = useState("");
+  const [isCurrentImageDeleted, setIsCurrentImageDeleted] = useState(false);
+
+  // 컴포넌트 마운트 시 기존 이미지 설정
+  useEffect(() => {
+    console.log("Board data:", board); // 디버깅용
+    console.log("Image URL:", board?.imageUrl); // 필드명 수정
+    
+    if (board?.imageUrl) {
+      setCurrentImage(board.imageUrl);
+      console.log("Final Image URL:", board.imageUrl); // 디버깅용
+    }
+  }, [board]);
 
   const handleDealTypeChange = (type) => {
     setDealType(type);
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setImageFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreviewUrl(reader.result);
+    };
+    reader.readAsDataURL(file);
+    
+    // 새 이미지를 선택하면 기존 이미지는 자동으로 교체됨을 표시
+    setIsCurrentImageDeleted(true);
+  };
+
+  // 기존 이미지 삭제 (프론트에서만)
+  const handleDeleteCurrentImage = () => {
+    setCurrentImage("");
+    setIsCurrentImageDeleted(true);
+  };
+
+  // 새 이미지 삭제
+  const handleDeleteNewImage = () => {
+    setImageFile(null);
+    setPreviewUrl("");
+    // 기존 이미지가 있고 삭제되지 않았다면 다시 표시
+    if (board?.imageUrl && !isCurrentImageDeleted) {
+      setCurrentImage(board.imageUrl);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const image = imageUrl.length > 0 ? imageUrl[0] : "";
-    const baseData = { title, content, imageUrl: image };
-    let requestData = {};
-
-    switch (dealType) {
-      case "purchase":
-      case "sell":
-        requestData = { ...baseData, price: Number(price) };
-        break;
-      case "rental":
-        requestData = { ...baseData, price: Number(price), deposit: Number(deposit) };
-        break;
-      case "exchange":
-        requestData = baseData;
-        break;
-      default:
-        alert("거래 유형을 선택해주세요.");
-        return;
-    }
-
     try {
-      const response = await fetch(`http://localhost/api/board/${dealType}/${board_id}`, {
-        method: "PATCH", // 🔁 PATCH로 변경
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestData),
+      // FormData 생성
+      const formData = new FormData();
+      
+      // DTO 객체 생성
+      const requestDto = {
+        title,
+        content,
+        price: (dealType === "purchase" || dealType === "sell" || dealType === "rental") ? parseInt(price) || 0 : 0,
+        deposit: dealType === "rental" ? parseInt(deposit) || 0 : 0
+      };
+
+      // JSON 형태로 dto 추가
+      formData.append("dto", new Blob([JSON.stringify(requestDto)], {
+        type: "application/json"
+      }));
+
+      // 이미지 파일이 있는 경우 추가 (RequestDto의 imageUrl 필드에 매핑)
+      if (imageFile) {
+        formData.append("imageUrl", imageFile);
+      }
+
+      const response = await axios.put(`/board/${dealType}/${board_id}`, formData, {
+        headers: {
+          'Authorization': `Bearer ${Cookies.get('accessToken')}`
+        }
       });
 
-      if (!response.ok) throw new Error("수정 실패");
-
-      alert("수정 완료!");
-      navigate(`/board/${type}/${board_id}`); // 수정된 dealType 대신 원래 type으로 이동
+      if (response.status === 200) {
+        alert("수정 완료!");
+        navigate(`/board/${type}/${board_id}`);
+      }
     } catch (err) {
-      alert("에러 발생: " + err.message);
+      console.error("게시글 수정 오류:", err);
+      alert("게시글 수정 실패: " + (err.response?.data?.message || err.message));
     }
   };
 
@@ -62,9 +111,7 @@ export default function EditBoardForm() {
     <form className="form-container" onSubmit={handleSubmit}>
       {/* 거래유형 버튼 */}
       <div className="radio-group">
-        <label
-          className="radio-label active"
-        >
+        <label className="radio-label active">
           <input type="radio" name="dealType" value={dealType} checked readOnly />
           <span className="radio-text">
             {dealType === "purchase"
@@ -131,25 +178,61 @@ export default function EditBoardForm() {
         </div>
       )}
 
-      {/* 이미지 URL 입력 */}
+      {/* 이미지 업로드 */}
       <div className="form-group">
+        <label htmlFor="image-upload" className="image-upload-label">
+          {!previewUrl && currentImage && !isCurrentImageDeleted ? (
+            <>
+              <img 
+                src={currentImage} 
+                alt="기존 이미지" 
+                className="preview-item"
+                onError={(e) => {
+                  console.error("이미지 로드 실패:", currentImage);
+                  e.target.style.display = 'none';
+                }}
+              />
+              <button 
+                type="button" 
+                className="delete-image-btn"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleDeleteCurrentImage();
+                }}
+                title="기존 이미지 삭제"
+              >
+                ×
+              </button>
+            </>
+          ) : null}
+        </label>
         <input
-          className="title-input"
-          type="text"
-          placeholder="이미지 URL을 입력하세요"
-          value={imageUrl[0] || ""}
-          onChange={(e) => setImageUrl([e.target.value])}
+          id="image-upload"
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
+          style={{ display: 'none' }}
         />
       </div>
 
       {/* 이미지 미리보기 */}
-      {imageUrl.length > 0 && (
-        <div className="preview-container">
-          {imageUrl.map((url, i) => (
-            <img key={i} src={url} alt="preview" className="preview-item" />
-          ))}
-        </div>
-      )}
+      <div className="preview-container">
+        {/* 새로 선택한 이미지 표시 */}
+        {previewUrl && (
+          <div className="preview-item-wrapper">
+            <img src={previewUrl} alt="새 이미지 미리보기" className="preview-item" />
+            <button 
+              type="button" 
+              className="delete-image-btn"
+              onClick={handleDeleteNewImage}
+              title="새 이미지 삭제"
+            >
+              ×
+            </button>
+            <span className="image-label">새 이미지</span>
+          </div>
+        )}
+      </div>
 
       {/* 버튼 */}
       <div className="button-container">

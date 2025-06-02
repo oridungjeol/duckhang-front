@@ -1,70 +1,172 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import './RefundButton.css';
 
-export default function RefundButton({ orderId }) {
-  const [loading, setLoading] = useState(false);
+const RefundButton = ({ orderId, room_id, room_name, board_id, type, refundInfo }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
+  console.log("RefundButton props:", { orderId, room_id, room_name, board_id, type, refundInfo });
+
+  // 모달이 열려있을 때 body에 modal-open 클래스 추가
+  useEffect(() => {
+    document.body.classList.add('modal-open');
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
+  }, []);
+
   const handleRefund = async () => {
-    if (!orderId) {
-      navigate("/refund-fail", { state: { message: "유효한 주문번호가 없습니다." } });
-      return;
-    }
-
-    setLoading(true);
-
+    setIsLoading(true);
+    setError(null);
     try {
-      const res = await fetch(`http://localhost/api/payment/cancel/${orderId}`, {
-        method: "POST",
+      const response = await fetch(`http://localhost/api/payment/cancel/${orderId}`, {
+        method: 'POST',
         credentials: 'include',
         headers: {
-          "Content-Type": "application/json",
-        }
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          room_id,
+          room_name,
+          board_id,
+          type,
+          amount: refundInfo.deposit || 0
+        }),
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        const errorMessage = data.error || "보증금 환불 실패";
-        throw new Error(errorMessage);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '환불 처리 중 오류가 발생했습니다.');
       }
 
-      navigate("/refund-success", {
-        state: {
+      const data = await response.json();
+      console.log("Refund API response:", data);
+      alert('환불이 성공적으로 처리되었습니다.');
+      
+      // 부모 창에 환불 완료 메시지 전송
+      if (window.parent) {
+        const now = new Date();
+        const kstOffset = now.getTime() + 9 * 60 * 60 * 1000;
+        const kstDate = new Date(kstOffset);
+        const created_at = kstDate.toISOString().slice(0, 19);
+
+        // API 응답에서 환불 금액 가져오기
+        const refundAmount = data.cancelAmount || data.amount || refundInfo?.deposit || 0;
+        console.log("Refund amount:", refundAmount);
+
+        const refundMessage = {
+          type: "COMPLETE_REFUNDED",
+          content: JSON.stringify({
+            message: "보증금 반환이 완료되었습니다.",
+            orderId: orderId,
+            totalAmount: refundInfo.deposit || 0,
+            method: "간편결제",
+            approvedAt: created_at
+          }),
+          created_at: created_at
+        };
+
+        console.log("Refund Message being sent:", refundMessage);
+
+        window.parent.postMessage({
+          type: 'closeRefundModal',
           refundInfo: {
-            orderId: data.orderId || orderId,
-            cancelAmount: data.cancelAmount,
-            refundedAt: data.refundedAt ?? data.canceledAt ?? new Date().toISOString(),
-          },
-        },
-      });
-    } catch (error) {
-      const errorMessage = error.message || "보증금 환불 실패";
-      navigate("/refund-fail", { 
-        state: { 
-          message: errorMessage 
-        } 
-      });
+            orderId: orderId,
+            totalAmount: refundInfo.deposit || 0,
+            approvedAt: created_at
+          }
+        }, window.location.origin);
+
+        // 채팅방으로 이동
+        navigate(`/chat/${room_id}`, {
+          state: {
+            room_id,
+            name: room_name,
+            board_id,
+            type,
+            isBuyer: true,
+            refundMessage: {
+              type: "COMPLETE_REFUNDED",
+              content: JSON.stringify({
+                message: "보증금 반환이 완료되었습니다.",
+                orderId: orderId,
+                totalAmount: refundInfo.deposit || 0,
+                method: "간편결제",
+                approvedAt: created_at
+              }),
+              created_at: created_at
+            }
+          }
+        });
+      }
+    } catch (err) {
+      console.error("Refund error:", err);
+      setError(err.message);
+      alert('환불 처리 중 오류가 발생했습니다.');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="result wrapper">
-        <div className="box_section loading-container">
-          <div className="loading-spinner"></div>
-          <h2>환불 요청 중...</h2>
-          <p>잠시만 기다려주세요</p>
+      <div className="loading-container">
+        <div className="loading-spinner">
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
         </div>
+        <h2>환불 처리 중...</h2>
+        <p>잠시만 기다려주세요.</p>
       </div>
     );
   }
 
+  if (error) {
+    return <div className="error-message">{error}</div>;
+  }
+
   return (
-    <button className="button" onClick={handleRefund} disabled={loading}>
-      구매확정
-    </button>
+    <div className="refund-button-container">
+      <div className="refund-info">
+        <div className="info-section">
+          <h3 className="section-title">환불 정보</h3>
+          <div className="info-item">
+            <span className="label">주문번호</span>
+            <span className="value">{orderId}</span>
+          </div>
+          <div className="info-item">
+            <span className="label">상품명</span>
+            <span className="value">{room_name}</span>
+          </div>
+          <div className="info-item">
+            <span className="label">환불 금액</span>
+            <span className="value" style={{ fontWeight: 'bold', color: '#ff4d4d' }}>
+              {refundInfo?.deposit ? `${Number(refundInfo.deposit).toLocaleString()}원` : '0원'}
+            </span>
+          </div>
+        </div>
+      </div>
+      <button 
+        className="refund-button" 
+        onClick={handleRefund}
+        disabled={isLoading}
+      >
+        구매확정
+      </button>
+    </div>
   );
-}
+};
+
+export default RefundButton;

@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
-import { jwtDecode } from "jwt-decode";
-import Cookies from "js-cookie";
-import "./detail.css";
+import { useEffect, useState } from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
+import Cookies from 'js-cookie';
+import './detail.css';
+import SockJS from 'sockjs-client';
+import { Client } from '@stomp/stompjs';
 
 // 채팅방 생성 함수 (예시)
 // 실제로는 별도 api/chat.js 파일 등에 정의되어야 함
@@ -21,6 +23,7 @@ export default function BoardDetail() {
   const { type, board_id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const fromChat = location.state?.from === 'chat';
 
   const [board, setBoard] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -48,13 +51,43 @@ export default function BoardDetail() {
     setLoading(true);
     setError(null);
 
-    const tryFetchBoard = async () => {
-      let boardTypes = [];
+    const fetchBoard = async () => {
+      // location.state에서 boardType을 먼저 확인
+      const boardType = location.state?.boardType;
+      
+      if (boardType) {
+        // boardType이 전달된 경우 해당 타입으로 직접 요청
+        try {
+          const response = await axios.get(`/board/${boardType}/${board_id}`);
+          setBoard(response.data);
+          
+          // JWT 토큰에서 현재 사용자의 UUID 가져오기
+          const token = Cookies.get('accessToken');
+          if (token) {
+            try {
+              const decoded = jwtDecode(token);
+              const currentUserUuid = decoded.sub;
+              setIsAuthor(currentUserUuid === response.data.author_uuid);
+            } catch (error) {
+              console.error('JWT 디코딩 실패:', error);
+              setIsAuthor(false);
+            }
+          } else {
+            setIsAuthor(false);
+          }
+          return;
+        } catch (err) {
+          console.error('게시글 조회 실패:', err);
+          setError('존재하지 않는 게시글입니다.');
+          return;
+        }
+      }
 
-      if (type === "deal") {
-        boardTypes = ["PURCHASE", "SELL", "RENTAL", "EXCHANGE"];
-      } else if (type === "person") {
-        boardTypes = ["DELEGATE", "HELPER", "MATE"];
+      let boardTypes = [];
+      if (type === 'deal') {
+        boardTypes = ['PURCHASE', 'SELL', 'RENTAL', 'EXCHANGE'];
+      } else if (type === 'person') {
+        boardTypes = ['DELEGATE', 'HELPER', 'MATE'];
       }
 
       for (const boardType of boardTypes) {
@@ -62,21 +95,24 @@ export default function BoardDetail() {
           const response = await axios.get(`/board/${boardType}/${board_id}`);
           setBoard(response.data);
 
-          // JWT 토큰에서 현재 사용자의 UUID 가져오기
           const token = Cookies.get("accessToken");
+
           if (token) {
             try {
               const decoded = jwtDecode(token);
               const currentUserUuid = decoded.sub;
+              console.log('Current User UUID:', currentUserUuid);
+              console.log('Author UUID:', response.data.author_uuid);
               setIsAuthor(currentUserUuid === response.data.author_uuid);
+              console.log('Is Author:', currentUserUuid === response.data.author_uuid);
             } catch (error) {
               console.error("JWT 디코딩 실패:", error);
               setIsAuthor(false);
             }
           } else {
+            console.log('No token found');
             setIsAuthor(false);
           }
-
           return;
         } catch (err) {
           continue;
@@ -86,8 +122,8 @@ export default function BoardDetail() {
       setError("존재하지 않는 게시글입니다.");
     };
 
-    tryFetchBoard().finally(() => setLoading(false));
-  }, [type, board_id]);
+    fetchBoard().finally(() => setLoading(false));
+  }, [type, board_id, location.state]);
 
   const createRoom = async () => {
     if (!board) return;
@@ -99,6 +135,7 @@ export default function BoardDetail() {
         board.type,
         board.author_uuid
       );
+      
       navigate(`/chat/${info.room_id}`, { state: info });
     } catch (err) {
       console.error("채팅방 생성 오류:", err);
@@ -123,8 +160,9 @@ export default function BoardDetail() {
       });
 
       if (response.status === 200) {
-        alert("게시글이 삭제되었습니다.");
-        navigate("/board/deal"); // deal 페이지로 이동
+        alert('게시글이 삭제되었습니다.');
+        navigate(`/board/${type}`); // 원래 카테고리 페이지로 이동
+
       }
     } catch (error) {
       console.error("게시글 삭제 실패:", error);
@@ -175,6 +213,11 @@ export default function BoardDetail() {
 
   return (
     <div className="board-detail-container">
+      {fromChat && (
+        <button className="back-btn" onClick={() => navigate(-1)}>
+          ←
+        </button>
+      )}
       <div className="board-detail-content">
         <div className="board-image">
           <img
@@ -191,6 +234,8 @@ export default function BoardDetail() {
           <div className="board-header">
             <div className="title-container">
               <h1 className="board-title">{board.title}</h1>
+              <div className="title-divider"></div>
+              <span className="board-author">작성자: {board.nickname}</span>
               {isAuthor && (
                 <button className="delete-btn" onClick={handleDelete}>
                   <svg
@@ -211,7 +256,6 @@ export default function BoardDetail() {
                 </button>
               )}
             </div>
-            <span className="board-author">작성자: {board.nickname}</span>
           </div>
 
           <div className="board-meta">
@@ -222,9 +266,9 @@ export default function BoardDetail() {
                   : "가격 미정"}
               </span>
             )}
-            <span className="board-type-badge">
+            <div className={`deal-type-badge ${board.type.toLowerCase()}`}>
               {boardTypeKorean[board.type] || board.type}
-            </span>
+            </div>
           </div>
 
           <div className="board-description">
@@ -240,12 +284,12 @@ export default function BoardDetail() {
         </div>
 
         <div className="board-actions">
-          {isAuthor && (
+          {isAuthor && !fromChat && (
             <button className="edit-btn" onClick={handleEdit}>
               수정하기
             </button>
           )}
-          {!isAuthor && (
+          {!fromChat && (
             <button className="chat-start-btn" onClick={createRoom}>
               채팅 시작하기
             </button>

@@ -48,6 +48,40 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
+.pay-btn:disabled {
+  background-color: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.pay-btn:disabled:hover {
+  background-color: #cccccc; /* Keep background color same on hover */
+  color: #666666; /* Keep text color same on hover */
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.chat-header span:last-child .pay-btn:disabled {
+  background-color: #ffffff; /* Match default pay-btn background */
+  color: #fba337; /* Match default pay-btn color */
+  cursor: not-allowed;
+  box-shadow: none; /* Remove shadow */
+  transform: none; /* Remove transform */
+  opacity: 0.6; /* Slightly reduce opacity to indicate disabled state */
+}
+
+.chat-header span:last-child .pay-btn:disabled:hover {
+  background-color: #ffffff; /* Keep background color same on hover */
+  color: #fba337; /* Keep text color same on hover */
+  cursor: not-allowed;
+  box-shadow: none; /* Remove shadow on hover */
+  transform: none; /* Remove transform on hover */
+  opacity: 0.6; /* Maintain opacity on hover */
+}
+
 .refund-btn {
   background-color: #ffffff;
   color: #fba337;
@@ -119,6 +153,10 @@
 
 .message-wrapper.other {
   justify-content: flex-start;
+}
+
+.message-wrapper.center {
+  justify-content: center;
 }
 
 .message {
@@ -349,16 +387,29 @@
 }
 
 .refund-request-info {
-  margin-top: 8px;
-  padding: 12px;
-  background-color: #fff3e0;
-  border-radius: 8px;
+  margin-top: 4px;
+  padding: 4px 0;
 }
 
 .refund-request-info p {
-  margin: 4px 0;
+  margin: 0;
   color: #4a4a3c;
-  font-size: 14px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: flex;
+  justify-content: space-between;
+}
+
+.refund-request-info p span.label {
+  color: #666;
+  font-size: 0.8rem;
+}
+
+.refund-request-info p span.value {
+   color: #4a4a3c;
+   font-weight: 500;
+   font-size: 0.85rem;
+
 }
 
 .refund-accept-btn {
@@ -378,4 +429,450 @@
   background-color: #45a049;
   transform: translateY(-2px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+}
+
+.payment-request-info {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 12px;
+  margin: 8px 0;
+  border: 1px solid #e9ecef;
+}
+
+.payment-request-info .board-title {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 8px;
+  font-size: 1.1em;
+}
+
+.payment-request-info p {
+  margin: 4px 0;
+  color: #495057;
+}
+
+.payment-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.payment-buttons button {
+  flex: 1;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+  border: none;
+}
+
+.payment-buttons .detail-btn {
+  background-color: #6c757d;
+  color: white;
+}
+
+.payment-buttons .detail-btn:hover {
+  background-color: #5a6268;
+}
+
+.payment-buttons .pay-btn {
+  background-color: #007bff;
+  color: white;
+}
+
+.payment-buttons .pay-btn:hover {
+  background-color: #0056b3;
+}
+
+.payment-complete-card,
+.payment-request-card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 12px;
+  margin: 10px 0;
+  max-width: 280px;
+  width: 80%;
+}
+
+.payment-complete-header,
+.payment-request-header {
+  text-align: center;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.payment-complete-header h3,
+.payment-request-header h3 {
+  color: #4a4a3c;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.payment-complete-content,
+.payment-request-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.payment-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.payment-info-item .label {
+  color: #666;
+  font-size: 0.8rem;
+}
+
+.payment-info-item .value {
+  color: #4a4a3c;
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+.payment-request-buttons {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.payment-request-buttons button {
+  flex: 1;
+  padding: 6px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.return-to-chat-btn {
+  display: block;
+  width: 100%;
+  padding: 6px;
+  margin-top: 12px;
+  background-color: #ffca1a;
+  color: #4a4a3c;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.return-to-chat-btn:hover {
+  background-color: #ffd54f;
+}
+
+.payment-request-card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 12px;
+  margin: 10px 0;
+  max-width: 240px;
+  width: 70%;
+}
+
+.payment-request-card.me {
+  margin-left: auto;
+  background-color: #ffca1a;
+}
+
+.payment-request-card.other {
+  margin-right: auto;
+  background-color: #f8f9fa;
+}
+
+.payment-request-card.me .payment-request-header h3,
+.payment-request-card.me .payment-info-item .label,
+.payment-request-card.me .payment-info-item .value {
+  color: #4a4a3c;
+}
+
+.payment-request-card.other .payment-request-header h3,
+.payment-request-card.other .payment-info-item .label,
+.payment-request-card.other .payment-info-item .value {
+  color: #4a4a3c;
+}
+
+.payment-request-card.me .payment-request-buttons .pay-btn {
+  background-color: #4a4a3c;
+  color: #ffca1a;
+}
+
+.payment-request-card.me .payment-request-buttons .pay-btn:hover {
+  background-color: #333;
+}
+
+.payment-complete-card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 12px;
+  margin: 10px 0;
+  max-width: 240px;
+  width: 70%;
+}
+
+.payment-complete-card.me {
+  margin-left: auto;
+  background-color: #ffca1a;
+}
+
+.payment-complete-card.other {
+  margin-right: auto;
+  background-color: #f8f9fa;
+}
+
+.payment-complete-card.me .payment-complete-header h3,
+.payment-complete-card.me .payment-info-item .label,
+.payment-complete-card.me .payment-info-item .value {
+  color: #4a4a3c;
+}
+
+.payment-complete-card.other .payment-complete-header h3,
+.payment-complete-card.other .payment-info-item .label,
+.payment-complete-card.other .payment-info-item .value {
+  color: #4a4a3c;
+}
+
+.payment-complete-card.me .return-to-chat-btn {
+  background-color: #4a4a3c;
+  color: #ffca1a;
+}
+
+.payment-complete-card.me .return-to-chat-btn:hover {
+  background-color: #333;
+}
+
+/* Refund Request Card Styles */
+.refund-request-card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 12px;
+  margin: 10px 0;
+  max-width: 240px;
+  width: 70%;
+}
+
+.refund-request-card.me {
+  margin-left: auto; /* Align to the right for sender */
+  background-color: #ffca1a; /* Sender's color */
+}
+
+.refund-request-card.other {
+  margin-right: auto; /* Align to the left for receiver */
+  background-color: #f8f9fa; /* Receiver's color */
+}
+
+.refund-request-header {
+  text-align: center;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.refund-request-header h3 {
+  color: #4a4a3c;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.refund-request-buttons {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.refund-request-buttons button {
+  flex: 1;
+  padding: 6px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.refund-request-card .payment-info-item .refund-amount {
+  color: #ff4d4d !important;
+  font-weight: bold !important;
+}
+
+.payment-divider {
+  height: 1px;
+  background-color: #e0e0e0;
+  margin: 8px 0;
+  width: 100%;
+}
+
+.total-amount .label,
+.total-amount .value {
+  font-weight: bold !important;
+  font-size: 0.95em;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  animation: slideIn 0.3s ease-out;
+}
+
+.modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: #4a4a3c;
+  font-size: 1.2rem;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #666;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.modal-close:hover {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.modal-body {
+  padding: 20px;
+  overflow: hidden;
+  flex: 1;
+}
+
+.refund-iframe {
+  width: 100%;
+  height: 500px;
+  border: none;
+  border-radius: 8px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.button {
+  background-color: #ffca1a;
+  color: #4a4a3c;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  margin-top: 10px;
+}
+
+.button:hover {
+  background-color: #fba337;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.button:disabled {
+  background-color: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.button:disabled:hover {
+  background-color: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  text-align: center;
+}
+
+.loading-container h2 {
+  color: #4a4a3c;
+  margin: 10px 0;
+  font-size: 1.2rem;
+}
+
+.loading-container p {
+  color: #666;
+  margin: 5px 0;
+  font-size: 0.9rem;
 }

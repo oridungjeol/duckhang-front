@@ -6,6 +6,7 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .board-detail-content {
@@ -20,6 +21,8 @@
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+  margin-top: 20px;
 }
 
 .board-image img {
@@ -34,18 +37,38 @@
   gap: 1rem;
 }
 
-.board-title {
-  font-size: 24px;
-  font-weight: bold;
-  color: #333;
-  background-color: #f9f8f7;
-  margin: 0;
+.board-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
 }
 
 .title-container {
   display: flex;
   align-items: center;
-  gap: 0;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 0;
+}
+
+.board-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0;
+  padding-left: 0;
+  background: none;
+  letter-spacing: -0.5px;
+  line-height: 1.3;
+  flex: 1;
+}
+
+.title-divider {
+  width: 1px;
+  height: 20px;
+  background-color: #fba337;
+  opacity: 0.5;
 }
 
 .delete-btn {
@@ -71,12 +94,14 @@
   display: flex;
   align-items: center;
   gap: 1rem;
+  margin-bottom: 1rem;
 }
 
 .board-price {
-  font-size: 20px;
-  font-weight: bold;
+  font-size: 24px;
+  font-weight: 700;
   color: #fba337;
+  letter-spacing: -0.5px;
 }
 
 .board-type {
@@ -88,10 +113,42 @@
   font-weight: 600;
 }
 
-.board-description {
+.board-author {
+  font-size: 15px;
   color: #666;
-  line-height: 1.6;
-  margin-top: 1rem;
+  font-weight: 500;
+  letter-spacing: -0.3px;
+  white-space: nowrap;
+}
+
+.board-author::before {
+  content: '';
+  width: 1px;
+  height: 16px;
+  background-color: #fba337;
+  opacity: 0.5;
+}
+
+.board-description h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 12px;
+  letter-spacing: -0.3px;
+}
+
+.board-description p {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #4a4a4a;
+  letter-spacing: -0.3px;
+}
+
+.board-timestamp {
+  font-size: 14px;
+  color: #888;
+  font-weight: 500;
+  margin-top: 8px;
 }
 
 .board-actions {
@@ -219,4 +276,28 @@
   100% {
     opacity: 0.4;
   }
+}
+
+.deal-type-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  background-color: #fba337;
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 2px 4px rgba(251, 163, 55, 0.2);
+}
+
+.deal-type-badge::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-right: 6px;
+  background-color: #ffffff;
 }

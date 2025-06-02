@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import Cookies from "js-cookie";
 import "./index.css";
 
 export default function CreateBoardForm() {
@@ -9,48 +11,65 @@ export default function CreateBoardForm() {
   const [content, setContent] = useState("");
   const [price, setPrice] = useState("");
   const [deposit, setDeposit] = useState("");
-  const [imageUrl, setImageUrl] = useState([]);
+  const [imageFile, setImageFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState("");
 
   const handleDealTypeChange = (type) => {
     setDealType(type);
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setImageFile(file);
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreviewUrl(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const image = imageUrl.length > 0 ? imageUrl[0] : "";
-    const baseData = { title, content, imageUrl: image };
-    let requestData = {};
-
-    switch (dealType) {
-      case "purchase":
-      case "sell":
-        requestData = { ...baseData, price };
-        break;
-      case "rental":
-        requestData = { ...baseData, price, deposit };
-        break;
-      case "exchange":
-        requestData = baseData;
-        break;
-      default:
-        alert("거래 유형을 선택해주세요.");
-        return;
-    }
-
     try {
-      const response = await fetch(`http://localhost/api/board/${dealType}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestData),
+      // FormData 생성
+      const formData = new FormData();
+      
+      // DTO 객체 생성
+      const requestDto = {
+        title,
+        content,
+        price: (dealType === "purchase" || dealType === "sell" || dealType === "rental") ? parseInt(price) || 0 : 0,
+        deposit: dealType === "rental" ? parseInt(deposit) || 0 : 0
+      };
+
+      // JSON 형태로 dto 추가
+      formData.append("dto", new Blob([JSON.stringify(requestDto)], {
+        type: "application/json"
+      }));
+
+      // 이미지 파일이 있는 경우 추가 (RequestDto의 imageUrl 필드에 매핑)
+      if (imageFile) {
+        formData.append("imageUrl", imageFile);
+      }
+
+      const response = await axios.post(`/board/${dealType}`, formData, {
+        headers: {
+          // Content-Type을 명시적으로 설정하지 않음 (브라우저가 자동으로 boundary 설정)
+          'Authorization': `Bearer ${Cookies.get('accessToken')}`
+        }
       });
 
-      if (!response.ok) throw new Error("작성 실패");
-      
-      alert("작성 완료!");
-      navigate('/board/deal');
+      if (response.status === 200) {
+        alert("작성 완료!");
+        navigate('/board/deal');
+      }
     } catch (err) {
-      alert("에러 발생: " + err.message);
+      console.error("게시글 작성 오류:", err);
+      alert("게시글 작성 실패: " + (err.response?.data?.message || err.message));
     }
   };
 
@@ -131,22 +150,21 @@ export default function CreateBoardForm() {
         </div>
       )}
 
-      {/* 이미지 업로드 (단순 URL 입력 예시) */}
+      {/* 이미지 업로드 */}
       <div className="form-group">
+        <label htmlFor="image-upload" className="image-upload-label"></label>
         <input
-          className="title-input"
-          type="text"
-          placeholder="이미지 URL을 입력하세요"
-          onChange={(e) => setImageUrl([e.target.value])}
+          id="image-upload"
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
         />
       </div>
 
       {/* 이미지 미리보기 */}
-      {imageUrl.length > 0 && (
+      {previewUrl && (
         <div className="preview-container">
-          {imageUrl.map((url, i) => (
-            <img key={i} src={url} alt="preview" className="preview-item" />
-          ))}
+          <img src={previewUrl} alt="preview" className="preview-item" />
         </div>
       )}
 
