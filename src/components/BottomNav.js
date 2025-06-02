@@ -15,7 +15,7 @@ export default function BottomNav() {
         채팅
       </NavLink>
       <NavLink 
-        to="/board" 
+        to="/board/deal" 
         className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
       >
         게시판

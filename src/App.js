@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import Login from "./pages/user/login"
-import Profile from "./pages/user/Profile";
+import Profile from "./pages/user/profile";
 import Board from "./pages/board";
 import BoardDetail from "./pages/board/post/detail";
 import Chat from "./pages/chat";

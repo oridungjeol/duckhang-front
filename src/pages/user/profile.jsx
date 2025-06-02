@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios'
 import Posts from './Posts';
 import Reviews from './Reviews';
-import './Profile.css';
+import './profile.css';
 import BottomNav from '../../components/BottomNav';
 import ProfileEdit from './ProfileEdit';
 
