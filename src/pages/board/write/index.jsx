@@ -13,6 +13,7 @@ export default function CreateBoardForm() {
   const [deposit, setDeposit] = useState("");
   const [imageFile, setImageFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState("");
+  const [imageError, setImageError] = useState(false);
 
   const handleDealTypeChange = (type) => {
     setDealType(type);
@@ -20,8 +21,11 @@ export default function CreateBoardForm() {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (!file) return;
-
+    if (!file) {
+      setImageError(true);
+      return;
+    }
+    setImageError(false);
     setImageFile(file);
 
     const reader = new FileReader();
@@ -33,6 +37,12 @@ export default function CreateBoardForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!imageFile) {
+      setImageError(true);
+      return;
+    }
+    setImageError(false);
 
     try {
       // FormData 생성
@@ -159,6 +169,7 @@ export default function CreateBoardForm() {
           accept="image/*"
           onChange={handleImageChange}
         />
+        <div className="error-message" style={{ display: imageError ? 'block' : 'none' }}>이미지를 업로드해주세요</div>
       </div>
 
       {/* 이미지 미리보기 */}

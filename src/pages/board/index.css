@@ -1,35 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
+
 .board-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0 2rem 2rem 2rem;
   background-color: #f9f8f7;
 }
 
-.board-header {
+.board-container .board-header {
+  background: linear-gradient(to bottom, #fb923c, #fbbf24);
+  padding: 2.5rem 1.5rem 1.5rem 1.5rem;
+  border-radius: 0 0 20px 20px;
+  margin: 0 -2rem 2rem -2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 2px solid #fba337;
+  border-bottom: none;
+  color: white;
 }
 
-.board-title-section {
+.board-container .board-title-section {
   flex: 1;
 }
 
-.board-title {
+.board-container .board-title {
   font-size: 2rem;
-  font-weight: bold;
-  color: #333;
-  margin: 0 0 0.5rem 0;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+  padding-bottom: 1rem;
   display: block;
+  letter-spacing: 1px;
 }
 
-.board-description {
+.board-container .board-description {
   font-size: 1rem;
-  color: #666;
+  color: rgba(255, 255, 255, 0.9);
   margin: 0;
+  letter-spacing: 0.5px;
 }
 
 .write-btn {
@@ -97,53 +106,68 @@
 
 .search-box {
   display: flex;
-  gap: 1.5rem;
+  gap: 1rem;
   align-items: center;
   margin-left: -15px;
   background-color: transparent;
 }
 
 .search-box input {
+  flex-grow: 1;
   padding: 0.5rem 1rem;
-  border: 1px solid #ddd;
+  border: 1px solid #a0a0a0;
   border-radius: 20px;
   font-size: 0.9rem;
   width: 200px;
-  transition: width 0.3s ease;
+  transition: all 0.3s ease;
   height: 36px;
   box-sizing: border-box;
   background-color: #fff;
   width: 250px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
 }
 
 .search-box input:focus {
   outline: none;
   border-color: #fba337;
-  
+  box-shadow: 0 2px 8px rgba(251, 163, 55, 0.5);
 }
 
 .search-btn {
   background-color: #fba337;
   color: #ffffff;
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.9rem;
+  padding: 0.3rem;
+  border-radius: 8px;
+  font-size: 0;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
   height: 36px;
+  width: 36px;
   box-sizing: border-box;
-  white-space: nowrap;
   margin-left: -1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.search-btn svg {
+  position: absolute;
+  top: 50%;
+  left: calc(50% + 2px);
+  transform: translate(-50%, -50%);
 }
 
 .search-btn:hover {
   background-color: #ffca1a;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .search-type-select {
   padding: 0.5rem 0.5rem;
-  border: 1px solid #ddd;
+  border: 1px solid #a0a0a0;
   border-radius: 20px;
   font-size: 0.9rem;
   color: #666;
@@ -151,6 +175,15 @@
   background-color: #fff;
   height: 36px;
   box-sizing: border-box;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  margin-left: 0.5rem;
+}
+
+.search-type-select:focus {
+  outline: none;
+  border-color: #fba337;
+  box-shadow: 0 2px 8px rgba(251, 163, 55, 0.5);
 }
 
 .board-content {
@@ -162,12 +195,12 @@
 
 /* 반응형 디자인 */
 @media (max-width: 768px) {
-  .board-header {
+  .board-container .board-header {
     flex-direction: column;
     gap: 1rem;
   }
 
-  .board-filter {
+  .board-container .board-filter {
     flex-direction: column;
     gap: 1rem;
   }

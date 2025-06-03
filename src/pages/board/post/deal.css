@@ -4,13 +4,14 @@
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 200px); /* 상단 여백 고려한 높이 */
+  height: calc(100vh - 150px); /* 높이 계산값 줄여서 영역 확장 */
+  /* min-height: calc(100vh - 200px); */ /* min-height는 제거 또는 조정 */
 }
 
 .deal-items {
   flex: 1;
-  overflow-y: auto;
-  padding-right: 10px;
+  overflow-y: auto; /* 내부 스크롤 다시 적용 */
+  padding-right: 10px; /* 스크롤바 공간 확보 */
   margin-right: -10px; /* 스크롤바 공간 확보 */
 }
 
@@ -195,7 +196,7 @@
 
 .deal-item-title {
   font-size: 1.2rem;
-  font-weight: bold;
+  font-weight: 500;
   color: #333;
   margin: 0;
 }
