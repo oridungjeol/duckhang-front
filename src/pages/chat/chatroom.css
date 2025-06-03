@@ -180,11 +180,11 @@
   text-align: center;
   color: #4a4a3c;
   font-size: 16px;
-  margin: 8px 0;
+  margin: 8px auto;
   padding: 8px 16px;
   background-color: rgba(251, 163, 55, 0.15);
   border-radius: 12px;
-  display: inline-block;
+  display: block;
   max-width: 80%;
 }
 
@@ -192,11 +192,11 @@
   text-align: center;
   color: #d32f2f;
   font-size: 16px;
-  margin: 8px 0;
+  margin: 8px auto;
   padding: 8px 16px;
   background-color: rgba(211, 47, 47, 0.1);
   border-radius: 12px;
-  display: inline-block;
+  display: block;
   max-width: 80%;
 }
 
