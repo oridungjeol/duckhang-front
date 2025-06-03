@@ -57,7 +57,7 @@ export default function BoardDetail() {
       if (boardType) {
         // boardType이 전달된 경우 해당 타입으로 직접 요청
         try {
-          const response = await axios.get(`/board/${boardType}/${board_id}`);
+          const response = await axios.get(`http://localhost/api/board/${boardType}/${board_id}`);
           setBoard(response.data);
 
           // JWT 토큰에서 현재 사용자의 UUID 가져오기
@@ -91,7 +91,7 @@ export default function BoardDetail() {
 
       for (const boardType of boardTypes) {
         try {
-          const response = await axios.get(`/board/${boardType}/${board_id}`);
+          const response = await axios.get(`http://localhost/api/board/${boardType}/${board_id}`);
           setBoard(response.data);
 
           const token = Cookies.get("accessToken");
@@ -155,7 +155,7 @@ export default function BoardDetail() {
     }
 
     try {
-      const response = await axios.delete(`/board/${board.type}/${board_id}`, {
+      const response = await axios.delete(`http://localhost/api/board/${board.type}/${board_id}`, {
         headers: {
           Authorization: `Bearer ${Cookies.get("accessToken")}`,
         },

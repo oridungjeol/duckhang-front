@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import './deal.css';
 
 // 시간 포맷팅 유틸리티 함수
@@ -58,12 +59,9 @@ export default function Deal({ keyword = '', category }) {
       params.append('boardType', category.toUpperCase());
       params.append('searchFieldType', 'CONTENT');
 
-      fetch(`/board/search?${params}`)
-        .then((res) => {
-          if (!res.ok) throw new Error('게시글을 불러오지 못했습니다');
-          return res.json();
-        })
-        .then((data) => {
+      axios.get(`http://localhost/api/board/search?${params}`)
+        .then((response) => {
+          const data = response.data;
           setPosts(data.content || []);
           setTotalPages(data.totalPages || 0);
           setTotalElements(data.totalElements || 0);
@@ -76,13 +74,9 @@ export default function Deal({ keyword = '', category }) {
           setLoading(false);
         });
     } else {
-      // 검색어가 없는 경우 일반 게시글 목록 API 사용
-      fetch(`/board/${category.toUpperCase()}?${params}`)
-        .then((res) => {
-          if (!res.ok) throw new Error('게시글을 불러오지 못했습니다');
-          return res.json();
-        })
-        .then((data) => {
+      axios.get(`http://localhost/api/board/${category.toUpperCase()}?${params}`)
+        .then((response) => {
+          const data = response.data;
           setPosts(data.content || []);
           setTotalPages(data.totalPages || 0);
           setTotalElements(data.totalElements || 0);
