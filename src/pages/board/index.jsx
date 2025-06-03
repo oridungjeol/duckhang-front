@@ -135,13 +135,16 @@ export default function Board() {
               : "함께할 사람을 찾는 공간입니다. 다양한 활동에 참여해보세요."}
           </p>
         </div>
-        <button className="write-btn" onClick={handleWriteClick}>
-          글쓰기
-        </button>
       </div>
 
       <div className="board-filter">
-        <div className="filter-options">{renderFilterButtons()}</div>
+        <div className="filter-options">{renderFilterButtons()}
+          <button className="write-btn" onClick={handleWriteClick}>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+              <path d="M19.0001 3.5L20.5001 5L19.0001 3.5ZM18.3541 4.146L19.8541 5.646L18.3541 4.146ZM11.0001 11.5L12.5001 13L11.0001 11.5ZM9.5001 13L11.0001 14.5L9.5001 13ZM3.0001 21H21.0001V19H3.0001V21ZM18.3541 4.146L8.5001 14L6.5001 12L16.3541 2.146L18.3541 4.146ZM8.5001 14L3.0001 19.5V19.5L8.5001 14ZM18.3541 4.146C18.5416 3.9585 18.7952 3.85352 19.0607 3.85352C19.3262 3.85352 19.5798 3.9585 19.7673 4.146L20.5001 5L19.0001 3.5L18.3541 4.146ZM8.5001 14L6.5001 12L8.5001 14ZM3.0001 19.5L8.5001 14L3.0001 19.5Z"></path>
+            </svg>
+          </button>
+        </div>
         <div className="search-box">
           <input
             type="text"

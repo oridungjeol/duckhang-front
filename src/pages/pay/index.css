@@ -21,6 +21,10 @@
   margin-right: auto;
 }
 
+.button:hover {
+  background-color: #5580e6; /* Prevent background color change on hover */
+  /* Remove or reset other hover effects if any */
+}
 
 .result.wrapper {
 min-height: 100vh;
