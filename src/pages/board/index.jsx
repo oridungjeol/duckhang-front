@@ -41,7 +41,6 @@ export default function Board() {
   };
 
   const handleSearchClick = () => {
-    if (!searchKeyword.trim()) return;
     setCurrentKeyword(searchKeyword);
     navigate(
       `/board/${type}?filter=${activeFilter}&keyword=${searchKeyword}&fieldType=${searchType}`
@@ -49,7 +48,7 @@ export default function Board() {
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === "Enter" && searchKeyword.trim()) {
+    if (e.key === "Enter") {
       handleSearchClick();
     }
   };
