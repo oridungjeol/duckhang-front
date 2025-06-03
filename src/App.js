@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-import Login from "./pages/user/login"
-import Profile from "./pages/user/Profile";
+import Login from "./pages/user/login";
+import Profile from "./pages/user/profile";
 import Board from "./pages/board";
 import BoardDetail from "./pages/board/post/detail";
 import Chat from "./pages/chat";
@@ -17,8 +17,6 @@ import Fail from "./pages/pay/Fail";
 import TestRefundPage from "./pages/pay/TestRefundPage";
 import RefundSuccess from "./pages/refund/RefundSuccess";
 import RefundFail from "./pages/refund/RefundFail";
-
-import BottomNav from "./components/BottomNav";
 
 import "./App.css";
 
@@ -41,7 +39,10 @@ function App() {
           <Route path="/board/:type" element={<Board />} />
           <Route path="/board/:type/write" element={<Write />} />
           <Route path="/board/:type/:board_id" element={<BoardDetail />} />
-          <Route path="/board/write/:type/:board_id" element={<EditBoardForm />} />
+          <Route
+            path="/board/write/:type/:board_id"
+            element={<EditBoardForm />}
+          />
           <Route path="/chat" element={<Chat />} />
           <Route path="/chat/:room_id" element={<ChatRoom />} />
           <Route path="/map" element={<Map />} />
@@ -53,7 +54,6 @@ function App() {
           <Route path="/refund-success" element={<RefundSuccess />} />
           <Route path="/refund-fail" element={<RefundFail />} />
         </Routes>
-        <BottomNav />
       </div>
     </Router>
   );

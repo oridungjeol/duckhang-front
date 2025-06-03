@@ -36,9 +36,9 @@
   background-color: #fba337;
   color: #ffffff;
   border: none;
-  padding: 0.8rem 1.5rem;
-  border-radius: 8px;
-  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -65,7 +65,7 @@
 
 .filter-options {
   display: flex;
-  gap: 1rem;
+  gap: 2rem;
 }
 
 .filter-btn {
@@ -73,7 +73,8 @@
   border: none;
   padding: 0.5rem 1rem;
   font-size: 0.9rem;
-  color: #666;
+  font-weight: 600;
+  color: #fba337;
   cursor: pointer;
   transition: all 0.3s ease;
   border-radius: 20px;
@@ -96,8 +97,10 @@
 
 .search-box {
   display: flex;
-  gap: 0.5rem;
+  gap: 1.5rem;
   align-items: center;
+  margin-left: -15px;
+  background-color: transparent;
 }
 
 .search-box input {
@@ -109,12 +112,14 @@
   transition: width 0.3s ease;
   height: 36px;
   box-sizing: border-box;
+  background-color: #fff;
+  width: 250px;
 }
 
 .search-box input:focus {
   outline: none;
   border-color: #fba337;
-  width: 250px;
+  
 }
 
 .search-btn {
@@ -129,6 +134,7 @@
   height: 36px;
   box-sizing: border-box;
   white-space: nowrap;
+  margin-left: -1px;
 }
 
 .search-btn:hover {
@@ -136,11 +142,11 @@
 }
 
 .search-type-select {
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 0.5rem;
   border: 1px solid #ddd;
   border-radius: 20px;
   font-size: 0.9rem;
-  color: #333;
+  color: #666;
   cursor: pointer;
   background-color: #fff;
   height: 36px;

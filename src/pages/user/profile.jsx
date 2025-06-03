@@ -6,6 +6,8 @@ import './Profile.css';
 import Header from '../../components/header';
 import Posts from './Posts';
 import Reviews from './Reviews';
+import './profile.css';
+import BottomNav from '../../components/BottomNav';
 import ProfileEdit from './ProfileEdit';
 import BottomNav from '../../components/BottomNav';
 

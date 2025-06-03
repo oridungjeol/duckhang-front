@@ -2,18 +2,18 @@
   max-width: 600px;
   margin: 0 auto;
   padding: 1rem;
-  background-color: #ffffff;
+  background-color: #f9f8f7;
   height: 90vh;
   display: flex;
   flex-direction: column;
 }
 
 h1 {
-  background-color: #ffffff;
-  color: #4a4a3c;
+  color: #4169e1;
   padding: 1rem;
   border-radius: 12px 12px 0 0;
   font-weight: bold;
+  font-size: 3em;
   margin: 0;
 }
 
@@ -94,3 +94,4 @@ h1 {
 .chatting:hover .chat-last-message {
   color: #4a4a3c;
 }
+

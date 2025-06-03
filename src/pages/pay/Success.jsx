@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
+import './Success.css';
 
 export function Success() {
   const hasFetched = useRef(false);
@@ -207,7 +208,7 @@ export function Success() {
       >
         
         <svg width="85" height="85" viewBox="0 0 100 100" fill="none">
-          <circle cx="50" cy="50" r="45" fill="#5580e6" />
+          <circle cx="50" cy="50" r="45" fill="#3182f6" />
           <path
             d="M30 52L45 67L70 42"
             stroke="white"
@@ -219,16 +220,15 @@ export function Success() {
         
 
         <div className="box_section">
-          <h1>결제를 완료했어요</h1>
-
+          <h1 className="success-title">결제를 완료했어요</h1>
         </div>
         
         <button
         onClick={handleReturnToChat}
         style={{
-          marginTop: "20px",
+          marginTop: "10px",
           padding: "12px 24px",
-          backgroundColor: "#5580e6",
+          backgroundColor: "#3182f6",
           color: "#ffffff",
           border: "none",
           borderRadius: "12px",
@@ -268,6 +268,16 @@ export function Success() {
               transform: translateY(0);
             }
           }
+
+          .success-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333; /* Adjust font size as needed */
+            margin-top: 30px; /* Increased margin to push it further down */
+            /* Add any other desired styles */
+          }
+
         `}
       </style>
 
