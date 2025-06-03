@@ -18,6 +18,9 @@ import TestRefundPage from "./pages/pay/TestRefundPage";
 import RefundSuccess from "./pages/refund/RefundSuccess";
 import RefundFail from "./pages/refund/RefundFail";
 
+import UpdateProfile from './pages/user/UpdateProfile';
+import Review from "./pages/review";
+
 import "./App.css";
 
 function App() {
@@ -53,6 +56,9 @@ function App() {
           <Route path="/test-refund" element={<TestRefundPage />} />
           <Route path="/refund-success" element={<RefundSuccess />} />
           <Route path="/refund-fail" element={<RefundFail />} />
+
+          <Route path="/user/update" element={<UpdateProfile />} />
+          <Route path="/review" element={<Review />} />
         </Routes>
       </div>
     </Router>

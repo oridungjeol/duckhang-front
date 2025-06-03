@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import './deal.css';
 
 const formatRelativeTime = (dateString) => {
@@ -45,40 +46,47 @@ export default function Deal({ keyword = '', category }) {
       size: pageSize.toString(),
     });
 
-    let url = '';
-
     if (keyword) {
-      // 제목 검색만 고정 (searchFieldType=TITLE)
       params.append('keyword', keyword);
       params.append('boardType', category.toUpperCase());
-      params.append('searchFieldType', 'TITLE');  // 여기서 항상 TITLE로 고정
-      url = `/board/search?${params}`;
-    } else {
-      url = `/board/${category}?${params}`;
-    }
+      // searchFieldType 항상 'ALL'로 고정
+      params.append('searchFieldType', 'TITLE');
 
-    fetch(url)
-      .then((res) => {
-        if (!res.ok) throw new Error('게시글을 불러오지 못했습니다');
-        return res.json();
-      })
-      .then((data) => {
-        setPosts(data.content || []);
-        setTotalPages(data.totalPages || 0);
-        setTotalElements(data.totalElements || 0);
-      })
-      .catch((err) => {
-        console.error(err);
-        setPosts([]);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+      axios.get(`http://localhost/api/board/search?${params}`)
+        .then((response) => {
+          const data = response.data;
+          setPosts(data.content || []);
+          setTotalPages(data.totalPages || 0);
+          setTotalElements(data.totalElements || 0);
+        })
+        .catch((err) => {
+          console.error(err);
+          setPosts([]);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    } else {
+      axios.get(`http://localhost/api/board/${category.toUpperCase()}?${params}`)
+        .then((response) => {
+          const data = response.data;
+          setPosts(data.content || []);
+          setTotalPages(data.totalPages || 0);
+          setTotalElements(data.totalElements || 0);
+        })
+        .catch((err) => {
+          console.error(err);
+          setPosts([]);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
   }, [category, currentPage, pageSize, keyword]);
 
   useEffect(() => {
     setCurrentPage(0);
-  }, [category]);
+  }, [category, keyword]);
 
   useEffect(() => {
     if (!loading && dealItemsRef.current) {

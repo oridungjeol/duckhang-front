@@ -14,7 +14,7 @@ export default function Board() {
     searchParams.get("filter") || (type === "deal" ? "purchase" : "recruit");
   const [activeFilter, setActiveFilter] = useState(initialFilter);
   const [searchType, setSearchType] = useState(
-    searchParams.get("fieldType") || "ALL"
+    searchParams.get("fieldType") || "TITLE"
   );
   const [searchKeyword, setSearchKeyword] = useState(
     searchParams.get("keyword") || ""
@@ -41,7 +41,6 @@ export default function Board() {
   };
 
   const handleSearchClick = () => {
-    if (!searchKeyword.trim()) return;
     setCurrentKeyword(searchKeyword);
     navigate(
       `/board/${type}?filter=${activeFilter}&keyword=${searchKeyword}&fieldType=${searchType}`
@@ -49,7 +48,7 @@ export default function Board() {
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === "Enter" && searchKeyword.trim()) {
+    if (e.key === "Enter") {
       handleSearchClick();
     }
   };
