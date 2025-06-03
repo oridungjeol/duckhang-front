@@ -66,7 +66,7 @@ export default function CreateBoardForm() {
         formData.append("imageUrl", imageFile);
       }
 
-      const response = await axios.post(`/board/${dealType}`, formData, {
+      const response = await axios.post(`http://localhost/api/board/${dealType}`, formData, {
         headers: {
           // Content-Type을 명시적으로 설정하지 않음 (브라우저가 자동으로 boundary 설정)
           'Authorization': `Bearer ${Cookies.get('accessToken')}`

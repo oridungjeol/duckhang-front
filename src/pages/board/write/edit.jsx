@@ -101,7 +101,7 @@ export default function EditBoardForm() {
         formData.append("imageUrl", imageFile);
       }
 
-      const response = await axios.put(`/board/${dealType}/${board_id}`, formData, {
+      const response = await axios.patch(`http://localhost/api/board/${dealType}/${board_id}`, formData, {
         headers: {
           'Authorization': `Bearer ${Cookies.get('accessToken')}`
         }
