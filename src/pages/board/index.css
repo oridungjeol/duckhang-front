@@ -74,7 +74,12 @@
 
 .filter-options {
   display: flex;
-  gap: 2rem;
+  gap: 2.25rem;
+  align-items: center;
+  flex-wrap: nowrap;
+  width: 100%;
+  justify-content: flex-start;
+  min-width: 800px;
 }
 
 .filter-btn {
@@ -203,12 +208,15 @@
   .board-container .board-filter {
     flex-direction: column;
     gap: 1rem;
+    overflow-x: auto;
   }
 
   .filter-options {
     width: 100%;
-    justify-content: center;
-    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 2.25rem;
+    flex-wrap: nowrap;
+    min-width: 800px;
   }
 
   .search-box {
