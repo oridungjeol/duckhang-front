@@ -156,15 +156,6 @@ export default function Board() {
           <button className="search-btn" onClick={handleSearchClick}>
             검색
           </button>
-          <select
-            className="search-type-select"
-            value={searchType}
-            onChange={(e) => setSearchType(e.target.value)}
-          >
-            <option value="ALL">제목+내용</option>
-            <option value="TITLE">제목</option>
-            <option value="CONTENT">내용</option>
-          </select>
         </div>
       </div>
 

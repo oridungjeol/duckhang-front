@@ -10,7 +10,7 @@
 
 .chat-header {
   background-color: #f9f8f7;
-  border-bottom: solid #ffdc58;
+  border-bottom: solid 1px #fba337;
   padding: 1rem;
   border-radius: 12px 12px 0 0;
   font-weight: bold;
@@ -26,7 +26,7 @@
 }
 
 .chat-title {
-  color: #4169e1;
+  color: #fba337;
 }
 
 .pay-btn {
@@ -42,14 +42,16 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.pay-btn:hover {
+.pay-btn:hover,
+.refund-btn:hover {
   background-color: #ffca1a;
   color: #ffffff;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-.pay-btn:disabled {
+.pay-btn:disabled,
+.refund-btn:disabled {
   background-color: #cccccc;
   color: #666666;
   cursor: not-allowed;
@@ -57,50 +59,24 @@
   transform: none;
 }
 
-.pay-btn:disabled:hover {
-  background-color: #cccccc; /* Keep background color same on hover */
-  color: #666666; /* Keep text color same on hover */
+.chat-header span:last-child .pay-btn:disabled,
+.chat-header span:last-child .refund-btn:disabled {
+  background-color: #ffffff;
+  color: #fba337;
   cursor: not-allowed;
   box-shadow: none;
   transform: none;
+  opacity: 0.6;
 }
 
-.chat-header span:last-child .pay-btn:disabled {
-  background-color: #ffffff; /* Match default pay-btn background */
-  color: #fba337; /* Match default pay-btn color */
-  cursor: not-allowed;
-  box-shadow: none; /* Remove shadow */
-  transform: none; /* Remove transform */
-  opacity: 0.6; /* Slightly reduce opacity to indicate disabled state */
-}
-
-.chat-header span:last-child .pay-btn:disabled:hover {
-  background-color: #ffffff; /* Keep background color same on hover */
-  color: #fba337; /* Keep text color same on hover */
-  cursor: not-allowed;
-  box-shadow: none; /* Remove shadow on hover */
-  transform: none; /* Remove transform on hover */
-  opacity: 0.6; /* Maintain opacity on hover */
-}
-
-.refund-btn {
+.chat-header span:last-child .pay-btn:disabled:hover,
+.chat-header span:last-child .refund-btn:disabled:hover {
   background-color: #ffffff;
   color: #fba337;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 20px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 14px;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.refund-btn:hover {
-  background-color: #ffca1a;
-  color: #ffffff;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+  opacity: 0.6;
 }
 
 .chat-box {
@@ -113,9 +89,27 @@
   gap: 8px;
 }
 
+.chat-box::-webkit-scrollbar {
+  width: px;
+}
+
+.chat-box::-webkit-scrollbar-track {
+  background: #ffca1a;
+}
+
+.chat-box::-webkit-scrollbar-thumb {
+  background-color: #cccccc;
+  border-radius: 4px;
+  border: 1px solid #999999;
+}
+
+.chat-box::-webkit-scrollbar-thumb:hover {
+  background: #999999;
+}
+
 .load-more-btn {
-  background-color: #ffca1a;
-  color: #4a4a3c;
+  background-color: #fba337;
+  color: #ffffff;
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 8px;
@@ -126,7 +120,7 @@
 }
 
 .load-more-btn:hover {
-  background-color: #fba337;
+  background-color: #ffca1a;
   color: #ffffff;
 }
 
@@ -168,47 +162,50 @@
   word-wrap: break-word;
   max-width: 70%;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  animation: messagePop 0.3s ease-out;
-}
-
-@keyframes messagePop {
-  0% {
-    transform: scale(0.8);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-  100% {
-    transform: scale(1);
-  }
 }
 
 .message.me {
-  background-color: #ffca1a;
-  color: #4a4a3c;
+  background-color: #fba337;
+  color: #ffffff;
   border-top-right-radius: 4px;
 }
 
 .message.other {
-  background-color: #d9d9d9;
+  background-color: #ffeacc;
   color: #4a4a3c;
   border-top-left-radius: 4px;
 }
 
 .system-message {
   text-align: center;
-  color: #fba337;
+  color: #4a4a3c;
   font-size: 16px;
   margin: 8px 0;
-  animation: fadeIn 0.5s ease-out;
+  padding: 8px 16px;
+  background-color: rgba(251, 163, 55, 0.15);
+  border-radius: 12px;
+  display: inline-block;
+  max-width: 80%;
 }
 
 .warnning-message {
   text-align: center;
-  color: rgb(251, 55, 55);
+  color: #d32f2f;
   font-size: 16px;
   margin: 8px 0;
-  animation: fadeIn 0.5s ease-out;
+  padding: 8px 16px;
+  background-color: rgba(211, 47, 47, 0.1);
+  border-radius: 12px;
+  display: inline-block;
+  max-width: 80%;
+}
+
+.input-container {
+  background-color: #f9f8f7;
+  padding: 1rem;
+  border-top: 1px solid #ffca1a;
+  display: flex;
+  gap: 0.5rem;
 }
 
 @keyframes fadeIn {
@@ -223,7 +220,7 @@
 .input-container {
   background-color: #f9f8f7;
   padding: 1rem;
-  border-top: 1px solid #ffca1a;
+  border-top:  solid 1px #fba337;
   display: flex;
   gap: 0.5rem;
 }
@@ -235,7 +232,7 @@
 .input-text {
   flex: 1;
   padding: 0.8rem;
-  border: 2px solid #ffca1a;
+  border: 2px solid #fba337;
   border-radius: 8px;
   font-size: 14px;
   outline: none;
@@ -243,12 +240,12 @@
 }
 
 .input-text:focus {
-  border-color: #fba337;
+  border-color: #ffca1a;
 }
 
 .input-container button {
-  background-color: #ffca1a;
-  color: #4a4a3c;
+  background-color: #fba337;
+  color: #ffffff;
   border: none;
   padding: 0.8rem 1.5rem;
   border-radius: 8px;
@@ -258,47 +255,103 @@
 }
 
 .input-container button:hover {
-  background-color: #fba337;
+  background-color: #ffca1a;
   color: #ffffff;
 }
 
 .map-wrapper {
   display: flex;
   justify-content: center;
-  margin: 8px 0;
+  margin: 12px 0;
   animation: messageSlideIn 0.3s ease-out;
 }
 
 .map {
-  padding: 12px 16px;
-  background-color: #ffca1a;
+  background: linear-gradient(145deg, #ffffff, #f8fafc);
   border-radius: 12px;
-  max-width: 80%;
+  padding: 16px;
+  width: 85%;
+  max-width: 280px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(251, 163, 55, 0.2);
+}
+
+.map-content {
   display: flex;
-  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.map-icon {
+  background: rgba(251, 163, 55, 0.1);
+  padding: 8px;
+  border-radius: 8px;
+  display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  color: #fba337;
 }
 
-.map button {
-  background-color: #fba337;
-  color: #ffffff;
+.map-text {
+  flex: 1;
+}
+
+.map-text h3 {
+  color: #1e293b;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 2px 0;
+}
+
+.map-text p {
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.map-button {
+  background: #fba337;
+  color: white;
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
-.map button:hover {
-  background-color: #fba337;
+.map-button:hover {
+  background: #ffca1a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(251, 163, 55, 0.3);
+}
+
+.map-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(251, 163, 55, 0.2);
+}
+
+.map-button svg {
+  transition: transform 0.2s ease;
+  stroke: #ffffff;
+}
+
+.map-button:hover svg {
+  transform: translateX(2px);
 }
 
 .send-btn {
   background-color: #fba337;
   color: #ffffff;
   border: none;
-  /* padding: 0.8rem; */
   border-radius: 50%;
   font-size: 1rem;
   font-weight: bold;
@@ -321,7 +374,6 @@
   height: 50px;
 }
 
-/* payment-success-card 스타일 */
 .payment-success-card {
   position: fixed;
   top: 50%;
@@ -349,7 +401,7 @@
 
 .payment-success-icon {
   font-size: 48px;
-  color: #4caf50; /* Green color for success */
+  color: #4caf50;
   margin-bottom: 15px;
 }
 
@@ -654,7 +706,6 @@
   background-color: #333;
 }
 
-/* Refund Request Card Styles */
 .refund-request-card {
   background: white;
   border-radius: 10px;
@@ -666,13 +717,13 @@
 }
 
 .refund-request-card.me {
-  margin-left: auto; /* Align to the right for sender */
-  background-color: #ffca1a; /* Sender's color */
+  margin-left: auto;
+  background-color: #ffca1a;
 }
 
 .refund-request-card.other {
-  margin-right: auto; /* Align to the left for receiver */
-  background-color: #f8f9fa; /* Receiver's color */
+  margin-right: auto;
+  background-color: #f8f9fa;
 }
 
 .refund-request-header {
@@ -896,7 +947,7 @@
 }
 
 .search-icon-btn:hover {
-  background-color: rgba(251, 163, 55, 0.1);
+  background-color: rgba(251, 163, 55, 0.15);
   transform: scale(1.2);
   box-shadow: none;
 }
@@ -904,7 +955,7 @@
 .search-icon-btn:active {
   transform: scale(0.9);
   box-shadow: none;
-  background-color: rgba(251, 163, 55, 0.2);
+  background-color: rgba(251, 163, 55, 0.25);
 }
 
 .search-box {
@@ -1030,7 +1081,7 @@
 }
 
 .search-result-item.active {
-  background-color: #fff8e1;
+  background-color: #ffeacc;
 }
 
 .search-result-time {
@@ -1043,7 +1094,6 @@
   color: #333;
 }
 
-/* 스크롤바 스타일링 */
 .search-results::-webkit-scrollbar {
   width: 6px;
 }
@@ -1061,52 +1111,26 @@
   background: #999;
 }
 
-/* 메시지 내용에 적용될 애니메이션 스타일 */
-/*
-.message.highlighted-message {
-  animation: bounce 0.8s cubic-bezier(0.36, 0, 0.66, -0.56);
-  transform-origin: center;
-  will-change: transform;
-}
-*/
-
-/* 이전 message-wrapper.highlight 스타일 제거 또는 주석 처리 */
-/*
-.message-wrapper.highlight {
-  animation: bounce 0.8s cubic-bezier(0.36, 0, 0.66, -0.56);
-  transform-origin: center;
-  will-change: transform;
-}
-*/
-
-/* 검색 결과 메시지 볼드 스타일 */
 .message.bolded-message {
   font-weight: bold;
 }
 
 .highlighted-keyword {
-  background-color: #ffeb3b;
+  background-color: #ffca1a;
   padding: 1px 2px;
   border-radius: 3px;
 }
 
-/* @keyframes bounce 제거 */
-/*
-@keyframes bounce {
-  0% {
-    transform: scale(1) rotate(0deg);
-  }
-  25% {
-    transform: scale(1.1) rotate(-2deg);
-  }
-  50% {
-    transform: scale(1.15) rotate(2deg);
-  }
-  75% {
-    transform: scale(1.1) rotate(-1deg);
-  }
-  100% {
-    transform: scale(1) rotate(0deg);
-  }
+.back-button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-*/
+
+.back-button svg {
+  stroke: #000;
+}

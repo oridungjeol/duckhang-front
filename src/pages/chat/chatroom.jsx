@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 
@@ -20,6 +20,7 @@ import BottomNav from "../../components/BottomNav";
 export default function ChatRoom() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { chatId } = useParams();
   const data = location.state || {};
   const uuid = localStorage.getItem("uuid");
 
@@ -191,6 +192,47 @@ export default function ChatRoom() {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  /**
+   * 스크롤 관련 로직
+   */
+  useEffect(() => {
+    if (location.state?.scrollToMessage) {
+      const { createdAt, authorUuid } = location.state.scrollToMessage;
+      const targetMessage = messages.find(msg => 
+        msg.created_at === createdAt && msg.author_uuid === authorUuid
+      );
+
+      if (targetMessage) {
+        // 메시지가 이미 로드된 경우 바로 스크롤
+        const messageIndex = messages.findIndex(msg => 
+          msg.created_at === createdAt && msg.author_uuid === authorUuid
+        );
+        if (messageIndex !== -1) {
+          const messageWrapper = scrollRef.current?.children[messageIndex + 1]; // +1 for the load more button
+          if (messageWrapper) {
+            messageWrapper.scrollIntoView({ behavior: "smooth", block: "center" });
+            // Optionally highlight the message
+            const messageElement = messageWrapper.querySelector('.message');
+             if (messageElement) {
+              messageElement.classList.add('highlighted-message');
+               setTimeout(() => {
+                messageElement.classList.remove('highlighted-message');
+              }, 2000);
+            }
+          }
+        } else {
+           console.warn("Message found in messages array but corresponding DOM element not found.", targetMessage);
+        }
+      } else {
+        // 메시지가 아직 로드되지 않은 경우 (예: 과거 메시지) 추가 로딩 필요
+        // TODO: Implement logic to load older messages until the target message is found
+        console.log("Target message not found in current view. Need to load older messages.");
+      }
+       // Clear the state after attempting to scroll
+       // navigate(location.pathname, { replace: true }); // This might remove other useful state
+    }
+  }, [messages, location.state]); // Depend on messages and location.state
 
   /**
    * 이전 채팅 기록 50개를 호출
@@ -867,17 +909,37 @@ export default function ChatRoom() {
 
       case "MAP":
         return (
-          <div key={index} className="map-wrapper" ref={el => messageRefs.current[messageId] = el}>
+          <div className="map-wrapper" ref={el => messageRefs.current[messageId] = el}>
             <div className="map">
-              <div>지도로 상대방의 위치를 확인하세요</div>
+              <div className="map-content">
+                <div className="map-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 13.5C13.6569 13.5 15 12.1569 15 10.5C15 8.84315 13.6569 7.5 12 7.5C10.3431 7.5 9 8.84315 9 10.5C9 12.1569 10.3431 13.5 12 13.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M12 22C16 18 20 14.4183 20 10.5C20 6.58172 16.4183 3 12 3C7.58172 3 4 6.58172 4 10.5C4 14.4183 8 18 12 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <div className="map-text">
+                  <h3>실시간 위치 공유</h3>
+                  <p>상대방의 현재 위치를 확인해보세요</p>
+                </div>
+              </div>
+              <div className="map-preview">
+                <div className="map-preview-placeholder">
+                  
+                </div>
+              </div>
               <button
+                className="map-button"
                 onClick={() => {
                   navigate("/map", {
                     state: { uuid: uuid, room_id: data.room_id },
                   });
                 }}
               >
-                지도 확인하기
+                <span>지도에서 보기</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </button>
             </div>
           </div>
@@ -890,15 +952,31 @@ export default function ChatRoom() {
 
   return (
     <div className="chat-container">
-      <ChatHeader
-        data={data}
-        isAuthor={isAuthor}
-        isPaymentApprovedInChat={isPaymentApprovedInChat}
-        handleMap={handleMap}
-        handlePay={handlePay}
-        handleRefundRequest={handleRefundRequest}
-        onSearchClick={() => setShowSearch(!showSearch)}
-      />
+      <div className="detail-header">
+        <button className="back-btn" onClick={() => navigate(-1, { state: location.state })}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <button className="home-btn" onClick={() => navigate('/board/deal')}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+        </button>
+      </div>
+    
+      <span>
+          <ChatHeader
+            data={data}
+            isAuthor={isAuthor}
+            isPaymentApprovedInChat={isPaymentApprovedInChat}
+            handleMap={handleMap}
+            handlePay={handlePay}
+            handleRefundRequest={handleRefundRequest}
+            onSearchClick={() => setShowSearch(!showSearch)}
+          />
+        </span>
       {showSearch && (
         <div className="search-box">
           <input
