@@ -25,26 +25,46 @@
   width: 100%;
   height: 20vh;
   display: flex;
+  margin-top: 10%;
 }
 
 /* 프로필 이미지 설정 */
 .profile-image{
-  width: 140px;
-  height: 140px;
+  width: 19vh;
+  height: 19vh;
   border-radius: 50%;
   object-fit: cover;
   border: 4px solid #ff9a42;
-  margin-top: 10%;
-  margin-left: 8%;
-  margin-right: 7%;
+  margin-right: 8%;
+  margin-left: 5%;
 }
 
 /* 닉네임, 별점 설정 */
 .user-info{
   width: 100% - 140px;
   height: 30vh;
-  margin-top: 20%;
+  /* margin-top: 20%; */
   margin-left: 5%;
+}
+
+/* 프로필 수정 버튼 */
+.update-profile-button {
+  width: 120px;
+  height: 45px;
+  border-radius: 11px;
+  background-color: #ff9a42;
+  color: #f9f8f7;
+  font-weight: 700;
+  font-size: 17px;
+  border: none;
+  padding: 8px 20px;
+  margin-top: 20%;
+  margin-bottom: 20%;
+  cursor: pointer;
+}
+
+.update-profile-button:hover {
+  background: #ff7a00;
 }
 
 /* 닉네임 */
@@ -52,7 +72,6 @@
   font-size: 28px;
   font-weight: bold;
   color: #222;
-  margin-top: 100%;
   margin-bottom: 10px;
 }
 
@@ -74,6 +93,7 @@
   display: flex;
   justify-content: center;
   border-bottom: 3px solid #ff9a42;
+  margin-top: 10%;
 }
 
 .tab-bar button {
