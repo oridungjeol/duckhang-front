@@ -45,9 +45,11 @@ export default function Profile() {
               alt="profile" 
             />
             <div classname='user-info'>
-              <button className='update-profile-button'>
-                프로필 수정
-              </button>
+              <Link to="/user/update">
+                <button className='update-profile-button'>
+                  프로필 수정
+                </button>
+              </Link>
               <h2 className='nickname'>{profile.nickname}</h2>
               <h3 classname='scope'>⭐️별점: {profile.scope}</h3>
             </div>
