@@ -8,7 +8,7 @@ import Posts from './Posts';
 import Reviews from './Reviews';
 import './Profile.css';
 import BottomNav from '../../components/BottomNav';
-import ProfileEdit from './ProfileEdit';
+import ProfileEdit from './UpdateProfile';
 
 export default function Profile() {
   const { userId } = useParams();
@@ -45,6 +45,9 @@ export default function Profile() {
               alt="profile" 
             />
             <div classname='user-info'>
+              <button className='update-profile-button'>
+                프로필 수정
+              </button>
               <h2 className='nickname'>{profile.nickname}</h2>
               <h3 classname='scope'>⭐️별점: {profile.scope}</h3>
             </div>

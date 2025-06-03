@@ -47,7 +47,7 @@ const PaymentMessage = ({ msg, isMine, data, onPay }) => {
                 <button
                   onClick={() => {
                     navigate(`/board/deal/${data.board_id}`, {
-                      state: { from: 'chat' }
+                      state: { from: 'chat', scrollToMessage: { createdAt: msg.created_at, authorUuid: msg.author_uuid } }
                     });
                   }}
                   className="detail-btn"

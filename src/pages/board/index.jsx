@@ -158,15 +158,6 @@ export default function Board() {
               <path d="M10 2a8 8 0 00-6.32 12.91l-3.44 3.45a1 1 0 001.41 1.41l3.45-3.44A8 8 0 1010 2zm0 14a6 6 0 116-6 6 6 0 01-6 6z"/>
             </svg>
           </button>
-          <select
-            className="search-type-select"
-            value={searchType}
-            onChange={(e) => setSearchType(e.target.value)}
-          >
-            <option value="ALL">제목+내용</option>
-            <option value="TITLE">제목</option>
-            <option value="CONTENT">내용</option>
-          </select>
         </div>
       </div>
 

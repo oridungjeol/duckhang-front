@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './deal.css';
 
-// 시간 포맷팅 유틸리티 함수
 const formatRelativeTime = (dateString) => {
   const now = new Date();
   const postDate = new Date(dateString);
@@ -12,23 +11,17 @@ const formatRelativeTime = (dateString) => {
   const diffInHours = Math.floor(diffInMinutes / 60);
   const diffInDays = Math.floor(diffInHours / 24);
 
-  if (diffInSeconds < 60) {
-    return '방금 전';
-  } else if (diffInMinutes < 60) {
-    return `${diffInMinutes}분 전`;
-  } else if (diffInHours < 24) {
-    return `${diffInHours}시간 전`;
-  } else if (diffInDays < 7) {
-    return `${diffInDays}일 전`;
-  } else {
-    const year = postDate.getFullYear();
-    const month = String(postDate.getMonth() + 1).padStart(2, '0');
-    const day = String(postDate.getDate()).padStart(2, '0');
-    return `${year}.${month}.${day}`;
-  }
+  if (diffInSeconds < 60) return '방금 전';
+  if (diffInMinutes < 60) return `${diffInMinutes}분 전`;
+  if (diffInHours < 24) return `${diffInHours}시간 전`;
+  if (diffInDays < 7) return `${diffInDays}일 전`;
+
+  const year = postDate.getFullYear();
+  const month = String(postDate.getMonth() + 1).padStart(2, '0');
+  const day = String(postDate.getDate()).padStart(2, '0');
+  return `${year}.${month}.${day}`;
 };
 
-// 가격 포맷팅 유틸리티 함수
 const formatPrice = (price) => {
   if (!price) return '가격 미정';
   return `${Number(price).toLocaleString()}원`;
@@ -50,11 +43,13 @@ export default function Deal({ keyword = '', category }) {
     setLoading(true);
     const params = new URLSearchParams({
       page: currentPage.toString(),
-      size: pageSize.toString()
+      size: pageSize.toString(),
     });
 
-    // 검색어가 있는 경우 검색 API 사용
+    let url = '';
+
     if (keyword) {
+      // 제목 검색만 고정 (searchFieldType=TITLE)
       params.append('keyword', keyword);
       params.append('boardType', category.toUpperCase());
       params.append('searchFieldType', 'CONTENT');
@@ -89,14 +84,30 @@ export default function Deal({ keyword = '', category }) {
           setLoading(false);
         });
     }
+
+    fetch(url)
+      .then((res) => {
+        if (!res.ok) throw new Error('게시글을 불러오지 못했습니다');
+        return res.json();
+      })
+      .then((data) => {
+        setPosts(data.content || []);
+        setTotalPages(data.totalPages || 0);
+        setTotalElements(data.totalElements || 0);
+      })
+      .catch((err) => {
+        console.error(err);
+        setPosts([]);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [category, currentPage, pageSize, keyword]);
 
   useEffect(() => {
-    // 카테고리가 변경될 때 페이지를 0으로 초기화
     setCurrentPage(0);
   }, [category]);
 
-  // 페이지 변경 시 스크롤 처리
   useEffect(() => {
     if (!loading && dealItemsRef.current) {
       dealItemsRef.current.scrollTop = 0;
@@ -104,52 +115,42 @@ export default function Deal({ keyword = '', category }) {
   }, [currentPage, loading]);
 
   const handleItemClick = (post) => {
-    // boardType을 state로 전달 (category를 대문자로 변환)
-    navigate(`/board/deal/${post.id}`, { 
-      state: { 
+    navigate(`/board/deal/${post.id}`, {
+      state: {
         boardType: category.toUpperCase(),
-        board: post 
-      } 
+        board: post,
+      },
     });
   };
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
-    // 페이지 변경 시 즉시 스크롤 처리
     if (dealItemsRef.current) {
       dealItemsRef.current.scrollTop = 0;
     }
   };
 
-  // 클라이언트 사이드 필터링 제거
   const filteredPosts = posts;
 
-  // 페이지네이션 버튼 생성
   const renderPagination = () => {
     if (totalPages <= 1) return null;
 
     const pages = [];
     const maxVisiblePages = 5;
-    
+
     let startPage = Math.max(0, currentPage - Math.floor(maxVisiblePages / 2));
     let endPage = Math.min(totalPages - 1, startPage + maxVisiblePages - 1);
-    
+
     if (endPage - startPage < maxVisiblePages - 1) {
       startPage = Math.max(0, endPage - maxVisiblePages + 1);
     }
 
-    // 이전 페이지 버튼
     pages.push(
-      <button
-        key="prev"
-        onClick={() => handlePageChange(currentPage - 1)}
-        disabled={currentPage === 0}
-      >
+      <button key="prev" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 0}>
         이전
       </button>
     );
 
-    // 페이지 번호 버튼들
     for (let i = startPage; i <= endPage; i++) {
       pages.push(
         <button
@@ -162,22 +163,15 @@ export default function Deal({ keyword = '', category }) {
       );
     }
 
-    // 다음 페이지 버튼
     pages.push(
-      <button
-        key="next"
-        onClick={() => handlePageChange(currentPage + 1)}
-        disabled={currentPage === totalPages - 1}
-      >
+      <button key="next" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages - 1}>
         다음
       </button>
     );
 
     return (
       <div className="pagination-container">
-        <div className="pagination">
-          {pages}
-        </div>
+        <div className="pagination">{pages}</div>
         <div className="pagination-info">
           총 {totalElements}개 중 {currentPage * pageSize + 1}-{Math.min((currentPage + 1) * pageSize, totalElements)}개 표시
         </div>
@@ -231,7 +225,6 @@ export default function Deal({ keyword = '', category }) {
                     <p className="deal-item-price">{formatPrice(post.price)}</p>
                   )}
                   <div className="deal-item-info">
-                    <span className="deal-nickname">{post.nickname}</span>
                     <span className="deal-time">{formatRelativeTime(post.createdAt)}</span>
                   </div>
                 </div>
