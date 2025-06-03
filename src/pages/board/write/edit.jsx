@@ -19,6 +19,7 @@ export default function EditBoardForm() {
   const [previewUrl, setPreviewUrl] = useState("");
   const [currentImage, setCurrentImage] = useState("");
   const [isCurrentImageDeleted, setIsCurrentImageDeleted] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   // 컴포넌트 마운트 시 기존 이미지 설정
   useEffect(() => {
@@ -37,8 +38,11 @@ export default function EditBoardForm() {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (!file) return;
-
+    if (!file) {
+      setImageError(true);
+      return;
+    }
+    setImageError(false);
     setImageFile(file);
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -68,6 +72,12 @@ export default function EditBoardForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!imageFile && !currentImage) {
+      setImageError(true);
+      return;
+    }
+    setImageError(false);
 
     try {
       // FormData 생성
@@ -213,6 +223,7 @@ export default function EditBoardForm() {
           onChange={handleImageChange}
           style={{ display: 'none' }}
         />
+        <div className="error-message" style={{ display: imageError ? 'block' : 'none' }}>이미지를 업로드해주세요</div>
       </div>
 
       {/* 이미지 미리보기 */}
