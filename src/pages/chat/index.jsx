@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { useEffect, useState } from "react";
 
 import { getChatRoomList } from "./hook";
@@ -8,8 +8,11 @@ import "./index.css";
 import BottomNav from "../../components/BottomNav";
 
 export default function Chat() {
+  const location = useLocation();
   const navigate = useNavigate();
   const [datas, setDatas] = useState([]);
+  const board_id = location.state;
+  console.log("board_id is", board_id);
 
   /**
    * 유저가 속한 채팅방 리스트 load

@@ -138,7 +138,7 @@ export default function BoardDetail() {
         board.author_uuid
       );
 
-      navigate(`/chat/${info.room_id}`, { state: info });
+      navigate(`/chat/${info.room_id}`, { state: board.id });
     } catch (err) {
       console.error("채팅방 생성 오류:", err);
       alert("채팅방을 생성할 수 없습니다.");
@@ -214,19 +214,9 @@ export default function BoardDetail() {
 
   return (
     <div className="board-detail-container">
-      <div className="detail-header">
-        <button className="back-btn" onClick={() => navigate(-1, { state: location.state })}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6"></polyline>
-          </svg>
-        </button>
-        <button className="home-btn" onClick={() => navigate('/board/deal')}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-            <polyline points="9 22 9 12 15 12 15 22"></polyline>
-          </svg>
-        </button>
-      </div>
+      <button className="back-btn" onClick={() => navigate(-1)}>
+        ←
+      </button>
       <div className="board-detail-content">
         <div className="board-image">
           <img

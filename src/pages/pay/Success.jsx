@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
-import './Success.css';
+import "./Success.css";
 
 export function Success() {
   const hasFetched = useRef(false);
@@ -25,7 +25,12 @@ export function Success() {
 
       // 필수 데이터 확인
       if (!room_id || !room_name || !board_id || !type) {
-        console.error("필수 데이터가 누락되었습니다:", { room_id, room_name, board_id, type });
+        console.error("필수 데이터가 누락되었습니다:", {
+          room_id,
+          room_name,
+          board_id,
+          type,
+        });
         return;
       }
 
@@ -43,10 +48,10 @@ export function Success() {
             orderId: paymentInfo.orderId,
             totalAmount: paymentInfo.totalAmount,
             method: paymentInfo.method,
-            approvedAt: paymentInfo.approvedAt
+            approvedAt: paymentInfo.approvedAt,
           };
 
-          console.log('Sending payment message:', messageContent);
+          console.log("Sending payment message:", messageContent);
 
           client.publish({
             destination: `/app/chat/${room_id}`,
@@ -56,27 +61,39 @@ export function Success() {
               content: JSON.stringify(messageContent),
               created_at: created_at,
               room_id: room_id,
-            })
+            }),
           });
 
-          // 메시지 전송 후 채팅방으로 이동
-          const chatState = {
-            room_id,
-            name: room_name,
-            board_id,
-            type,
-            orderId: paymentInfo.orderId,
-            fromPayment: true,
-            paymentCompleted: true,
-            isBuyer: true
-          };
+          setTimeout(() => {
+            client.publish({
+              destination: `/app/chat/${room_id}`,
+              body: JSON.stringify({
+                type: "REVIEW",
+                author_uuid: "",
+                content: "",
+                created_at: created_at,
+                room_id: room_id,
+              }),
+            });
+            // 메시지 전송 후 채팅방으로 이동
+            const chatState = {
+              room_id,
+              name: room_name,
+              board_id,
+              type,
+              orderId: paymentInfo.orderId,
+              fromPayment: true,
+              paymentCompleted: true,
+              isBuyer: true,
+            };
 
-          console.log("채팅방으로 이동:", chatState);
-          navigate(`/chat/${room_id}`, { state: chatState });
+            console.log("채팅방으로 이동:", chatState);
+            navigate(`/chat/${room_id}`, { state: chatState });
 
-          // 연결 종료
-          client.deactivate();
-        }
+            // 연결 종료
+            client.deactivate();
+          }, 1000);
+        },
       });
 
       client.activate();
@@ -90,7 +107,12 @@ export function Success() {
 
       // 필수 데이터 확인
       if (!room_id || !room_name || !board_id || !type) {
-        console.error("필수 데이터가 누락되었습니다:", { room_id, room_name, board_id, type });
+        console.error("필수 데이터가 누락되었습니다:", {
+          room_id,
+          room_name,
+          board_id,
+          type,
+        });
         return;
       }
 
@@ -101,7 +123,7 @@ export function Success() {
         type,
         orderId: paymentInfo.orderId,
         fromPayment: true,
-        isBuyer: true
+        isBuyer: true,
       };
 
       console.log("에러 발생 후 채팅방으로 이동:", chatState);
@@ -206,7 +228,6 @@ export function Success() {
           marginBottom: "32px",
         }}
       >
-        
         <svg width="85" height="85" viewBox="0 0 100 100" fill="none">
           <circle cx="50" cy="50" r="45" fill="#3182f6" />
           <path
@@ -217,45 +238,44 @@ export function Success() {
             strokeLinejoin="round"
           />
         </svg>
-        
 
         <div className="box_section">
           <h1 className="success-title">결제를 완료했어요</h1>
         </div>
-        
+
         <button
-        onClick={handleReturnToChat}
-        style={{
-          marginTop: "10px",
-          padding: "12px 24px",
-          backgroundColor: "#3182f6",
-          color: "#ffffff",
-          border: "none",
-          borderRadius: "12px",
-          cursor: "pointer",
-          fontSize: "16px",
-          fontWeight: "bold",
-          transition: "all 0.3s ease",
-          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-          animation: "buttonSlideUp 0.5s ease-out",
-          position: "relative",
-          overflow: "hidden",
-        }}
-        onMouseEnter={(e) => {
-          e.target.style.transform = "translateY(-2px)";
-          e.target.style.boxShadow = "0 6px 12px rgba(0, 0, 0, 0.15)";
-          e.target.style.backgroundColor = "#6b8fe6";
-        }}
-        onMouseLeave={(e) => {
-          e.target.style.transform = "translateY(0)";
-          e.target.style.boxShadow = "0 4px 6px rgba(0, 0, 0, 0.1)";
-          e.target.style.backgroundColor = "#5580e6";
-        }}
-      >
-        채팅방으로 가기
-      </button>
+          onClick={handleReturnToChat}
+          style={{
+            marginTop: "10px",
+            padding: "12px 24px",
+            backgroundColor: "#3182f6",
+            color: "#ffffff",
+            border: "none",
+            borderRadius: "12px",
+            cursor: "pointer",
+            fontSize: "16px",
+            fontWeight: "bold",
+            transition: "all 0.3s ease",
+            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+            animation: "buttonSlideUp 0.5s ease-out",
+            position: "relative",
+            overflow: "hidden",
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.transform = "translateY(-2px)";
+            e.target.style.boxShadow = "0 6px 12px rgba(0, 0, 0, 0.15)";
+            e.target.style.backgroundColor = "#6b8fe6";
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.transform = "translateY(0)";
+            e.target.style.boxShadow = "0 4px 6px rgba(0, 0, 0, 0.1)";
+            e.target.style.backgroundColor = "#5580e6";
+          }}
+        >
+          채팅방으로 가기
+        </button>
       </div>
-      
+
       <style>
         {`
           @keyframes buttonSlideUp {
@@ -280,7 +300,6 @@ export function Success() {
 
         `}
       </style>
-
     </div>
   );
 }

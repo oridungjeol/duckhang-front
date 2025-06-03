@@ -161,7 +161,9 @@ export default function ChatRoom() {
 
             console.log("New message received:", newMessage);
             const updatedMessages = [...prev, newMessage];
-            updatedMessages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+            updatedMessages.sort(
+              (a, b) => new Date(a.created_at) - new Date(b.created_at)
+            );
             return updatedMessages;
           });
         });
@@ -199,38 +201,47 @@ export default function ChatRoom() {
   useEffect(() => {
     if (location.state?.scrollToMessage) {
       const { createdAt, authorUuid } = location.state.scrollToMessage;
-      const targetMessage = messages.find(msg => 
-        msg.created_at === createdAt && msg.author_uuid === authorUuid
+      const targetMessage = messages.find(
+        (msg) => msg.created_at === createdAt && msg.author_uuid === authorUuid
       );
 
       if (targetMessage) {
         // 메시지가 이미 로드된 경우 바로 스크롤
-        const messageIndex = messages.findIndex(msg => 
-          msg.created_at === createdAt && msg.author_uuid === authorUuid
+        const messageIndex = messages.findIndex(
+          (msg) =>
+            msg.created_at === createdAt && msg.author_uuid === authorUuid
         );
         if (messageIndex !== -1) {
           const messageWrapper = scrollRef.current?.children[messageIndex + 1]; // +1 for the load more button
           if (messageWrapper) {
-            messageWrapper.scrollIntoView({ behavior: "smooth", block: "center" });
+            messageWrapper.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
             // Optionally highlight the message
-            const messageElement = messageWrapper.querySelector('.message');
-             if (messageElement) {
-              messageElement.classList.add('highlighted-message');
-               setTimeout(() => {
-                messageElement.classList.remove('highlighted-message');
+            const messageElement = messageWrapper.querySelector(".message");
+            if (messageElement) {
+              messageElement.classList.add("highlighted-message");
+              setTimeout(() => {
+                messageElement.classList.remove("highlighted-message");
               }, 2000);
             }
           }
         } else {
-           console.warn("Message found in messages array but corresponding DOM element not found.", targetMessage);
+          console.warn(
+            "Message found in messages array but corresponding DOM element not found.",
+            targetMessage
+          );
         }
       } else {
         // 메시지가 아직 로드되지 않은 경우 (예: 과거 메시지) 추가 로딩 필요
         // TODO: Implement logic to load older messages until the target message is found
-        console.log("Target message not found in current view. Need to load older messages.");
+        console.log(
+          "Target message not found in current view. Need to load older messages."
+        );
       }
-       // Clear the state after attempting to scroll
-       // navigate(location.pathname, { replace: true }); // This might remove other useful state
+      // Clear the state after attempting to scroll
+      // navigate(location.pathname, { replace: true }); // This might remove other useful state
     }
   }, [messages, location.state]); // Depend on messages and location.state
 
@@ -240,7 +251,9 @@ export default function ChatRoom() {
   const loadMessageData = async () => {
     const message_list = await getChattingData(data, pageRef);
     // 불러온 메시지를 created_at 기준으로 오름차순 정렬
-    message_list.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+    message_list.sort(
+      (a, b) => new Date(a.created_at) - new Date(b.created_at)
+    );
     setMessages(message_list);
   };
 
@@ -253,7 +266,9 @@ export default function ChatRoom() {
       const more_message_list = await getChattingData(data, pageRef);
       // 새로 불러온 메시지를 기존 메시지 앞에 추가하고 전체를 다시 정렬
       const combinedMessages = [...more_message_list, ...messages];
-      combinedMessages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      combinedMessages.sort(
+        (a, b) => new Date(a.created_at) - new Date(b.created_at)
+      );
       setMessages(combinedMessages);
     } catch (error) {
       console.error("과거 채팅 기록 불러오기 중 오류 발생:", error);
@@ -709,9 +724,11 @@ export default function ChatRoom() {
 
     const results = messages
       .map((msg, index) => ({ ...msg, index }))
-      .filter(msg => {
+      .filter((msg) => {
         if (msg.type === "TEXT") {
-          return msg.content.toLowerCase().includes(searchKeyword.toLowerCase());
+          return msg.content
+            .toLowerCase()
+            .includes(searchKeyword.toLowerCase());
         }
         return false;
       });
@@ -729,44 +746,54 @@ export default function ChatRoom() {
 
   const scrollToMessage = (messageToScroll) => {
     // Find the current index of the message in the messages array
-    const currentIndex = messages.findIndex(msg => 
-      msg.content === messageToScroll.content && 
-      msg.author_uuid === messageToScroll.author_uuid &&
-      msg.created_at === messageToScroll.created_at
+    const currentIndex = messages.findIndex(
+      (msg) =>
+        msg.content === messageToScroll.content &&
+        msg.author_uuid === messageToScroll.author_uuid &&
+        msg.created_at === messageToScroll.created_at
       // Add other unique properties if available and necessary
     );
 
     if (currentIndex === -1) {
-      console.warn("Target message not found in current messages list.", messageToScroll);
+      console.warn(
+        "Target message not found in current messages list.",
+        messageToScroll
+      );
       return;
     }
 
-    const messageWrappers = document.querySelectorAll('.message-wrapper');
+    const messageWrappers = document.querySelectorAll(".message-wrapper");
     if (messageWrappers[currentIndex]) {
       // 이전 강조 효과 제거 (애니메이션 클래스 제거)
-      document.querySelectorAll('.message.highlighted-message').forEach(el => {
-        el.classList.remove('highlighted-message');
-      });
-      document.querySelectorAll('.message-wrapper.highlight').forEach(el => {
-        el.classList.remove('highlight');
+      document
+        .querySelectorAll(".message.highlighted-message")
+        .forEach((el) => {
+          el.classList.remove("highlighted-message");
+        });
+      document.querySelectorAll(".message-wrapper.highlight").forEach((el) => {
+        el.classList.remove("highlight");
       });
 
-      const messageElement = messageWrappers[currentIndex].querySelector('.message');
+      const messageElement =
+        messageWrappers[currentIndex].querySelector(".message");
       if (messageElement) {
         // 해당 메시지 내용 요소에 볼드 스타일 클래스 추가
-        messageElement.classList.add('bolded-message');
-        messageWrappers[currentIndex].scrollIntoView({ behavior: "smooth", block: "center" });
+        messageElement.classList.add("bolded-message");
+        messageWrappers[currentIndex].scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
 
         // 2초 후 볼드 스타일 클래스 제거
         setTimeout(() => {
-          messageElement.classList.remove('bolded-message');
+          messageElement.classList.remove("bolded-message");
         }, 2000);
 
         // 메시지 자체 배경색 강조 제거 (이전 로직에서 추가되었을 수 있음)
-         messageWrappers[currentIndex].style.backgroundColor = "";
+        messageWrappers[currentIndex].style.backgroundColor = "";
       }
     } else {
-       console.warn("Message wrapper not found for index:", currentIndex);
+      console.warn("Message wrapper not found for index:", currentIndex);
     }
   };
 
@@ -782,7 +809,8 @@ export default function ChatRoom() {
     if (searchResults.length === 0) return;
     // 이전 (더 오래된) 결과로 이동 -> currentSearchIndex 감소
     // 인덱스가 음수가 되지 않도록 처리
-    const prevIndex = (currentSearchIndex - 1 + searchResults.length) % searchResults.length;
+    const prevIndex =
+      (currentSearchIndex - 1 + searchResults.length) % searchResults.length;
     setCurrentSearchIndex(prevIndex);
     scrollToMessage(searchResults[prevIndex]);
   };
@@ -792,19 +820,20 @@ export default function ChatRoom() {
     setSearchResults([]);
     setCurrentSearchIndex(-1);
     setIsSearching(false);
-     // 남아있는 강조 효과 제거 (애니메이션 및 볼드 클래스 제거)
-     document.querySelectorAll('.message.highlighted-message').forEach(el => {
-       el.classList.remove('highlighted-message');
-     });
-     document.querySelectorAll('.message-wrapper.highlight').forEach(el => {
-       el.classList.remove('highlight');
-     });
-     document.querySelectorAll('.message.bolded-message').forEach(el => { // bolded-message 클래스 제거 추가
-       el.classList.remove('bolded-message');
-     });
-      document.querySelectorAll('.message-wrapper').forEach(el => {
-        el.style.backgroundColor = "";
-      });
+    // 남아있는 강조 효과 제거 (애니메이션 및 볼드 클래스 제거)
+    document.querySelectorAll(".message.highlighted-message").forEach((el) => {
+      el.classList.remove("highlighted-message");
+    });
+    document.querySelectorAll(".message-wrapper.highlight").forEach((el) => {
+      el.classList.remove("highlight");
+    });
+    document.querySelectorAll(".message.bolded-message").forEach((el) => {
+      // bolded-message 클래스 제거 추가
+      el.classList.remove("bolded-message");
+    });
+    document.querySelectorAll(".message-wrapper").forEach((el) => {
+      el.style.backgroundColor = "";
+    });
   };
 
   /**
@@ -820,19 +849,24 @@ export default function ChatRoom() {
     switch (msg.type) {
       case "SYSTEM":
         return (
-          <div key={index} className="system-message" ref={el => messageRefs.current[messageId] = el}>
+          <div
+            key={index}
+            className="system-message"
+            ref={(el) => (messageRefs.current[messageId] = el)}
+          >
             {msg.content}
           </div>
         );
 
       case "WARNNING":
         return (
-          <div ref={el => messageRefs.current[messageId] = el}>
+          <div ref={(el) => (messageRefs.current[messageId] = el)}>
             {!isMine && (
               <div key={index} className="system-message">
                 {msg.content === "EXTERNAL" && (
                   <div key={index} className="warnning-message">
-                    거래를 외부에서 유도하면 사기 가능성이 있어요. 주의해 주세요.
+                    거래를 외부에서 유도하면 사기 가능성이 있어요. 주의해
+                    주세요.
                   </div>
                 )}
                 {msg.content === "DEPOSIT" && (
@@ -852,24 +886,58 @@ export default function ChatRoom() {
           </div>
         );
 
+      case "REVIEW":
+        return (
+          <div className="review-wrapper">
+            {/* <div className="review-message"> */}
+            <button className="review-button">리뷰 남기러 가기</button>
+            {/* </div> */}
+          </div>
+        );
+
       case "TEXT":
         const renderContent = (content, keyword) => {
-          if (!keyword || !content || typeof content !== 'string') return content;
-          const parts = content.split(new RegExp(`(${keyword})`, 'gi'));
-          return parts.map((part, i) => 
-            part.toLowerCase() === keyword.toLowerCase() ? 
-            <span key={i} className="highlighted-keyword">{part}</span> : 
-            part
+          if (!keyword || !content || typeof content !== "string")
+            return content;
+          const parts = content.split(new RegExp(`(${keyword})`, "gi"));
+          return parts.map((part, i) =>
+            part.toLowerCase() === keyword.toLowerCase() ? (
+              <span key={i} className="highlighted-keyword">
+                {part}
+              </span>
+            ) : (
+              part
+            )
           );
         };
-        return <TextMessage key={index} msg={{...msg, content: renderContent(msg.content, searchKeyword)}} isMine={isMine} ref={el => messageRefs.current[messageId] = el} />;
+        return (
+          <TextMessage
+            key={index}
+            msg={{ ...msg, content: renderContent(msg.content, searchKeyword) }}
+            isMine={isMine}
+            ref={(el) => (messageRefs.current[messageId] = el)}
+          />
+        );
 
       case "IMAGE":
-        return <ImageMessage key={index} msg={msg} isMine={isMine} ref={el => messageRefs.current[messageId] = el} />;
+        return (
+          <ImageMessage
+            key={index}
+            msg={msg}
+            isMine={isMine}
+            ref={(el) => (messageRefs.current[messageId] = el)}
+          />
+        );
 
       case "PAY":
         return (
-          <PaymentMessage key={index} msg={msg} isMine={isMine} data={data} ref={el => messageRefs.current[messageId] = el} />
+          <PaymentMessage
+            key={index}
+            msg={msg}
+            isMine={isMine}
+            data={data}
+            ref={(el) => (messageRefs.current[messageId] = el)}
+          />
         );
 
       case "REFUND":
@@ -880,7 +948,7 @@ export default function ChatRoom() {
             isMine={isMine}
             data={data}
             onRefund={handleRefund}
-            ref={el => messageRefs.current[messageId] = el}
+            ref={(el) => (messageRefs.current[messageId] = el)}
           />
         );
 
@@ -892,7 +960,7 @@ export default function ChatRoom() {
             isMine={isMine}
             openPaymentDetail={openPaymentDetail[index]}
             togglePaymentDetail={() => togglePaymentDetail(index)}
-            ref={el => messageRefs.current[messageId] = el}
+            ref={(el) => (messageRefs.current[messageId] = el)}
           />
         );
 
@@ -903,19 +971,40 @@ export default function ChatRoom() {
             msg={msg}
             openRefundDetail={openRefundDetail[index]}
             toggleRefundDetail={() => toggleRefundDetail(index)}
-            ref={el => messageRefs.current[messageId] = el}
+            ref={(el) => (messageRefs.current[messageId] = el)}
           />
         );
 
       case "MAP":
         return (
-          <div className="map-wrapper" ref={el => messageRefs.current[messageId] = el}>
+          <div
+            className="map-wrapper"
+            ref={(el) => (messageRefs.current[messageId] = el)}
+          >
             <div className="map">
               <div className="map-content">
                 <div className="map-icon">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 13.5C13.6569 13.5 15 12.1569 15 10.5C15 8.84315 13.6569 7.5 12 7.5C10.3431 7.5 9 8.84315 9 10.5C9 12.1569 10.3431 13.5 12 13.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M12 22C16 18 20 14.4183 20 10.5C20 6.58172 16.4183 3 12 3C7.58172 3 4 6.58172 4 10.5C4 14.4183 8 18 12 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M12 13.5C13.6569 13.5 15 12.1569 15 10.5C15 8.84315 13.6569 7.5 12 7.5C10.3431 7.5 9 8.84315 9 10.5C9 12.1569 10.3431 13.5 12 13.5Z"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M12 22C16 18 20 14.4183 20 10.5C20 6.58172 16.4183 3 12 3C7.58172 3 4 6.58172 4 10.5C4 14.4183 8 18 12 22Z"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
                   </svg>
                 </div>
                 <div className="map-text">
@@ -924,9 +1013,7 @@ export default function ChatRoom() {
                 </div>
               </div>
               <div className="map-preview">
-                <div className="map-preview-placeholder">
-                  
-                </div>
+                <div className="map-preview-placeholder"></div>
               </div>
               <button
                 className="map-button"
@@ -937,8 +1024,20 @@ export default function ChatRoom() {
                 }}
               >
                 <span>지도에서 보기</span>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M9 18L15 12L9 6"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               </button>
             </div>
@@ -953,30 +1052,53 @@ export default function ChatRoom() {
   return (
     <div className="chat-container">
       <div className="detail-header">
-        <button className="back-btn" onClick={() => navigate(-1, { state: location.state })}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <button
+          className="back-btn"
+          onClick={() => navigate(-1, { state: location.state })}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="26"
+            height="26"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <polyline points="15 18 9 12 15 6"></polyline>
           </svg>
         </button>
-        <button className="home-btn" onClick={() => navigate('/board/deal')}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <button className="home-btn" onClick={() => navigate("/board/deal")}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="26"
+            height="26"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
             <polyline points="9 22 9 12 15 12 15 22"></polyline>
           </svg>
         </button>
       </div>
-    
+
       <span>
-          <ChatHeader
-            data={data}
-            isAuthor={isAuthor}
-            isPaymentApprovedInChat={isPaymentApprovedInChat}
-            handleMap={handleMap}
-            handlePay={handlePay}
-            handleRefundRequest={handleRefundRequest}
-            onSearchClick={() => setShowSearch(!showSearch)}
-          />
-        </span>
+        <ChatHeader
+          data={data}
+          isAuthor={isAuthor}
+          isPaymentApprovedInChat={isPaymentApprovedInChat}
+          handleMap={handleMap}
+          handlePay={handlePay}
+          handleRefundRequest={handleRefundRequest}
+          onSearchClick={() => setShowSearch(!showSearch)}
+        />
+      </span>
       {showSearch && (
         <div className="search-box">
           <input

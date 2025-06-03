@@ -220,7 +220,7 @@
 .input-container {
   background-color: #f9f8f7;
   padding: 1rem;
-  border-top:  solid 1px #fba337;
+  border-top: solid 1px #fba337;
   display: flex;
   gap: 0.5rem;
 }
@@ -346,6 +346,27 @@
 
 .map-button:hover svg {
   transform: translateX(2px);
+}
+
+.review-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 12px 0;
+  animation: messageSlideIn 0.3s ease-out;
+}
+
+.review-button {
+  background-color: #fba337;
+  color: #ffffff;
+  border: none;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80%;
 }
 
 .send-btn {
