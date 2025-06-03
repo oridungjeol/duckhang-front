@@ -46,13 +46,11 @@ export default function Deal({ keyword = '', category }) {
       size: pageSize.toString(),
     });
 
-    let url = '';
-
     if (keyword) {
-      // 제목 검색만 고정 (searchFieldType=TITLE)
       params.append('keyword', keyword);
       params.append('boardType', category.toUpperCase());
-      params.append('searchFieldType', 'CONTENT');
+      // searchFieldType 항상 'ALL'로 고정
+      params.append('searchFieldType', 'TITLE');
 
       axios.get(`http://localhost/api/board/search?${params}`)
         .then((response) => {
@@ -84,29 +82,11 @@ export default function Deal({ keyword = '', category }) {
           setLoading(false);
         });
     }
-
-    fetch(url)
-      .then((res) => {
-        if (!res.ok) throw new Error('게시글을 불러오지 못했습니다');
-        return res.json();
-      })
-      .then((data) => {
-        setPosts(data.content || []);
-        setTotalPages(data.totalPages || 0);
-        setTotalElements(data.totalElements || 0);
-      })
-      .catch((err) => {
-        console.error(err);
-        setPosts([]);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
   }, [category, currentPage, pageSize, keyword]);
 
   useEffect(() => {
     setCurrentPage(0);
-  }, [category]);
+  }, [category, keyword]);
 
   useEffect(() => {
     if (!loading && dealItemsRef.current) {

@@ -14,7 +14,7 @@ export default function Board() {
     searchParams.get("filter") || (type === "deal" ? "purchase" : "recruit");
   const [activeFilter, setActiveFilter] = useState(initialFilter);
   const [searchType, setSearchType] = useState(
-    searchParams.get("fieldType") || "ALL"
+    searchParams.get("fieldType") || "TITLE"
   );
   const [searchKeyword, setSearchKeyword] = useState(
     searchParams.get("keyword") || ""
