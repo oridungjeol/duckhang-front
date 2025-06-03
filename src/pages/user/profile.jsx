@@ -6,10 +6,9 @@ import './Profile.css';
 import Header from '../../components/header';
 import Posts from './Posts';
 import Reviews from './Reviews';
-import './profile.css';
+import './Profile.css';
 import BottomNav from '../../components/BottomNav';
 import ProfileEdit from './ProfileEdit';
-import BottomNav from '../../components/BottomNav';
 
 export default function Profile() {
   const { userId } = useParams();
