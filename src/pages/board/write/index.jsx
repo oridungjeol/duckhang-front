@@ -162,22 +162,33 @@ export default function CreateBoardForm() {
 
       {/* 이미지 업로드 */}
       <div className="form-group">
-        <label htmlFor="image-upload" className="image-upload-label"></label>
+        <label htmlFor="image-upload" className="image-upload-label">
+          {previewUrl ? (
+            <>
+              <img src={previewUrl} alt="preview" className="preview-item" />
+              <button 
+                type="button" 
+                className="delete-image-btn"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setImageFile(null);
+                  setPreviewUrl("");
+                }}
+              >
+                ×
+              </button>
+            </>
+          ) : null}
+        </label>
         <input
           id="image-upload"
           type="file"
           accept="image/*"
           onChange={handleImageChange}
+          style={{ display: 'none' }}
         />
         <div className="error-message" style={{ display: imageError ? 'block' : 'none' }}>이미지를 업로드해주세요</div>
       </div>
-
-      {/* 이미지 미리보기 */}
-      {previewUrl && (
-        <div className="preview-container">
-          <img src={previewUrl} alt="preview" className="preview-item" />
-        </div>
-      )}
 
       {/* 버튼 */}
       <div className="button-container">
