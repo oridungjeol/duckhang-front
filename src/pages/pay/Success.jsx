@@ -41,7 +41,10 @@ export function Success() {
           const now = new Date();
           const kstOffset = now.getTime() + 9 * 60 * 60 * 1000;
           const kstDate = new Date(kstOffset);
+          const kstData_review = new Date(kstDate.getTime() + 1000);
+
           const created_at = kstDate.toISOString().slice(0, 19);
+          const created_review = kstData_review.toISOString().slice(0, 19);
 
           const messageContent = {
             message: "결제가 완료되었습니다.",
@@ -64,35 +67,33 @@ export function Success() {
             }),
           });
 
-          setTimeout(() => {
-            client.publish({
-              destination: `/app/chat/${room_id}`,
-              body: JSON.stringify({
-                type: "REVIEW",
-                author_uuid: "",
-                content: "",
-                created_at: created_at,
-                room_id: room_id,
-              }),
-            });
-            // 메시지 전송 후 채팅방으로 이동
-            const chatState = {
-              room_id,
-              name: room_name,
-              board_id,
-              type,
-              orderId: paymentInfo.orderId,
-              fromPayment: true,
-              paymentCompleted: true,
-              isBuyer: true,
-            };
+          client.publish({
+            destination: `/app/chat/${room_id}`,
+            body: JSON.stringify({
+              type: "REVIEW",
+              author_uuid: "",
+              content: "",
+              created_at: created_review,
+              room_id: room_id,
+            }),
+          });
+          // 메시지 전송 후 채팅방으로 이동
+          const chatState = {
+            room_id,
+            name: room_name,
+            board_id,
+            type,
+            orderId: paymentInfo.orderId,
+            fromPayment: true,
+            paymentCompleted: true,
+            isBuyer: true,
+          };
 
-            console.log("채팅방으로 이동:", chatState);
-            navigate(`/chat/${room_id}`, { state: chatState });
+          console.log("채팅방으로 이동:", chatState);
+          navigate(`/chat/${room_id}`, { state: chatState });
 
-            // 연결 종료
-            client.deactivate();
-          }, 1000);
+          // 연결 종료
+          client.deactivate();
         },
       });
 

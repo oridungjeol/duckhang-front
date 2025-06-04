@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 
@@ -20,7 +20,6 @@ import BottomNav from "../../components/BottomNav";
 export default function ChatRoom() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { chatId } = useParams();
   const data = location.state || {};
   const uuid = localStorage.getItem("uuid");
 
@@ -28,7 +27,6 @@ export default function ChatRoom() {
   const [input, setInput] = useState("");
   const [image, setImage] = useState(null);
   const [isAuthor, setIsAuthor] = useState(false);
-  const [isImage, setIsImage] = useState(false);
   const [isBuyer, setIsBuyer] = useState(false);
   const [showRefundModal, setShowRefundModal] = useState(false);
   const [refundData, setRefundData] = useState(null);
@@ -39,12 +37,15 @@ export default function ChatRoom() {
   const [currentSearchIndex, setCurrentSearchIndex] = useState(-1);
   const [isSearching, setIsSearching] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  const [boardData, setBoardData] = useState({});
   const messageRefs = useRef({});
 
   const stompClientRef = useRef(null);
   const isConnected = useRef(false);
   const scrollRef = useRef();
   const pageRef = useRef(0);
+
+  console.log("board to chatroom data is ", data);
 
   useEffect(() => {
     if (!location.state || !location.state.room_id) {
@@ -66,6 +67,7 @@ export default function ChatRoom() {
         }
       );
       const boardData = await response.json();
+      setBoardData(boardData);
 
       const isAuthorCheck = boardData.author_uuid === uuid;
 
@@ -888,11 +890,20 @@ export default function ChatRoom() {
 
       case "REVIEW":
         return (
-          <div className="review-wrapper">
-            {/* <div className="review-message"> */}
-            <button className="review-button">리뷰 남기러 가기</button>
-            {/* </div> */}
-          </div>
+          !isAuthor && (
+            <div className="review-wrapper">
+              <button
+                className="review-button"
+                onClick={() => {
+                  navigate("/review", {
+                    state: { author_uuid: boardData.author_uuid },
+                  });
+                }}
+              >
+                리뷰 남기러 가기
+              </button>
+            </div>
+          )
         );
 
       case "TEXT":

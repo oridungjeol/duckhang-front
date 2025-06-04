@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
-import './index.css';
+import React, { useState } from "react";
+import { useLocation } from "react-router-dom";
+import "./index.css";
 
 export default function Review() {
+  const location = useLocation();
+  const author_uuid = location.state.author_uuid;
+
   const [rating, setRating] = useState(0);
-  const [reviewContent, setReviewContent] = useState('');
+  const [reviewContent, setReviewContent] = useState("");
 
   const handleRatingChange = (newRating) => {
     setRating(newRating);
@@ -15,14 +19,15 @@ export default function Review() {
 
   const handleSubmitReview = () => {
     // TODO: Implement review submission logic
-    console.log('Submitted Review:', { rating, reviewContent });
-    alert('리뷰 제출 (기능 미구현)');
+    console.log("Submitted Review:", { rating, reviewContent });
+    alert("리뷰 제출 (기능 미구현)");
   };
 
   return (
     <div className="review-container">
       <div className="review-header">
         <h2>리뷰 작성</h2>
+        {author_uuid}
       </div>
       <div className="review-form">
         <div className="rating-section">
@@ -32,7 +37,7 @@ export default function Review() {
             {[1, 2, 3, 4, 5].map((star) => (
               <span
                 key={star}
-                className={`star ${star <= rating ? 'filled' : ''}`}
+                className={`star ${star <= rating ? "filled" : ""}`}
                 onClick={() => handleRatingChange(star)}
               >
                 ★
@@ -56,4 +61,4 @@ export default function Review() {
       </div>
     </div>
   );
-} 
+}
