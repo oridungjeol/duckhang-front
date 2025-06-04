@@ -50,16 +50,16 @@
 /* 프로필 수정 버튼 */
 .update-profile-button {
   width: 120px;
-  height: 45px;
-  border-radius: 11px;
+  height: 38px;
+  border-radius: 8px;
   background-color: #ff9a42;
   color: #f9f8f7;
   font-weight: 700;
-  font-size: 17px;
+  font-size: 15px;
   border: none;
-  padding: 8px 20px;
-  margin-top: 20%;
-  margin-bottom: 20%;
+  padding: 6px 15px;
+  margin-top: 15%;
+  margin-bottom: 15%;
   cursor: pointer;
 }
 

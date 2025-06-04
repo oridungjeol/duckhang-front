@@ -27,6 +27,7 @@ export default function Profile() {
     axios.get(`http://localhost/api/board/user/${userId}`, { withCredentials: true })
       .then(res => setPosts(res.data));
 
+    console.log(userId)
     axios.get(`http://localhost/api/review/${userId}?pageNumber=0&pageSize=10`, { withCredentials: true })
       .then(res => setReviews(res.data));
   }, [userId]);
