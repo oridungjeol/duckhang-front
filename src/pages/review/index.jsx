@@ -53,7 +53,15 @@ export default function Review() {
         content: reviewContent.trim()
       });
       alert("리뷰가 성공적으로 작성되었습니다.");
-      // navigate(-1); // 이전 페이지로 돌아가기
+
+      // 성공 알림 후 채팅방으로 이동
+      if (location.state?.room_id) {
+        navigate(`/chat/${location.state.room_id}`);
+      } else {
+        // room_id가 없을 경우 이전 페이지로 이동하거나 기본 채팅 목록 페이지로 이동
+        navigate(-1); // 또는 navigate('/chat');
+      }
+
     } catch (error) {
       console.error("리뷰 작성 실패:", error);
       if (error.response?.data) {

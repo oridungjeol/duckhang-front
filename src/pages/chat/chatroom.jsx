@@ -585,7 +585,10 @@ export default function ChatRoom() {
               const now = new Date();
               const kstOffset = now.getTime() + 9 * 60 * 60 * 1000;
               const kstDate = new Date(kstOffset);
+              const kstData_review = new Date(kstDate.getTime() + 1000);
+
               const created_at = kstDate.toISOString().slice(0, 19);
+              const created_review = kstData_review.toISOString().slice(0, 19);
 
               const refundMessage = {
                 message: "보증금 반환이 완료되었습니다.",
@@ -605,6 +608,17 @@ export default function ChatRoom() {
                   author_uuid: uuid,
                   content: JSON.stringify(refundMessage),
                   created_at: created_at,
+                  room_id: data.room_id,
+                }),
+              });
+
+              client.publish({
+                destination: `/app/chat/${data.room_id}`,
+                body: JSON.stringify({
+                  type: "REVIEW",
+                  author_uuid: "",
+                  content: "", 
+                  created_at: created_review,
                   room_id: data.room_id,
                 }),
               });
@@ -924,13 +938,15 @@ export default function ChatRoom() {
 
                   console.log("리뷰 작성 페이지로 전달할 데이터:", {
                     author_uuid: boardData.author_uuid,
-                    orderId: orderId
+                    orderId: orderId,
+                    room_id: data.room_id
                   });
 
                   navigate("/review", {
                     state: { 
                       author_uuid: boardData.author_uuid,
-                      orderId: orderId
+                      orderId: orderId,
+                      room_id: data.room_id
                     },
                   });
                 }}

@@ -67,16 +67,19 @@ export function Success() {
             }),
           });
 
-          client.publish({
-            destination: `/app/chat/${room_id}`,
-            body: JSON.stringify({
-              type: "REVIEW",
-              author_uuid: "",
-              content: "",
-              created_at: created_review,
-              room_id: room_id,
-            }),
-          });
+          { 
+            type != 'RENTAL' &&
+            client.publish({
+              destination: `/app/chat/${room_id}`,
+              body: JSON.stringify({
+                type: "REVIEW",
+                author_uuid: "",
+                content: "",
+                created_at: created_review,
+                room_id: room_id,
+              }),
+            });
+          }
           // 메시지 전송 후 채팅방으로 이동
           const chatState = {
             room_id,
