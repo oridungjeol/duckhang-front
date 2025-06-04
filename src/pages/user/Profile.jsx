@@ -29,7 +29,14 @@ export default function Profile() {
 
     console.log(userId)
     axios.get(`http://localhost/api/review/${userId}?pageNumber=0&pageSize=10`, { withCredentials: true })
-      .then(res => setReviews(res.data));
+      .then(res => {
+        setReviews(res.data);
+        if (res.data && res.data.length > 0) {
+          const totalScope = res.data.reduce((sum, review) => sum + review.scope, 0);
+          const averageScope = totalScope / res.data.length;
+          setProfile(prev => ({ ...prev, scope: averageScope }));
+        }
+      });
   }, [userId]);
 
   if (!profile) return <div>Loading...</div>;
@@ -52,7 +59,8 @@ export default function Profile() {
                 </button>
               </Link>
               <h2 className='nickname'>{profile.nickname}</h2>
-              <h3 classname='scope'>⭐️별점: {profile.scope}</h3>
+              {console.log('Profile scope raw value:', profile.scope)}
+              <h3 classname='scope'>⭐️별점: {profile.scope ? profile.scope.toFixed(1) : 'N/A'}</h3>
             </div>
           </div>
           <div className='tab-bar'>

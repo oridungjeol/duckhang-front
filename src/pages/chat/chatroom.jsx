@@ -909,43 +909,21 @@ export default function ChatRoom() {
               <button
                 className="review-button"
                 onClick={() => {
-                  // 결제 완료 메시지에서 orderId 찾기
-                  const paymentMessage = messages.find(msg => msg.type === "COMPLETE_PAYMENT");
-                  let orderId = undefined; // 초기값을 undefined로 설정
-                  
-                  if (paymentMessage) {
-                    console.log("COMPLETE_PAYMENT 메시지 발견:", paymentMessage);
-                    try {
-                      const paymentData = JSON.parse(paymentMessage.content);
-                      console.log("Payment Data 파싱 결과:", paymentData);
-
-                      // orderId 추출 및 할당
-                      orderId = paymentData.orderId; // orderId를 변수에 할당
-
-                      console.log("추출된 orderId:", orderId);
-                    } catch (error) {
-                      console.error("결제 데이터 파싱 실패:", error);
-                      alert("결제 정보를 처리하는데 실패했습니다.");
-                    }
-                  } else {
-                    console.warn("COMPLETE_PAYMENT 메시지를 찾을 수 없습니다.");
-                  }
-
-                  if (!orderId) {
-                    alert("결제 정보를 찾을 수 없습니다. 결제가 완료되었는지 확인해주세요."); // 오류 메시지 수정
+                  if (!data.orderId) {
+                    alert("결제 정보를 찾을 수 없습니다. 결제가 완료되었는지 확인해주세요.");
                     return;
                   }
 
                   console.log("리뷰 작성 페이지로 전달할 데이터:", {
                     author_uuid: boardData.author_uuid,
-                    orderId: orderId,
+                    orderId: data.orderId,
                     room_id: data.room_id
                   });
 
                   navigate("/review", {
                     state: { 
                       author_uuid: boardData.author_uuid,
-                      orderId: orderId,
+                      orderId: data.orderId,
                       room_id: data.room_id
                     },
                   });
