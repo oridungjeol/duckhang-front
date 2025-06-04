@@ -78,32 +78,34 @@ export default function Chat() {
   };
 
   return (
-    <div className="container">
-      <h1 className="title">채팅</h1>
-      <div className="chatting-list">
-        {datas.map((data) => (
-          <div
-            key={data.room_id}
-            className="chatting"
-            onClick={() => {
-              enterChatRoom(data);
-            }}
-          >
-            <div>
-              <img
-                src="/images/duckhang.jpg"
-                alt="duckhang"
-                className="chat-thumbnail"
-              />
+    <div className="chat-page">
+      <div className="container">
+        <h1 className="title">채팅</h1>
+        <div className="chatting-list">
+          {datas.map((data) => (
+            <div
+              key={data.room_id}
+              className="chatting"
+              onClick={() => {
+                enterChatRoom(data);
+              }}
+            >
+              <div>
+                <img
+                  src="/images/duckhang.jpg"
+                  alt="duckhang"
+                  className="chat-thumbnail"
+                />
+              </div>
+              <div className="chat-texts">
+                <div className="chat-nickname">{data.name}</div>
+                <div className="chat-last-message">{data.recent}</div>
+              </div>
             </div>
-            <div className="chat-texts">
-              <div className="chat-nickname">{data.name}</div>
-              <div className="chat-last-message">{data.recent}</div>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
+        <BottomNav />
       </div>
-      <BottomNav />
     </div>
   );
 }

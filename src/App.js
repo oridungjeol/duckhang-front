@@ -36,7 +36,7 @@ function App() {
     <Router>
       <div className="min-h-screen bg-gray-50 layout">
         <Routes>
-          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<Login />} />
           <Route path="/user/:userId" element={<Profile />} />
           <Route path="/board" element={<Board />} />
           <Route path="/board/:type" element={<Board />} />

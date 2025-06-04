@@ -1,6 +1,12 @@
 @import url(https://fonts.googleapis.com/css?family=Righteous);
 
-.login-wrap {
+.login-page {
+  width: 100%;
+  height: 100vh;
+  background-color: #ffdc58;
+}
+
+.login-page .login-wrap {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -9,7 +15,7 @@
   margin-top: 2rem;
 }
 
-.social {
+.login-page .social {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -18,7 +24,7 @@
   opacity: 1;
 }
 
-.kakao-login-button {
+.login-page .kakao-login-button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -32,26 +38,26 @@
   transition: box-shadow 0.2s;
 }
 
-.kakao-login-button img {
+.login-page .kakao-login-button img {
   width: 100%;
   height: auto;
   display: block;
 }
 
-.main-image img {
+.login-page .main-image img {
   width: 30px;
 }
 
 /* swiper css */
 
-.swiper {
+.login-page .swiper {
   width: 520px;
   height: 100vh;
   background: #ffdc58;
   box-shadow: 0 8px 32px rgba(65, 105, 225, 0.08);
 }
 
-.swiper-slide {
+.login-page .swiper-slide {
   text-align: center;
   font-size: 18px;
   background: transparent;
@@ -61,19 +67,19 @@
   align-items: center;
 }
 
-.swiper-slide img {
+.login-page .swiper-slide img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.swiper-page {
+.login-page .swiper-page {
   width: 100%;
   height: 100%;
 }
 
-.swiper-group {
+.login-page .swiper-group {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -82,42 +88,44 @@
   height: 100%;
 }
 
-.swiper-title {
-  font-family: "Righteous", serif;
+.login-page .swiper-title {
+  font-family: "Jua", cursive;
   font-size: 2em;
   background-color: transparent;
+  color: #378ffb;
 }
 
-.title-margin {
-  margin-top: 20rem;
-}
-
-.swiper-text {
-  font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+.login-page .swiper-text {
+  font-family: "Jua", cursive;
   color: rgb(118, 118, 118);
   background-color: transparent;
   margin-bottom: 3rem;
+  margin-top: 1rem;
 }
 
-.text-group {
+.login-page .text-group {
   position: absolute;
-  top: 100px;
-
+  top: 150px;
+  left: 0;
+  right: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
   text-align: center;
-}
-
-.map-icon {
+  width: 100%;
   margin: auto;
 }
 
-.map-icon img {
+.login-page .map-icon {
+  margin: auto;
+}
+
+.login-page .map-icon img {
   width: 20rem;
 }
 
 /* 포인트 컬러로 사용할 클래스 */
-.point-color {
+.login-page .point-color {
   color: #378ffb;
 }

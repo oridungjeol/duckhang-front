@@ -70,7 +70,7 @@ const Login = () => {
 
 export default function LoginPage() {
   return (
-    <div>
+    <div className="login-page">
       <Login />
     </div>
   );
